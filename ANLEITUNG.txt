@@ -1,0 +1,51 @@
+=====================================================================
+ CIAO ITALIA — Installation und Hosting
+=====================================================================
+
+A) AUF LIMA CITY HOCHLADEN
+---------------------------------------------------------------------
+1. In der lima-city-Verwaltung eine Subdomain anlegen oder vorhandenen
+   Webspace verwenden, zum Beispiel https://italien.DEINNAME.de.
+2. Den GESAMTEN Inhalt des Ordners ciao-italia in das DocumentRoot
+   hochladen. Die Ordner audio/, icons/ und tools/ beibehalten.
+3. Für die Domain „SSL erzwingen“ aktivieren. HTTPS ist für die
+   Installation und den Offline-Modus zwingend erforderlich.
+4. Die URL einmal im Browser öffnen. Danach ist der App-Shell gecacht.
+
+B) AUF DEM IPHONE INSTALLIEREN
+---------------------------------------------------------------------
+1. Die Seite in Safari öffnen.
+2. Das Teilen-Symbol antippen.
+3. „Zum Home-Bildschirm“ wählen und bestätigen.
+4. „Ciao Italia“ erscheint als eigenständige App und läuft nach dem
+   ersten vollständigen Laden auch offline.
+
+C) AUSSPRACHE
+---------------------------------------------------------------------
+- Standardmäßig verwendet die App die iPhone-Stimme für Italienisch
+  (it-IT). In den iOS-Einstellungen kann eine hochwertige italienische
+  Stimme nachgeladen werden.
+- Optional lassen sich eigene MP3-Dateien im Ordner audio/ ablegen.
+  Die exakten Namen stehen in AUDIO-MANIFEST.txt.
+- Die App probiert immer zuerst die MP3 und fällt bei fehlender Datei
+  automatisch auf die Gerätestimme zurück.
+
+D) APP AKTUALISIEREN
+---------------------------------------------------------------------
+Nach Änderungen an Inhalt, Code, Styling oder Audio in sw.js die Zeile
+  const CACHE = "ciaoit-v2";
+auf eine neue Version erhöhen, zum Beispiel "ciaoit-v3". Danach alle
+Dateien neu hochladen. Installierte Geräte übernehmen die neue Version
+beim nächsten Start.
+
+E) INHALT PFLEGEN
+---------------------------------------------------------------------
+- Basisdaten: data.js
+- A1-Wortschatz: vocabulary-a1.js
+- 80 Verbtabellen: verbs-a1.js
+- Satzmuster, Dialoge und Missionen: sentences.js
+- Oberfläche und Lernlogik: app.js
+- Design: styles.css
+- Audio-Dateiliste neu erzeugen:
+  node tools/generate-audio-manifest.js
+=====================================================================

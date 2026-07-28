@@ -1,0 +1,17 @@
+{
+  "name": "Ciao Italia — Grundkurs",
+  "short_name": "Ciao Italia",
+  "description": "Italienisch für die Reise: Grundwortschatz, Verben und aktive Übungen.",
+  "lang": "it-IT",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F6F0E4",
+  "theme_color": "#155B45",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
