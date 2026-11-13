@@ -1,2 +1,7 @@
 ciao-italia.zip
 .DS_Store
+sync-data/*
+!sync-data/.htaccess
+!sync-data/index.html
+deploy-backups/
+.zcode/

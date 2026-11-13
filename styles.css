@@ -106,6 +106,8 @@ body {
 .hero h1 { font-family: var(--serif); font-size: 40px; margin: 0 0 6px; font-weight: 600; }
 .hero p { margin: 0; opacity: .92; font-size: 15px; max-width: 32ch; }
 .hero-kicker { font-size: 10px; letter-spacing: 1.8px; font-weight: 800; opacity: .76; margin-bottom: 8px; }
+.hero-bonus { margin-top: 10px !important; font-size: 13px !important; background: rgba(255,255,255,.12); padding: 8px 12px; border-radius: 10px; }
+.story-cta.espresso { background: #6F4E37; }
 .hero .countdown {
   display: inline-block; margin-top: 14px; font-size: 13px;
   background: rgba(255,255,255,.16); padding: 6px 12px; border-radius: 999px;
@@ -275,6 +277,12 @@ body {
 .tab.active { color: var(--verde-italia); }
 .tab.active .tab-ico { filter: none; }
 .tab.active .tab-ico { border-bottom: 2px solid var(--telha); }
+/* Sieben Tabs: Labels kompakt halten, damit „Allenamento“ passt */
+.tabbar .tab { padding: 0 1px; }
+.tabbar .tab > span:last-child {
+  white-space: nowrap; overflow: hidden; max-width: 100%;
+  font-size: clamp(8.5px, 2.5vw, 11px); letter-spacing: 0;
+}
 
 @media (prefers-reduced-motion: reduce) {
   .flip-inner { transition: none; }
@@ -401,3 +409,140 @@ body {
 .tiles-result.bad { color: var(--telha); }
 
 .btn:disabled { opacity: .55; cursor: default; }
+
+/* ---------- Percorso (Lernpfad) & XP ---------- */
+.xp-line { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 14px 0 4px; }
+.xp-line.home { margin: 2px 0 0; font-size: 13px; color: var(--ink-soft); }
+.xp-chip {
+  background: var(--tile-2); border: 1px solid var(--line); border-radius: 999px;
+  padding: 6px 12px; font-size: 13px; font-weight: 700; color: var(--verde-italia); box-shadow: var(--shadow);
+}
+.badge-shelf { display: flex; gap: 8px; margin: 10px 0 4px; flex-wrap: wrap; }
+.badge {
+  width: 44px; height: 44px; border-radius: 50%; background: var(--tile-2);
+  border: 1px solid var(--line); display: grid; place-items: center; font-size: 22px;
+  box-shadow: var(--shadow);
+}
+.path { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+.story-card {
+  display: flex; align-items: center; gap: 14px; text-align: left; width: 100%;
+  padding: 16px; border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--tile-2); box-shadow: var(--shadow); cursor: pointer; font-family: var(--sans);
+}
+.story-card:active { transform: scale(.985); }
+.story-card .story-ico {
+  flex: 0 0 auto; width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center;
+  font-size: 24px; background: var(--tile); border: 1px solid var(--line);
+}
+.story-card.next { border: 2px solid var(--verde-italia); background: #EDF4EF; }
+.story-card.done { opacity: .78; }
+.story-card.done .story-ico { background: var(--verde); border-color: var(--verde); color: #fff; font-size: 20px; font-weight: 700; }
+.story-card.locked { opacity: .55; cursor: default; border-style: dashed; }
+.story-card.locked .story-ico { filter: grayscale(1); }
+.level-h { display: flex; align-items: baseline; gap: 8px; }
+.level-count { font-family: var(--sans); font-size: 12px; color: var(--ink-soft); font-weight: 600; }
+
+/* ---------- Piazza & Passaporto ---------- */
+.story-cta.mission { background: var(--verde-italia); }
+.bilanz {
+  display: block; width: 100%; margin: 10px 0 0; padding: 12px 14px; text-align: left;
+  background: #EDF4EF; border: 1px solid var(--line); border-radius: var(--radius);
+  color: var(--ink); font-size: 13px; cursor: pointer; font-family: var(--sans);
+}
+.bilanz b { color: var(--verde-italia); }
+.diario-input { min-height: 64px; resize: vertical; font-family: var(--sans); }
+.skill-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.skill-ico { flex: 0 0 26px; font-size: 16px; }
+.skill-bar { flex: 1; height: 14px; background: var(--line); border-radius: 999px; overflow: hidden; }
+.skill-fill { height: 100%; background: linear-gradient(90deg, var(--verde), var(--verde-2)); border-radius: 999px; transition: width .4s; }
+.skill-num { flex: 0 0 34px; text-align: right; font-size: 13px; font-weight: 700; color: var(--verde-italia); }
+.chapter-head {
+  display: flex; align-items: center; gap: 12px; margin: 4px 0 2px; padding: 12px 14px;
+  background: #EFE9DB; border: 1px dashed var(--line); border-radius: var(--radius); cursor: default;
+}
+.chapter-ico { font-size: 20px; }
+.chapter-name { font-family: var(--serif); font-weight: 700; font-size: 16px; }
+
+/* ---------- Parole: Level-Badge, Lernstand, Grading ---------- */
+.grbtn { flex: 0 0 auto; width: 38px; height: 38px; border-radius: 10px; border: 1px solid var(--line); background: var(--tile-2); font-size: 15px; cursor: pointer; color: var(--ink-soft); }
+.grbtn.good { color: var(--verde); border-color: rgba(40,116,90,.5); }
+.srs-dot { flex: 0 0 auto; width: 10px; height: 10px; border-radius: 50%; background: var(--line); }
+.srs-dot.half { background: var(--oro); }
+.srs-dot.ripe { background: var(--verde); }
+.cat-tile { position: relative; }
+/* Level-Badge: generisch (Orecchie, Dialog-Metazeile), in cat-tile absolut */
+.lv {
+  display: inline-flex; align-items: center; margin-left: 8px;
+  font-size: 10px; font-weight: 800; letter-spacing: .5px;
+  padding: 3px 8px; border-radius: 999px; vertical-align: middle;
+  background: #EFE9DB; color: var(--ink-soft); border: 1px solid var(--line);
+}
+.lv.A2 { background: #F6EDDA; color: var(--oro); }
+.lv.B1 { background: #F7E8E4; color: var(--telha); }
+.cat-tile .lv { position: absolute; top: 12px; right: 12px; margin-left: 0; }
+.lvl-row { display: flex; align-items: center; gap: 8px; }
+.lvl-row .lv { margin-left: 0; flex: 0 0 auto; }
+.cat-tile .tile-bar { height: 4px; background: var(--line); border-radius: 99px; overflow: hidden; margin-top: 4px; }
+.cat-tile .tile-bar > div { height: 100%; background: var(--verde); border-radius: 99px; }
+.story-name { font-weight: 700; font-size: 16px; }
+.story-sub { color: var(--ink-soft); font-size: 13px; margin-top: 2px; }
+.story-go { font-size: 17px; color: var(--verde-italia); font-weight: 700; flex: 0 0 auto; }
+.story-cta {
+  display: flex; align-items: center; gap: 12px; width: 100%; margin: 14px 0 4px; padding: 16px;
+  border-radius: var(--radius); border: 0; background: var(--telha); color: #fff;
+  font-size: 15px; font-weight: 700; cursor: pointer; box-shadow: var(--shadow); text-align: left; font-family: var(--sans);
+}
+.story-cta .sci { font-size: 26px; flex: 0 0 auto; }
+.story-cta .story-cta-sub { opacity: .85; font-size: 12px; font-weight: 600; margin-top: 2px; }
+
+/* ---------- Story-Player ---------- */
+.story-head { display: flex; align-items: center; gap: 10px; margin: 2px 0 14px; }
+.story-head .progbar { flex: 1; margin: 0; }
+.xp-live { font-weight: 800; font-size: 14px; color: var(--oro); white-space: nowrap; }
+.discover-card {
+  background: var(--tile-2); border: 1px solid var(--line); border-radius: 24px;
+  box-shadow: var(--shadow); padding: 30px 22px 24px; text-align: center;
+}
+.dc-emoji { font-size: 84px; line-height: 1.15; }
+.dc-svg { display: block; }
+.dc-svg svg { width: 160px; height: 160px; display: block; margin: 0 auto; background: #EFE9DB; border-radius: 20px; padding: 10px; }
+.dc-it { font-family: var(--serif); font-size: 28px; font-weight: 600; color: var(--verde-italia); margin-top: 12px; }
+.dc-de { color: var(--ink-soft); font-size: 15px; margin-top: 4px; }
+.dc-reveal { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 14px; animation: slideIn .28s ease; }
+.scene-card {
+  background: var(--tile-2); border: 1px solid var(--line); border-radius: 20px;
+  box-shadow: var(--shadow); padding: 20px; margin-bottom: 14px; text-align: left;
+}
+.scene-card.mine { background: #EEF3F8; }
+.scene-who { font-size: 11px; font-weight: 700; color: var(--ink-soft); text-transform: uppercase; letter-spacing: .4px; }
+.scene-it { font-family: var(--serif); font-size: 22px; font-weight: 600; margin: 8px 0 2px; }
+.scene-it.hidden { display: none; }
+.scene-de { color: var(--ink-soft); font-size: 14px; margin-top: 4px; }
+.finale-mission { font-size: 14px; color: var(--oro); }
+@media (prefers-reduced-motion: reduce) { .dc-reveal { animation: none; } }
+
+/* ---------- Sapere: Aussprache, Grammatik, Redewendungen ---------- */
+.pron-rule { padding: 16px; border-bottom: 1px solid var(--line); background: var(--tile-2); }
+.pron-rule:first-child { border-radius: var(--radius) var(--radius) 0 0; }
+.pron-rule:last-child { border-bottom: 0; border-radius: 0 0 var(--radius) var(--radius); }
+.pron-title { font-family: var(--serif); font-size: 18px; font-weight: 700; color: var(--verde-italia); }
+.pron-text { font-size: 13.5px; margin: 5px 0 10px; }
+.pron-ex { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-top: 1px dashed var(--line); }
+.pron-ex:first-of-type { border-top: 0; }
+.pron-ex .grow { flex: 1; min-width: 0; }
+.pron-ex .pt { font-weight: 600; font-size: 16px; }
+.pron-ex .de { color: var(--ink-soft); font-size: 13px; margin-top: 1px; }
+
+.gram-table {
+  display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr 1fr;
+  border: 1px solid var(--line); border-radius: 12px; overflow: hidden;
+  background: var(--tile-2); box-shadow: var(--shadow); margin-bottom: 12px;
+}
+.gram-table > div { padding: 10px 8px; font-size: 13px; display: flex; align-items: center; }
+.gram-table .gh { background: var(--verde-italia); color: #fff; font-weight: 700; font-size: 11px; letter-spacing: .3px; }
+.gram-table .who { color: var(--ink-soft); font-weight: 700; }
+.gram-note {
+  font-size: 13px; background: #EDF4EF; border-left: 3px solid var(--verde-2);
+  padding: 8px 10px; border-radius: 8px; margin: 8px 0;
+}
+@media (max-width: 420px) { .gram-table > div { font-size: 11.5px; padding: 9px 5px; } }

@@ -12,6 +12,10 @@ A) AUF LIMA CITY HOCHLADEN
    Installation und den Offline-Modus zwingend erforderlich.
 4. Die URL einmal im Browser öffnen. Danach ist der App-Shell gecacht.
 
+   Hinweis: Diese Installation läuft live unter https://italien.4lima.de/
+   (FTP: festivalist.lima-ftp.de, Zielordner /ciao-italia; sync-data/
+   niemals löschen — dort liegen Sync-Code-Verankerung und Backups).
+
 B) AUF DEM IPHONE INSTALLIEREN
 ---------------------------------------------------------------------
 1. Die Seite in Safari öffnen.
@@ -49,3 +53,28 @@ E) INHALT PFLEGEN
 - Audio-Dateiliste neu erzeugen:
   node tools/generate-audio-manifest.js
 =====================================================================
+
+F) Fortschritt auf dem Server sichern (Sincronizzazione)
+--------------------------------------------------------
+Ab Version ciaoit-v12 kann der Lernfortschritt auf dem Server
+gespeichert werden (sync.php). Alles bleibt zusätzlich lokal —
+die App funktioniert weiterhin offline.
+
+Einrichtung:
+1. sync.php und den Ordner sync-data/ (mit .htaccess) mit hochladen.
+2. App öffnen → Passaporto (🛂) → „Sincronizzazione“.
+3. Eigenen Sync-Code festlegen (min. 6 Zeichen) → „Verbinden & sichern“.
+   Der Code wird beim ersten Kontakt am Server registriert und
+   verschlüsselt abgelegt — notiere ihn dir, er ist nicht wiederherstellbar!
+
+Funktionsweise:
+- Nach jedem Lernstück wird ~8 Sekunden später automatisch gesichert.
+- Beim App-Start wird ein neuerer Server-Stand automatisch geladen.
+- Schutz: Ein fast leerer Gerätestand überschreibt den Server nie von selbst.
+- Gerät wechseln: App installieren, Code eingeben, „Vom Server laden“.
+
+Wichtig:
+- sync-data/ niemals löschen, sonst gehen alle Backups verloren.
+- Code ändern = per FTP sync-data/ leeren (nur .htaccess + index.html lassen).
+- Das Backup liegt als unverschlüsselte JSON-Datei auf dem Server —
+  den Sync-Code geheim halten.

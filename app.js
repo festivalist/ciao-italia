@@ -11,7 +11,7 @@
   /* ---------- Settings & storage ---------- */
   const LS = {
     get(k, def) { try { return JSON.parse(localStorage.getItem(k)) ?? def; } catch { return def; } },
-    set(k, v)   { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+    set(k, v)   { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} if (k !== "ciaoit_sync") scheduleSyncPush(); }
   };
   const settings = Object.assign({ speak: true, tripDate: null }, LS.get("ciaoit_settings", {}));
   const saveSettings = () => LS.set("ciaoit_settings", settings);
@@ -44,7 +44,7 @@
     pickVoice();
     speechSynthesis.onvoiceschanged = pickVoice;
   }
-  function speak(text, key) {
+  function speak(text, key, rate) {
     if (!settings.speak) return;
     // 1) Versuche hinterlegte Audiodatei
     const url = `audio/${key}.mp3`;
@@ -57,18 +57,45 @@
       a.play().then(res).catch(rej);
     });
     tryFile().catch(() => {
-      // 2) Fallback: Gerätesprachausgabe (it-IT)
+      // 2) Fallback: Gerätesprachausgabe (it-IT); rate für Hör-Geschichten
       if (!window.speechSynthesis) return;
       try {
         speechSynthesis.cancel();
         const u = new SpeechSynthesisUtterance(text);
-        u.lang = "it-IT"; u.rate = 0.9;
+        u.lang = "it-IT"; u.rate = rate || 0.9;
         if (ttsVoice) u.voice = ttsVoice;
         speechSynthesis.speak(u);
       } catch {}
     });
   }
   function hasAudioFlag(key) { return key in audioCache && !audioCache[key].error; }
+  // Wie speak(), aber als Promise, das am Ende der Wiedergabe auflöst —
+  // für Dialog-Ketten ohne überlappende Stimmen.
+  function speakWait(text, key, rate) {
+    return new Promise(resolve => {
+      if (!settings.speak) return resolve();
+      let settled = false;
+      const done = () => { if (!settled) { settled = true; resolve(); } };
+      const guard = setTimeout(done, Math.max(2600, (text.length * 170) / Math.max(0.5, rate || 0.9)));
+      const finish = () => { clearTimeout(guard); done(); };
+      const a = audioCache[key] || new Audio(`audio/${key}.mp3`);
+      audioCache[key] = a;
+      a.onended = finish;
+      a.onerror = () => {
+        if (!window.speechSynthesis) return finish();
+        try {
+          const u = new SpeechSynthesisUtterance(text);
+          u.lang = "it-IT"; u.rate = rate || 0.9;
+          if (ttsVoice) u.voice = ttsVoice;
+          u.onend = finish;
+          speechSynthesis.cancel();
+          speechSynthesis.speak(u);
+        } catch { finish(); }
+      };
+      a.currentTime = 0;
+      a.play().catch(() => a.onerror());
+    });
+  }
 
   /* ---------- Flatten vocab pool ---------- */
   const POOL = [];
@@ -105,7 +132,7 @@
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
   }
   function daysApart(a, b) { return Math.round((Date.parse(b) - Date.parse(a)) / DAY); }
-  function streak() { return LS.get("ciaoit_streak", { last: null, count: 0, freezes: 2, day: null, todayCount: 0, best: 0 }); }
+  function streak() { return LS.get("ciaoit_streak", { last: null, count: 0, freezes: 2, day: null, todayCount: 0, best: 0, restWeek: null }); }
   // Wird nach jeder abgeschlossenen Übung aufgerufen (n = Anzahl Items)
   function markPractice(n) {
     const s = streak(); const today = ymd();
@@ -117,6 +144,7 @@
         const gap = daysApart(s.last, today);
         if (gap === 1) s.count += 1;
         else if (gap === 2 && s.freezes > 0) { s.freezes -= 1; s.count += 1; } // ein Tag verpasst → Freeze
+        else if (gap === 2 && s.restWeek !== isoWeekKey()) { s.restWeek = isoWeekKey(); s.count += 1; } // 1 Pausentag pro Woche
         else s.count = 1;
       }
       s.last = today;
@@ -125,6 +153,171 @@
     LS.set("ciaoit_streak", s);
   }
   function goalToday() { const s = streak(); return s.day === ymd() ? s.todayCount : 0; }
+
+  /* ---------- XP, Badges & Story-Fortschritt ---------- */
+  function xpState() { return LS.get("ciaoit_xp", { xp: 0, badges: [] }); }
+  function addXP(n) { const x = xpState(); x.xp += n; LS.set("ciaoit_xp", x); }
+  function storyState() { return LS.get("ciaoit_stories", {}); }
+  function storyDone(id) { const st = storyState()[id]; return !!(st && st.done); }
+
+  /* ---------- Output & Können („Was du gesagt hast", nicht Zeit) ---------- */
+  function isoWeekKey(d) {
+    d = d || new Date();
+    const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    const day = t.getUTCDay() || 7;
+    t.setUTCDate(t.getUTCDate() + 4 - day);
+    const start = new Date(Date.UTC(t.getUTCFullYear(), 0, 1));
+    return `${t.getUTCFullYear()}-W${String(Math.ceil(((t - start) / DAY) + 1)).padStart(2, "0")}`;
+  }
+  function output() { return LS.get("ciaoit_output", { total: 0, week: null }); }
+  function bumpOutput(kind, n) {
+    const o = output(); o.total += (n || 1);
+    const wk = isoWeekKey();
+    if (!o.week || o.week.start !== wk) o.week = { start: wk, satze: 0, missionen: 0, memos: 0, diario: 0 };
+    o.week[kind] = (o.week[kind] || 0) + (n || 1);
+    LS.set("ciaoit_output", o);
+  }
+  function skills() { return LS.get("ciaoit_skills", { hoeren: 0, lesen: 0, sprechen: 0, schreiben: 0 }); }
+  function bumpSkill(kind, n) { const s = skills(); s[kind] += (n || 1); LS.set("ciaoit_skills", s); }
+
+  /* ---------- Sprachtagebuch (Sette giorni, sette frasi) ---------- */
+  function diario() { return LS.get("ciaoit_diario", []); }
+  function diarioAdd(text) {
+    const d = diario();
+    const entry = { d: ymd(), t: text };
+    d.push(entry); LS.set("ciaoit_diario", d);
+    bumpOutput("diario"); bumpSkill("schreiben"); markPractice(1); addXP(20);
+    return entry;
+  }
+
+  /* ---------- Sprachmemos (IndexedDB; Audio-Blobs) ---------- */
+  const MEMODB = (() => {
+    let p = null;
+    function open() {
+      if (p) return p;
+      p = new Promise((res, rej) => {
+        const rq = indexedDB.open("ciaoit", 1);
+        rq.onupgradeneeded = () => rq.result.createObjectStore("memos");
+        rq.onsuccess = () => res(rq.result);
+        rq.onerror = () => rej(rq.error);
+        rq.onblocked = () => rej(new Error("Datenbank blockiert (anderer Tab?)"));
+        setTimeout(() => rej(new Error("Datenbank-Zugriff zeitüberschritten")), 3000);
+      });
+      return p;
+    }
+    async function tx(mode, fn) {
+      const db = await open();
+      return new Promise((res, rej) => {
+        const t = db.transaction("memos", mode);
+        const out = fn(t.objectStore("memos"));
+        t.oncomplete = () => res(out.result);
+        t.onerror = () => rej(t.error);
+      });
+    }
+    return {
+      put: (key, blob) => tx("readwrite", s => s.put({ blob, when: Date.now() }, key)),
+      get: (key) => tx("readonly", s => s.get(key)),
+      keys: () => tx("readonly", s => s.getAllKeys()),
+      entries: () => open().then(db => new Promise((res, rej) => {
+        const t = db.transaction("memos", "readonly");
+        const st = t.objectStore("memos");
+        const keysR = st.getAllKeys();
+        const valsR = st.getAll();
+        t.oncomplete = () => res(keysR.result.map((k, i) => ({ key: k, val: valsR.result[i] })));
+        t.onerror = () => rej(t.error);
+      }))
+    };
+  })();
+  const canRecord = !!(navigator.mediaDevices && window.MediaRecorder);
+  async function saveMemo(key, blob) {
+    await MEMODB.put(key, blob);
+    bumpOutput("memos"); bumpSkill("sprechen"); markPractice(1); addXP(15);
+  }
+
+  /* ---------- Sincronizzazione: Fortschritt auf dem Server ----------
+     Local-first: alles bleibt lokal (offline nutzbar), Änderungen
+     werden nach X Sek. automatisch per sync.php gesichert; beim Start
+     wird ein neuerer Server-Stand geholt. Konfliktregel: letzter
+     Schreiber gewinnt (gesamtes Datenpaket, savedAt-Zeitstempel). */
+  const SYNC_KEYS = ["ciaoit_settings", "ciaoit_srs", "ciaoit_streak", "ciaoit_xp",
+    "ciaoit_stories", "ciaoit_missions", "ciaoit_check", "ciaoit_output",
+    "ciaoit_skills", "ciaoit_diario", "ciaoit_espresso"];
+  function syncState() { return LS.get("ciaoit_sync", { savedAt: 0, lastPush: null, lastPull: null }); }
+  function bufToB64(buf) {
+    let s = ""; const b = new Uint8Array(buf);
+    for (let i = 0; i < b.length; i += 0x8000) s += String.fromCharCode.apply(null, b.subarray(i, i + 0x8000));
+    return btoa(s);
+  }
+  function b64ToBlob(b64, type) {
+    const s = atob(b64); const u = new Uint8Array(s.length);
+    for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i);
+    return new Blob([u], { type: type || "audio/webm" });
+  }
+  let syncTimer = null;
+  function scheduleSyncPush() {
+    if (!settings.syncCode || !navigator.onLine) return;
+    clearTimeout(syncTimer);
+    syncTimer = setTimeout(() => { syncPush(false).catch(() => {}); }, 8000);
+  }
+  // Schutz: ein fast leerer Lokalzustand darf einen gefüllten Server-Stand
+  // nicht überschreiben (z. B. nach „Website-Daten löschen“ mit rest-Timer).
+  function localProgressEmpty() {
+    const xp = xpState(), stories = storyState(), s = srs();
+    return (!xp.xp || xp.xp <= 0) && Object.keys(stories).length === 0 && Object.keys(s).length === 0;
+  }
+  async function syncPush(manual) {
+    const code = settings.syncCode;
+    if (!code) return { ok: false, error: "Kein Sync-Code gesetzt." };
+    if (localProgressEmpty()) {
+      if (!manual) return { ok: false, skipped: true }; // Auto-Push: leer überschreibt nichts
+      if (!window.confirm("Lokal ist kaum Fortschritt vorhanden. Der vorhandene Server-Stand würde überschrieben. Trotzdem sichern?")) {
+        return { ok: false, skipped: true };
+      }
+    }
+    const blob = { savedAt: Date.now(), data: {}, memos: {} };
+    SYNC_KEYS.forEach(k => { const raw = localStorage.getItem(k); if (raw != null) blob.data[k] = raw; });
+    try {
+      const entries = await MEMODB.entries();
+      for (const e of entries) blob.memos[e.key] = { when: e.val.when, type: e.val.blob.type, b64: bufToB64(await e.val.blob.arrayBuffer()) };
+      if (JSON.stringify(blob).length > 5500000) blob.memos = {}; // Notbremse: Memos zu groß → nur Fortschritt
+    } catch {}
+    const res = await fetch("sync.php?action=save", {
+      method: "POST",
+      headers: { "X-Sync-Code": code, "Content-Type": "application/json" },
+      body: JSON.stringify(blob)
+    });
+    const j = await res.json().catch(() => ({ ok: false, error: "Server-Antwort ungültig." }));
+    if (j.ok) { const s = syncState(); s.lastPush = Date.now(); LS.set("ciaoit_sync", s); }
+    return j;
+  }
+  async function syncPull(force) {
+    const code = settings.syncCode;
+    if (!code) return { ok: false, error: "Kein Sync-Code gesetzt." };
+    const res = await fetch("sync.php?action=load", { headers: { "X-Sync-Code": code } });
+    if (res.status === 404) return { ok: false, empty: true };
+    const j = await res.json().catch(() => ({ ok: false, error: "Server-Antwort ungültig." }));
+    if (!j.ok || !j.blob) return j;
+    if (!force && (j.blob.savedAt || 0) <= (syncState().savedAt || 0)) return { ok: true, newer: false };
+    Object.entries(j.blob.data || {}).forEach(([k, v]) => {
+      if (SYNC_KEYS.includes(k) && k !== "ciaoit_settings") localStorage.setItem(k, v);
+    });
+    // Einstellungen übernehmen, aber eigenen Sync-Code nie auslöschen
+    if (j.blob.data && j.blob.data.ciaoit_settings) {
+      try {
+        const srv = JSON.parse(j.blob.data.ciaoit_settings);
+        const mine = settings.syncCode;
+        const merged = Object.assign({}, srv, { syncCode: mine || srv.syncCode || null });
+        localStorage.setItem("ciaoit_settings", JSON.stringify(merged));
+      } catch {}
+    }
+    try {
+      for (const [key, m] of Object.entries(j.blob.memos || {})) {
+        await MEMODB.put(key, b64ToBlob(m.b64, m.type));
+      }
+    } catch {}
+    const s = syncState(); s.savedAt = j.blob.savedAt || Date.now(); s.lastPull = Date.now(); LS.set("ciaoit_sync", s);
+    return { ok: true, applied: true };
+  }
 
   // Beherrschung je Kategorie (für die Fortschrittsanzeige)
   function masteryByCat() {
@@ -137,6 +330,13 @@
     return out;
   }
 
+  function srsDot(key) {
+    const r = srs()[key];
+    const d = el("span", "srs-dot" + (r && r.box >= 4 ? " ripe" : r ? " half" : ""));
+    d.title = r ? "Lernstufe " + r.box + " von 8" : "noch nicht gelernt";
+    return d;
+  }
+
   function buildDeck() {
     const s = srs(), now = Date.now();
     const due = [], fresh = [], later = [];
@@ -147,7 +347,7 @@
       else later.push(p);
     });
     shuffle(due); shuffle(fresh);
-    return due.concat(fresh).concat(later).slice(0, 20);
+    return due.concat(fresh).concat(later).slice(0, 40);
   }
   function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; }
 
@@ -178,6 +378,13 @@
     hero.appendChild(el("div", "hero-kicker", "IL TUO VIAGGIO INIZIA QUI"));
     hero.appendChild(el("h1", null, "Ciao, Italia!"));
     hero.appendChild(el("p", null, "Italienisch für die Reise — Grundwortschatz, Verben und echte Alltagssätze nach dem Prinzip der kleinsten wirksamen Dosis."));
+    const doneAny = STORIES.some(s => storyDone(s.id));
+    if (!doneAny) {
+      hero.appendChild(el("p", "hero-bonus", "🚀 6 Minuten bis zu deinem ersten Espresso auf Italienisch — Story 1 ist startklar."));
+    } else {
+      const doneN = STORIES.filter(s => storyDone(s.id) && s.level === "A1").length;
+      hero.appendChild(el("p", "hero-bonus", `📈 Kapitel-Fortschritt: ${doneN} von 50 A1-Lektionen — jede schaltet eine echte Aufgabe frei.`));
+    }
     const cd = el("button", "countdown");
     cd.style.border = "0"; cd.style.cursor = "pointer";
     cd.textContent = tripText();
@@ -192,18 +399,75 @@
     stats.appendChild(stat(dueCount(), "fällig"));
     wrap.appendChild(stats);
 
+    const xps = xpState();
+    const storiesDone = STORIES.filter(s => storyDone(s.id)).length;
+    const badgeIcons = xps.badges.map(id => { const st = STORIES.find(s => s.id === id); return st ? st.icon : ""; }).join(" ");
+    wrap.appendChild(el("p", "xp-line home", `⭐ ${xps.xp} XP · 🏅 ${storiesDone}/${STORIES.length} Stories${badgeIcons ? "  " + badgeIcons : ""}`));
+
     // Streak + Tagesziel
     const stk = streak(); const todayN = goalToday();
     const sc = el("div", "streak-card");
     sc.appendChild(el("div", "streak-flame", todayN > 0 || stk.count > 0 ? "🔥" : "💤"));
     const sinfo = el("div", "streak-info grow");
-    sinfo.appendChild(el("div", "streak-num", `${stk.count} ${stk.count === 1 ? "Tag" : "Tage"} am Stück`));
-    sinfo.appendChild(el("div", "streak-sub", `Heute ${Math.min(todayN, DAILY_GOAL)}/${DAILY_GOAL} Übungen${stk.freezes ? ` · ❄️ ${stk.freezes}` : ""}`));
+    sinfo.appendChild(el("div", "streak-num", `${stk.count} ${stk.count === 1 ? "Tag" : "Tage"} am Stück · Rekord ${stk.best || 0}`));
+    sinfo.appendChild(el("div", "streak-sub", `Heute ${Math.min(todayN, DAILY_GOAL)}/${DAILY_GOAL} Übungen${stk.freezes ? ` · ❄️ ${stk.freezes}` : ""} · 1 Pausentag/Woche inklusive`));
     sc.appendChild(sinfo);
     const ring = el("div", "goal-ring"); ring.style.setProperty("--p", Math.min(100, Math.round(todayN / DAILY_GOAL * 100)));
     ring.appendChild(el("span", null, todayN >= DAILY_GOAL ? "✓" : String(Math.max(0, DAILY_GOAL - todayN))));
     sc.appendChild(ring);
     wrap.appendChild(sc);
+
+    // Weiter mit der nächsten Story
+    const nextStory = STORIES.find(s => !storyDone(s.id));
+    if (nextStory) {
+      const nr = STORIES.indexOf(nextStory) + 1;
+      const cta = el("button", "story-cta");
+      cta.appendChild(el("span", "sci", nextStory.icon));
+      const cg = el("div", "grow");
+      cg.appendChild(el("div", null, `Weiter mit Story ${nr}: ${nextStory.title}`));
+      cg.appendChild(el("div", "story-cta-sub", `${nextStory.words.length} neue Wörter · ca. 6 Minuten`));
+      cta.appendChild(cg);
+      cta.appendChild(el("span", "story-go", "▶"));
+      cta.addEventListener("click", () => startStory(nextStory));
+      wrap.appendChild(cta);
+    }
+
+    // Espresso del giorno: genau eine kurze Challenge — danach Ruhe
+    const esp = espressoPick();
+    if (esp) {
+      const espDone = espressoDone(esp);
+      const eCard = el("button", "story-cta espresso");
+      eCard.appendChild(el("span", "sci", "☕"));
+      const eg = el("div", "grow");
+      eg.appendChild(el("div", null, espDone ? "Espresso getrunken — per oggi basta!" : `Espresso del giorno: ${esp.title}`));
+      eg.appendChild(el("div", "story-cta-sub", espDone ? "Buona giornata — morgen gibt es den nächsten." : "Die heutige Kurz-Challenge (ca. 3 Minuten) — mehr brauchst du heute nicht."));
+      eCard.appendChild(eg);
+      eCard.appendChild(el("span", "story-go", espDone ? "✓" : "▶"));
+      if (!espDone) eCard.addEventListener("click", () => startStory(esp));
+      wrap.appendChild(eCard);
+    }
+
+    // Nächste reale Mission (Piazza-Schleife)
+    const nm = nextRealMission();
+    if (nm) {
+      const mCard = el("button", "story-cta mission");
+      mCard.appendChild(el("span", "sci", "🎯"));
+      const mg = el("div", "grow");
+      mg.appendChild(el("div", null, `Echte Aufgabe: ${nm.mission.title}`));
+      mg.appendChild(el("div", "story-cta-sub", `Sag es laut, draußen oder schreib es — aus „${nm.story.title}“`));
+      mCard.appendChild(mg);
+      mCard.appendChild(el("span", "story-go", "▶"));
+      mCard.addEventListener("click", () => viewMissione(nm.story));
+      wrap.appendChild(mCard);
+    }
+
+    // Wochenbilanz: Können statt Zeit
+    const ow = output();
+    const wkv = (ow.week && ow.week.start === isoWeekKey()) ? ow.week : { satze: 0, missionen: 0, memos: 0, diario: 0 };
+    const bilanz = el("button", "bilanz");
+    bilanz.innerHTML = `📊 Diese Woche: <b>${(wkv.satze || 0) + (wkv.diario || 0)}</b> Sätze produziert · <b>${wkv.missionen || 0}</b> Missionen · <b>${wkv.memos || 0}</b> Memos — Passaporto öffnen`;
+    bilanz.addEventListener("click", () => go("passaporto"));
+    wrap.appendChild(bilanz);
 
     // Fortschritt je Kategorie (Azulejo-Kacheln füllen sich)
     const m = masteryByCat();
@@ -230,7 +494,9 @@
     b1.addEventListener("click", () => go("vocab"));
     const b2 = el("button", "btn btn-ghost", "🔤 Verbi");
     b2.addEventListener("click", () => go("verbs"));
-    menu.appendChild(b1); menu.appendChild(b2);
+    const b3 = el("button", "btn btn-ghost", "✎ Sapere");
+    b3.addEventListener("click", () => go("sapere"));
+    menu.appendChild(b1); menu.appendChild(b2); menu.appendChild(b3);
     wrap.appendChild(menu);
 
     wrap.appendChild(el("div", "section-h", "Schlüssel-Sätze (Ferriss)"));
@@ -271,9 +537,10 @@
 
   /* ---------- VOCAB ---------- */
   function viewVocab() {
+    let levelFilter = null;
     const wrap = el("div");
     wrap.appendChild(el("h2", "view-title", "Parole"));
-    wrap.appendChild(el("p", "view-sub", `${POOL.length} Wörter und Ausdrücke nach Kategorie. Suche auf Italienisch oder Deutsch.`));
+    wrap.appendChild(el("p", "view-sub", `${POOL.length} Wörter und Ausdrücke in ${D.categories.length} Kategorien — filterbar nach Level. Suche auf Italienisch oder Deutsch.`));
     const search = el("input", "search-input");
     search.type = "search";
     search.placeholder = "Wort oder Übersetzung suchen …";
@@ -285,12 +552,26 @@
       host.innerHTML = "";
       const q = fold(query).trim();
       if (!q) {
+        const chips = el("div", "tabs");
+        [["Alle", null], ["A1", "A1"], ["A2", "A2"], ["B1", "B1"]].forEach(([label, lv]) => {
+          const c = el("button", "chip" + (levelFilter === lv ? " active" : ""), label);
+          c.addEventListener("click", () => { levelFilter = lv; draw(search.value); });
+          chips.appendChild(c);
+        });
+        host.appendChild(chips);
+        const mm = masteryByCat();
         const grid = el("div", "grid");
-        D.categories.forEach(cat => {
+        D.categories.filter(cat => !levelFilter || (cat.level || "A1") === levelFilter).forEach(cat => {
           const t = el("button", "cat-tile");
           t.appendChild(el("span", "emoji", cat.icon));
           t.appendChild(el("span", "name", cat.title));
-          t.appendChild(el("span", "count", `${cat.items.length} Wörter`));
+          t.appendChild(el("span", "count", `${cat.items.length} Wörter · ${mm[cat.id].known} gereift`));
+          const bar = el("div", "tile-bar");
+          const fill = el("div");
+          fill.style.width = `${mm[cat.id].total ? Math.round((mm[cat.id].known / mm[cat.id].total) * 100) : 0}%`;
+          bar.appendChild(fill);
+          t.appendChild(bar);
+          t.appendChild(el("span", "lv " + (cat.level || "A1"), cat.level || "A1"));
           t.addEventListener("click", () => viewCategory(cat));
           grid.appendChild(t);
         });
@@ -313,6 +594,7 @@
         g.appendChild(el("div", "pt", it.it));
         g.appendChild(el("div", "de", `${it.de} · ${cat.title}`));
         row.appendChild(g);
+        row.appendChild(srsDot(key));
         row.addEventListener("click", () => speak(it.it, key));
         card.appendChild(row);
       });
@@ -329,7 +611,19 @@
     back.addEventListener("click", viewVocab);
     wrap.appendChild(back);
     wrap.appendChild(el("h2", "view-title", `${cat.icon} ${cat.title}`));
-    const card = el("div", "card");
+    const mm = masteryByCat()[cat.id];
+    wrap.appendChild(el("p", "view-sub", `${cat.items.length} Wörter · ${mm.known} gereift · Level ${cat.level || "A1"}`));
+    const practice = el("button", "btn btn-telha", "🃏 Diese Kategorie üben");
+    practice.addEventListener("click", () => runFlash(deckFrom(POOL.filter(p => p.cat === cat.id), cat.items.length), "‹ Parole", viewVocab));
+    wrap.appendChild(practice);
+    const storyLink = STORIES.find(s => (s.covers || []).includes(cat.id));
+    if (storyLink) {
+      const sb = el("button", "btn btn-ghost", `📚 Lernen im Kontext: „${storyLink.title}“ ▶`);
+      sb.style.marginTop = "10px";
+      sb.addEventListener("click", () => startStory(storyLink));
+      wrap.appendChild(sb);
+    }
+    const card = el("div", "card"); card.style.marginTop = "12px";
     cat.items.forEach(it => {
       const key = wordKey(cat.id, it.key || it.it);
       const row = el("div", "row");
@@ -338,6 +632,7 @@
       g.appendChild(el("div", "pt", it.it));
       g.appendChild(el("div", "de", it.de));
       row.appendChild(g);
+      row.appendChild(srsDot(key));
       row.addEventListener("click", () => speak(it.it, key));
       card.appendChild(row);
     });
@@ -433,9 +728,12 @@
     wrap.appendChild(mk("btn-telha", "🎲 Misch-Training", startMix, "Empfohlen: wählen, hören, Lücke füllen, Satz bauen — alles gemischt."));
     wrap.appendChild(mk("btn-primary", "🧩 Satzbau (Kacheln)", startTiles, "Wörter in die richtige Reihenfolge tippen."));
     wrap.appendChild(mk("btn-ghost", "🃏 Karteikarten (Wörter)", startFlash));
-    wrap.appendChild(mk("btn-ghost", "🗣️ Satz-Drill (DE → PT)", startSentenceDrill, "Pimsleur: erst selbst sagen, dann auflösen."));
+    wrap.appendChild(mk("btn-ghost", "🗣️ Satz-Drill (DE → IT)", startSentenceDrill, "Pimsleur: erst selbst sagen, dann auflösen."));
     wrap.appendChild(mk("btn-ghost", "🔁 Zeitform-Flip", startTenseFlip, "Derselbe Satz in Presente, Passato prossimo und Futuro semplice."));
     wrap.appendChild(mk("btn-ghost", "🎙️ Shadowing", startShadow, "Hören und laut nachsprechen."));
+    wrap.appendChild(mk("btn-ghost", "💬 Redewendungen (Modi di dire)", viewFrasi, "Feste Wendungen lesen, hören und wiederholen."));
+
+    wrap.appendChild(mk("btn-ghost", "🎧 Hör-Geschichten (Orecchie)", viewOrecchie, "Graded Input: kurz hören, Satz für Satz verstehen."));
 
     wrap.appendChild(el("div", "section-h", "Warum das wirkt"));
     wrap.appendChild(el("p", "view-sub", "Aktives Abrufen schlägt passives Wiederholen — und gemischte Aufgabentypen wirken am stärksten. Die Wiederholung (Leitner) reicht jetzt bis zwei Monate, damit es auch nach der Reise sitzt."));
@@ -446,10 +744,21 @@
   function startFlash() {
     const deck = buildDeck();
     if (!deck.length) { toast("Alles wiederholt — boa! 🎉"); return; }
+    runFlash(deck);
+  }
+  // Deck von außen (z. B. kategoriegeffiltert) — gleicher Ablauf,
+  // aber mit passendem Zurück-Button.
+  function runFlash(deck, backLabel, backFn) {
+    if (!deck.length) { toast("Nichts zu üben in dieser Auswahl."); return; }
     let i = 0, flipped = false;
     const wrap = el("div");
-    const back = el("button", "back", "‹ Allenamento");
-    back.addEventListener("click", viewTrain);
+    const back = el("button", "back", backLabel || "‹ Allenamento");
+    // Antworten sind pro Karte sofort gespeichert — beim vorzeitigen Beenden
+    // bestätigen, damit klar ist, dass nichts verloren geht.
+    back.addEventListener("click", () => {
+      if (i > 0) toast(`✓ ${i} ${i === 1 ? "Antwort" : "Antworten"} gespeichert — Fortschritt bleibt.`);
+      (backFn || viewTrain)();
+    });
     wrap.appendChild(back);
 
     const fw = el("div", "flash-wrap");
@@ -476,15 +785,15 @@
     function load() {
       if (i >= deck.length) {
         fw.innerHTML = "";
-        const done = el("div", "empty", `<div style="font-size:40px">🎉</div><p>${deck.length} Karten geübt. Muito bem!</p>`);
+        const done = el("div", "empty", `<div style="font-size:40px">🎉</div><p>${deck.length} Karten geübt. Molto bene!</p><p>✓ Jede Antwort war sofort gespeichert.</p>`);
         const again2 = el("button", "btn btn-primary", "Nochmal");
-        again2.addEventListener("click", startFlash);
+        again2.addEventListener("click", () => runFlash(deck));
         fw.appendChild(done); fw.appendChild(again2);
         return;
       }
       flipped = false; flip.classList.remove("flipped");
       const c = deck[i];
-      prog.innerHTML = `<span>Karte ${i + 1} / ${deck.length}</span><span>PT → DE</span>`;
+      prog.innerHTML = `<span>Karte ${i + 1} / ${deck.length}</span><span>IT → DE</span>`;
       frontBig.textContent = c.pt;
       backBig.textContent = c.de; backSub.textContent = c.pt;
       speak(c.pt, c.key);
@@ -493,50 +802,6 @@
     again.addEventListener("click", () => { grade(deck[i].key, false); i++; load(); });
     knew.addEventListener("click", () => { grade(deck[i].key, true); i++; load(); });
     render(wrap); load();
-  }
-
-  /* ---------- Quiz ---------- */
-  function startQuiz() {
-    const pool = shuffle(POOL.slice());
-    const N = Math.min(10, pool.length);
-    let i = 0, score = 0;
-    const wrap = el("div");
-    const back = el("button", "back", "‹ Allenamento");
-    back.addEventListener("click", viewTrain);
-    wrap.appendChild(back);
-    const host = el("div"); wrap.appendChild(host);
-    render(wrap);
-
-    function question() {
-      if (i >= N) {
-        host.innerHTML = "";
-        host.appendChild(el("div", "empty", `<div style="font-size:40px">${score >= N * 0.7 ? "🌟" : "💪"}</div><p>${score} / ${N} richtig</p>`));
-        const b = el("button", "btn btn-primary", "Nochmal");
-        b.addEventListener("click", startQuiz); host.appendChild(b);
-        return;
-      }
-      const q = pool[i];
-      const opts = shuffle([q, ...shuffle(POOL.filter(p => p.key !== q.key)).slice(0, 3)]);
-      host.innerHTML = "";
-      host.appendChild(el("div", "quiz-score", `Frage ${i + 1} / ${N} · ${score} richtig`));
-      const qd = el("div", "quiz-q", q.pt);
-      host.appendChild(qd);
-      const pb = el("div"); pb.style.textAlign = "center"; pb.style.marginBottom = "8px";
-      pb.appendChild(playBtn(q.pt, q.key));
-      host.appendChild(pb);
-      host.appendChild(el("div", "quiz-prompt", "Was bedeutet das?"));
-      opts.forEach(o => {
-        const b = el("button", "opt", o.de);
-        b.addEventListener("click", () => {
-          [...host.querySelectorAll(".opt")].forEach(x => x.disabled = true);
-          if (o.key === q.key) { b.classList.add("correct"); score++; }
-          else { b.classList.add("wrong"); host.querySelectorAll(".opt").forEach(x => { if (x.textContent === q.de) x.classList.add("correct"); }); }
-          setTimeout(() => { i++; question(); }, 850);
-        });
-        host.appendChild(b);
-      });
-    }
-    question();
   }
 
   /* ============================================================
@@ -592,7 +857,7 @@
 
   /* ---------- Modus: Satz-Drill (Pimsleur-Stil) ---------- */
   function startSentenceDrill() {
-    const deck = deckFrom(SENT_POOL, 14);
+    const deck = deckFrom(DRILL_SENT, 24);
     let i = 0;
     const wrap = el("div");
     const back = el("button", "back", "‹ Allenamento"); back.addEventListener("click", viewTrain);
@@ -608,7 +873,7 @@
       host.innerHTML = "";
       host.appendChild(el("div", "flash-progress", `<span>Satz ${i + 1} / ${deck.length}</span><span></span>`));
       const card = el("div", "drill-card");
-      const bt = tenseBadge(c.tense); card.appendChild(bt);
+      if (c.tense) card.appendChild(tenseBadge(c.tense));
       card.appendChild(el("div", "drill-de", c.de));
       const reveal = el("div", "drill-pt hidden");
       const pp = el("span", null, c.pt);
@@ -651,7 +916,7 @@
     function step() {
       if (idx >= items.length) { host.innerHTML = ""; finish(host, items.length, startTenseFlip, viewTrain); return; }
       const item = items[idx];
-      const person = (Math.random() * 5) | 0;
+      const person = (Math.random() * S.subjects.it.length) | 0;
       let shown = 1; // wie viele Zeiten aufgedeckt
       host.innerHTML = "";
       host.appendChild(el("div", "flash-progress", `<span>Satz ${idx + 1} / ${items.length}</span><span>${S.subjects.it[person]} · ${S.subjects.de[person]}</span>`));
@@ -691,7 +956,7 @@
   }
 
   function finish(host, n, again, home) {
-    host.appendChild(el("div", "empty", `<div style="font-size:40px">🎉</div><p>${n} geübt. Muito bem!</p>`));
+    host.appendChild(el("div", "empty", `<div style="font-size:40px">🎉</div><p>${n} geübt. Molto bene!</p>`));
     const a = el("button", "btn btn-primary", "Nochmal"); a.addEventListener("click", again);
     const h = el("button", "btn btn-ghost", "Zurück"); h.style.marginTop = "10px"; h.addEventListener("click", home);
     host.appendChild(a); host.appendChild(h);
@@ -726,6 +991,28 @@
   });
   const WORD_SRC = POOL.map(p => ({ key: p.key, pt: p.pt, de: p.de, src: "word" }));
 
+  // Story-Sätze als zusätzliche Drill-Quelle — gleiche SRS-Schlüssel wie im
+  // Story-Player, damit Fortschritt in beide Richtungen zählt. Duplikate
+  // (Sätze, die in mehreren Stories vorkommen) bleiben nur einmal drin.
+  const STORY_SENT_POOL = (() => {
+    const seen = new Set(); const out = [];
+    (window.IT_STORIES || []).forEach(st => (st.sentences || []).forEach((sn, i) => {
+      const norm = sn.it.trim().toLocaleLowerCase();
+      if (seen.has(norm)) return;
+      seen.add(norm);
+      out.push(mkSent("story_" + st.id + "_sent_" + i, sn.it, sn.de));
+    }));
+    return out;
+  })();
+  const DRILL_SENT = ALL_SENT.concat(STORY_SENT_POOL);
+
+  // Wort-Pool für Satzbau-Ablenker im Training (aus allen Drillsätzen)
+  const DRILL_WORD_POOL = (() => {
+    const set = new Set();
+    DRILL_SENT.forEach(s => s.tokens.forEach(t => { if (t.length > 2) set.add(t); }));
+    return [...set];
+  })();
+
   // alle Verbformen für Cloze-Distraktoren
   const ALL_FORMS = (() => {
     const set = new Set();
@@ -748,19 +1035,22 @@
         : { type: "listen", key: s.key, audioText: s.pt, options, answer: s.de };
     }
     const r = Math.random();
-    if (r < 0.4) {
+    if (r < 0.4 && s.blank) {
       const options = shuffle([s.blank, ...sampleVals(ALL_FORMS, 3, s.blank)]);
       return { type: "cloze", key: s.key, full: s.pt, blank: s.blank, de: s.de, options, answer: s.blank };
     }
-    if (r < 0.8) return { type: "tiles", key: s.key, pt: s.pt, de: s.de, tokens: s.tokens };
-    const options = shuffle([s.de, ...sampleObjs(ALL_SENT, 3, s.key).map(x => x.de)]);
+    if (r < 0.8 || !s.blank) {
+      const d = withDistractors(s.tokens, DRILL_WORD_POOL, 0, 4);
+      return { type: "tiles", key: s.key, pt: s.pt, de: s.de, tokens: d.tokens, answer: d.answer };
+    }
+    const options = shuffle([s.de, ...sampleObjs(DRILL_SENT, 3, s.key).map(x => x.de)]);
     return { type: "listen", key: s.key, audioText: s.pt, options, answer: s.de };
   }
 
-  function runSession(title, sub, exercises, backFn) {
+  function runSession(title, sub, exercises, backFn, backLabel) {
     let i = 0, correct = 0;
     const wrap = el("div");
-    const back = el("button", "back", "‹ Allenamento"); back.addEventListener("click", backFn || viewTrain); wrap.appendChild(back);
+    const back = el("button", "back", backLabel || "‹ Allenamento"); back.addEventListener("click", backFn || viewTrain); wrap.appendChild(back);
     wrap.appendChild(el("h2", "view-title", title));
     if (sub) wrap.appendChild(el("p", "view-sub", sub));
     const bar = el("div", "progbar"); const fill = el("div", "progfill"); bar.appendChild(fill); wrap.appendChild(bar);
@@ -784,7 +1074,11 @@
     }
     step();
   }
-  function reroll(ex) { return ex; } // Platzhalter (Reihenfolge bleibt, Inhalt stabil)
+  function reroll(ex) {
+    // Antwortoptionen neu mischen; Kachel-Pools (Lösung + Ablenker) bleiben wie generiert
+    if (ex.options) ex.options = shuffle(ex.options.slice());
+    return ex;
+  }
 
   function renderExercise(host, ex, done) {
     if (ex.type === "tiles") return renderTiles(host, ex, done);
@@ -837,11 +1131,24 @@
     });
     host.appendChild(optWrap);
   }
+  // Ablenker-Wörter für Kachel-Übungen: zufällig viele (minN…maxN), begrenzt
+  // durch Kandidaten und Satzlänge — Abwechslung statt fester zwei Ablenker.
+  function withDistractors(target, pool, minN, maxN) {
+    const cand = [];
+    (pool || []).forEach(t => { if (t.length > 2 && !target.includes(t) && !cand.includes(t)) cand.push(t); });
+    const cap = Math.min(maxN, cand.length, target.length);
+    if (cap <= 0) return { tokens: target.slice(), answer: target.slice() };
+    const n = Math.min(cap, minN + Math.floor(Math.random() * (maxN - minN + 1)));
+    return { tokens: target.concat(shuffle(cand.slice()).slice(0, n)), answer: target.slice() };
+  }
+
   function renderTiles(host, ex, done) {
     const card = el("div", "drill-card");
     card.appendChild(el("div", "tiles-de", ex.de));
     const answer = el("div", "tiles-answer"); const bank = el("div", "tiles-bank");
     card.appendChild(answer); card.appendChild(bank); host.appendChild(card);
+    // ex.answer = Lösungsreihenfolge; ohne Ablenker ist es ex.tokens selbst
+    const expected = ex.answer || ex.tokens;
     let chosen = []; let pool = ex.tokens.map(t => t); shuffle(pool);
     function draw() {
       answer.innerHTML = ""; bank.innerHTML = "";
@@ -854,7 +1161,7 @@
     const reset = el("button", "btn btn-ghost", "Zurücksetzen"); reset.addEventListener("click", () => { pool = ex.tokens.map(t => t); shuffle(pool); chosen = []; draw(); });
     const check = el("button", "btn btn-primary", "Prüfen");
     check.addEventListener("click", () => {
-      const ok = chosen.join(" ") === ex.tokens.join(" ");
+      const ok = chosen.join(" ") === expected.join(" ");
       const res = el("div", "tiles-result " + (ok ? "good" : "bad")); res.textContent = (ok ? "Giusto! " : "Richtig: ") + ex.pt;
       card.appendChild(res); speak(ex.pt, ex.key); grade(ex.key, ok);
       check.disabled = true; reset.disabled = true;
@@ -864,11 +1171,17 @@
   }
 
   // Einstiegspunkte der Modi
-  function startMix()   { runSession("Misch-Training", "Wechselnde Aufgaben: wählen, hören, Lücke füllen, Satz bauen.", deckFrom(WORD_SRC.concat(ALL_SENT), 14).map(makeExercise), viewTrain); }
-  function startTiles() { runSession("Satzbau", "Tippe die Wörter in die richtige Reihenfolge.", deckFrom(ALL_SENT, 12).map(s => ({ type: "tiles", key: s.key, pt: s.pt, de: s.de, tokens: s.tokens })), viewTrain); }
+  function startMix()   { runSession("Misch-Training", "Wechselnde Aufgaben: wählen, hören, Lücke füllen, Satz bauen.", deckFrom(WORD_SRC.concat(DRILL_SENT), 24).map(makeExercise), viewTrain); }
+  function startTiles() {
+    runSession("Satzbau", "Tippe die Wörter in die richtige Reihenfolge — Ablenker gibt es unterschiedlich viele.",
+      deckFrom(DRILL_SENT, 20).map(s => {
+        const d = withDistractors(s.tokens, DRILL_WORD_POOL, 0, 4);
+        return { type: "tiles", key: s.key, pt: s.pt, de: s.de, tokens: d.tokens, answer: d.answer };
+      }), viewTrain);
+  }
 
   function startShadow() {
-    const picks = deckFrom(WORD_SRC.concat(ALL_SENT), 14); let i = 0;
+    const picks = deckFrom(WORD_SRC.concat(DRILL_SENT), 24); let i = 0;
     const wrap = el("div"); const back = el("button", "back", "‹ Allenamento"); back.addEventListener("click", viewTrain); wrap.appendChild(back);
     wrap.appendChild(el("h2", "view-title", "Shadowing")); wrap.appendChild(el("p", "view-sub", "Hören, laut nachsprechen, dann aufdecken — trainiert Aussprache und Hörverstehen."));
     const host = el("div"); wrap.appendChild(host); render(wrap);
@@ -895,57 +1208,110 @@
   }
 
   /* ============================================================
-     VIAGEM (Reise-Material): Checkliste + Dialoge
+     VIAGGIO (Reise-Material): Checkliste + Dialoge
      ============================================================ */
   function viewViaggio() {
     const wrap = el("div");
     wrap.appendChild(el("h2", "view-title", "Viaggio"));
-    wrap.appendChild(el("p", "view-sub", "Dein Reisematerial: die wichtigsten Sätze und echte Mini-Dialoge."));
-    const b1 = el("button", "btn btn-primary", "✅ Reisecheckliste (30 Sätze)");
-    b1.addEventListener("click", viewChecklist);
+    wrap.appendChild(el("p", "view-sub", "Dein Reisematerial: Checklisten je Level, Missionen (auch aus den Lektionen) und echte Mini-Dialoge von A1 bis B1."));
+    const b1 = el("button", "btn btn-primary", `✅ Reisecheckliste (A1 · ${S.checklist.length} Sätze)`);
+    b1.addEventListener("click", () => viewChecklist("A1"));
     wrap.appendChild(b1);
     const bm = el("button", "btn btn-telha", "🗺️ Reise-Missionen");
     bm.style.marginTop = "10px"; bm.addEventListener("click", viewMissions);
     wrap.appendChild(bm);
     wrap.appendChild(el("div", "section-h", "Reise-Dialoge"));
-    const grid = el("div", "grid");
-    S.dialogues.forEach(dl => {
-      const t = el("button", "cat-tile");
-      t.appendChild(el("span", "emoji", dl.icon));
-      t.appendChild(el("span", "name", dl.title));
-      t.appendChild(el("span", "count", `${dl.lines.length} Zeilen`));
-      t.addEventListener("click", () => viewDialogue(dl));
-      grid.appendChild(t);
-    });
-    wrap.appendChild(grid);
+    let levelFilter = null;
+    const host = el("div"); wrap.appendChild(host);
+    function drawDialogues() {
+      host.innerHTML = "";
+      const chips = el("div", "tabs");
+      [["Alle", null], ["A1", "A1"], ["A2", "A2"], ["B1", "B1"]].forEach(([label, lv]) => {
+        const n = lv ? S.dialogues.filter(dl => (dl.level || "A1") === lv).length : S.dialogues.length;
+        const c = el("button", "chip" + (levelFilter === lv ? " active" : ""), `${label} · ${n}`);
+        c.addEventListener("click", () => { levelFilter = lv; drawDialogues(); });
+        chips.appendChild(c);
+      });
+      host.appendChild(chips);
+      const grid = el("div", "grid");
+      S.dialogues.filter(dl => !levelFilter || (dl.level || "A1") === levelFilter).forEach(dl => {
+        const lvl = dl.level || "A1";
+        const t = el("button", "cat-tile");
+        t.appendChild(el("span", "emoji", dl.icon));
+        t.appendChild(el("span", "name", dl.title));
+        const inStory = STORIES.find(x => x.dialogueId === dl.id);
+        t.appendChild(el("span", "count", `${dl.lines.length} Zeilen${inStory ? ` · Szene in „${inStory.title}“` : ""}`));
+        t.appendChild(el("span", "lv " + lvl, lvl));
+        t.addEventListener("click", () => viewDialogue(dl));
+        grid.appendChild(t);
+      });
+      host.appendChild(grid);
+    }
+    drawDialogues();
     render(wrap);
   }
 
   function checkState() { return LS.get("ciaoit_check", {}); }
-  function viewChecklist() {
+  // Checklisten je Level. A1 behält die alten SRS-Keys (chk_<i>), damit
+  // vorhandener Fortschritt erhalten bleibt; A2/B1 nutzen eigene Präfixe.
+  const CHECKLISTS = [
+    ["A1", "checklist", "chk_"],
+    ["A2", "checklistA2", "chkA2_"],
+    ["B1", "checklistB1", "chkB1_"]
+  ];
+  function checklistOf(level) {
+    const def = CHECKLISTS.find(([lv]) => lv === level) || CHECKLISTS[0];
+    const items = S[def[1]] || [];
+    return { level: def[0], items, pfx: def[2] };
+  }
+  function viewChecklist(level) {
+    const cur = checklistOf(level);
     const wrap = el("div");
     const back = el("button", "back", "‹ Viaggio"); back.addEventListener("click", viewViaggio);
     wrap.appendChild(back);
-    const st = checkState();
-    const done = S.checklist.filter((_, i) => st[i]).length;
+    // Einmalige Übernahme alter Häkchen in die SRS-Boxen (Box 4), damit
+    // früher getickte Sätze nicht als „ungelernt“ verloren gehen.
+    if (cur.level === "A1") {
+      const legacy = checkState();
+      if (Object.keys(legacy).length) {
+        const s = srs();
+        Object.keys(legacy).forEach(i => {
+          if (legacy[i] && !s[`chk_${i}`]) s[`chk_${i}`] = { box: 4, due: Date.now() + 4 * DAY };
+        });
+        srsSave(s);
+        LS.set("ciaoit_check", {});
+      }
+    }
+    const sr = srs();
+    const ripe = cur.items.filter((_, i) => sr[`${cur.pfx}${i}`] && sr[`${cur.pfx}${i}`].box >= 4).length;
     wrap.appendChild(el("h2", "view-title", "Reisecheckliste"));
-    wrap.appendChild(el("p", "view-sub", `${done} / ${S.checklist.length} sitzen. Antippen zum Anhören, Haken wenn es sitzt.`));
-    const bar = el("div", "progbar"); const fill = el("div", "progfill"); fill.style.width = `${(done / S.checklist.length) * 100}%`; bar.appendChild(fill); wrap.appendChild(bar);
+    const tabs = el("div", "tabs");
+    CHECKLISTS.forEach(([lv]) => {
+      const n = (S[CHECKLISTS.find(([l]) => l === lv)[1]] || []).length;
+      const c = el("button", "chip" + (lv === cur.level ? " active" : ""), `${lv} · ${n} Sätze`);
+      c.addEventListener("click", () => viewChecklist(lv));
+      tabs.appendChild(c);
+    });
+    wrap.appendChild(tabs);
+    wrap.appendChild(el("p", "view-sub", `Level ${cur.level} · ${ripe} / ${cur.items.length} sitzen sicher. Anhören, laut sagen, dann bewerten — alles wandert in die Wiederholung.`));
+    const bar = el("div", "progbar"); const fill = el("div", "progfill"); fill.style.width = `${Math.round((ripe / cur.items.length) * 100)}%`; bar.appendChild(fill); wrap.appendChild(bar);
     const card = el("div", "card");
-    S.checklist.forEach((c, i) => {
-      const key = `chk_${i}`;
+    cur.items.forEach((c, i) => {
+      const key = `${cur.pfx}${i}`;
       const row = el("div", "row chk");
-      const box = el("button", "checkbox" + (st[i] ? " on" : ""), st[i] ? "✓" : "");
-      box.addEventListener("click", (e) => {
-        e.stopPropagation();
-        const s = checkState(); s[i] = !s[i]; LS.set("ciaoit_check", s); viewChecklist();
-      });
-      row.appendChild(box);
+      row.appendChild(srsDot(key));
       const g = el("div", "grow");
       g.appendChild(el("div", "pt", c.it));
       g.appendChild(el("div", "de", c.de));
       row.appendChild(g);
       row.appendChild(playBtn(c.it, key));
+      const again = el("button", "grbtn", "↻");
+      again.title = "Nochmal üben";
+      again.addEventListener("click", (e) => { e.stopPropagation(); grade(key, false); bumpSkill("hoeren"); viewChecklist(cur.level); });
+      const knew = el("button", "grbtn good", "✓");
+      knew.title = "Wusste ich";
+      knew.addEventListener("click", (e) => { e.stopPropagation(); grade(key, true); bumpSkill("hoeren"); viewChecklist(cur.level); });
+      row.appendChild(again); row.appendChild(knew);
       row.addEventListener("click", () => speak(c.it, key));
       card.appendChild(row);
     });
@@ -954,33 +1320,75 @@
   }
 
   function missionState() { return LS.get("ciaoit_missions", {}); }
+  // Vereinigt die 12 Reisemissionen mit den Story-Missionen aller Lektionen
+  // (Stories mit missionId nutzen die Reisemission — keine Doppelliste).
+  function allMissionList() {
+    const seen = new Set(); const out = [];
+    S.missions.forEach(mn => { seen.add(mn.id); out.push({ id: mn.id, title: mn.title, say: mn.say, phase: mn.phase, audioKey: `mis_${mn.id}` }); });
+    STORIES.forEach(story => {
+      const m = storyMission(story);
+      if (seen.has(m.id)) return;
+      seen.add(m.id);
+      out.push({ id: m.id, title: m.title, say: m.say, de: m.de, phase: "storia", level: story.level, story, audioKey: m.audioKey });
+    });
+    return out;
+  }
+  function toggleMission(id) {
+    const s = missionState();
+    if (s[id]) { delete s[id]; LS.set("ciaoit_missions", s); return; }
+    s[id] = { when: Date.now() }; LS.set("ciaoit_missions", s);
+    bumpOutput("missionen"); bumpSkill("sprechen"); markPractice(1); addXP(25);
+    toast("Mission erledigt! +25 XP 🎯");
+  }
   function viewMissions() {
     const wrap = el("div");
     const back = el("button", "back", "‹ Viaggio"); back.addEventListener("click", viewViaggio); wrap.appendChild(back);
     const st = missionState();
-    const done = S.missions.filter(mn => st[mn.id]).length;
+    const all = allMissionList();
+    const done = all.filter(mn => st[mn.id]).length;
     wrap.appendChild(el("h2", "view-title", "Reise-Missionen"));
-    wrap.appendChild(el("p", "view-sub", `${done}/${S.missions.length} erledigt. Echte Aufgaben — vor, während und nach der Reise.`));
-    const phases = [["prima", "Vorbereiten"], ["viaggio", "Unterwegs in Italien"], ["dopo", "Nach der Reise — dranbleiben"]];
-    phases.forEach(([ph, label]) => {
-      const items = S.missions.filter(mn => mn.phase === ph);
-      if (!items.length) return;
-      wrap.appendChild(el("div", "section-h", label));
+    wrap.appendChild(el("p", "view-sub", `${done}/${all.length} erledigt. Echte Aufgaben — aus den Lektionen sowie vor, während und nach der Reise.`));
+    const renderRows = (items) => {
       const card = el("div", "card");
       items.forEach(mn => {
         const row = el("div", "row chk");
         const box = el("button", "checkbox" + (st[mn.id] ? " on" : ""), st[mn.id] ? "✓" : "");
-        box.addEventListener("click", (e) => { e.stopPropagation(); const s = missionState(); s[mn.id] = !s[mn.id]; LS.set("ciaoit_missions", s); viewMissions(); });
+        box.addEventListener("click", (e) => { e.stopPropagation(); toggleMission(mn.id); viewMissions(); });
         row.appendChild(box);
         const g = el("div", "grow");
         g.appendChild(el("div", "pt", mn.title));
         if (mn.say) g.appendChild(el("div", "de", `„${mn.say}"`));
         row.appendChild(g);
-        if (mn.say) row.appendChild(playBtn(mn.say, `mis_${mn.id}`));
+        if (mn.say) row.appendChild(playBtn(mn.say, mn.audioKey || `mis_${mn.id}`));
+        const story = mn.story || STORIES.find(x => x.missionId === mn.id);
+        if (story) {
+          const go = el("button", "grbtn", "›");
+          go.title = "Zur Missions-Seite";
+          go.addEventListener("click", (e) => { e.stopPropagation(); viewMissione(story); });
+          row.appendChild(go);
+        }
         card.appendChild(row);
       });
       wrap.appendChild(card);
+    };
+    const phases = [["prima", "Vorbereiten"], ["viaggio", "Unterwegs in Italien"], ["dopo", "Nach der Reise — dranbleiben"]];
+    phases.forEach(([ph, label]) => {
+      const items = all.filter(mn => mn.phase === ph);
+      if (!items.length) return;
+      wrap.appendChild(el("div", "section-h", label));
+      renderRows(items);
     });
+    const storyMissions = all.filter(mn => mn.phase === "storia");
+    if (storyMissions.length) {
+      wrap.appendChild(el("div", "section-h", "Aus den Lektionen"));
+      ["A1", "A2", "B1"].forEach(lv => {
+        const items = storyMissions.filter(mn => mn.level === lv);
+        if (!items.length) return;
+        const lvlDone = items.filter(mn => st[mn.id]).length;
+        wrap.appendChild(el("div", "section-h level-h", `${lv} <span class="level-count">${lvlDone}/${items.length}</span>`));
+        renderRows(items);
+      });
+    }
     render(wrap);
   }
 
@@ -989,9 +1397,33 @@
     const back = el("button", "back", "‹ Viaggio"); back.addEventListener("click", viewViaggio);
     wrap.appendChild(back);
     wrap.appendChild(el("h2", "view-title", `${dl.icon} ${dl.title}`));
-    const playAll = el("button", "btn btn-ghost", "▶︎ Ganzen Dialog anhören");
-    playAll.addEventListener("click", () => speakSequence(dl));
-    wrap.appendChild(playAll);
+    const dlLevel = dl.level || "A1";
+    const dlMeta = el("p", "view-sub lvl-row");
+    dlMeta.appendChild(el("span", "lv " + dlLevel, dlLevel));
+    dlMeta.appendChild(el("span", null, `${dl.lines.length} Zeilen · Tempo wählen, dann anhören.`));
+    wrap.appendChild(dlMeta);
+    let rate = 0.85;
+    const tabs = el("div", "tabs");
+    [["🐢 Lento", 0.6], ["Normale", 0.85], ["Veloce", 1.05]].forEach(([label, r], i) => {
+      const c = el("button", "chip" + (i === 1 ? " active" : ""), label);
+      c.addEventListener("click", () => { rate = r; [...tabs.children].forEach(x => x.classList.remove("active")); c.classList.add("active"); });
+      tabs.appendChild(c);
+    });
+    wrap.appendChild(tabs);
+    const btnRow = el("div", "btn-row");
+    const playAll = el("button", "btn btn-primary", "▶︎ Ganzen Dialog anhören");
+    playAll.addEventListener("click", () => { const t = ++seqToken; speakSequence(dl, rate, t); });
+    const stopBtn = el("button", "btn btn-ghost", "⏹ Stop");
+    stopBtn.addEventListener("click", () => { seqToken++; if (window.speechSynthesis) speechSynthesis.cancel(); toast("Wiedergabe gestoppt"); });
+    btnRow.appendChild(playAll); btnRow.appendChild(stopBtn);
+    wrap.appendChild(btnRow);
+    const story = STORIES.find(x => x.dialogueId === dl.id);
+    if (story) {
+      const sb = el("button", "btn btn-telha", `🎬 Diese Szene in „${story.title}“ spielen ▶`);
+      sb.style.marginTop = "10px";
+      sb.addEventListener("click", () => { seqToken++; startStory(story); });
+      wrap.appendChild(sb);
+    }
     const card = el("div", "card"); card.style.marginTop = "12px";
     dl.lines.forEach((ln, i) => {
       const key = `dlg_${dl.id}_${i}`;
@@ -1009,30 +1441,1039 @@
     wrap.appendChild(card);
     render(wrap);
   }
-  // Spielt einen Dialog Zeile für Zeile (nutzt vorhandene Audio/TTS)
-  function speakSequence(dl) {
+  // Spielt einen Dialog Zeile für Zeile — die nächste Zeile beginnt erst,
+  // wenn die vorherige fertig ist (MP3 onended, sonst TTS onend, sonst Taktung).
+  let seqToken = 0;
+  async function speakSequence(dl, rate, token) {
     if (!settings.speak) { toast("Ton ist aus"); return; }
-    let i = 0;
-    const go = () => {
-      if (i >= dl.lines.length) return;
-      const ln = dl.lines[i]; const key = `dlg_${dl.id}_${i}`; i++;
-      // nach Datei oder TTS: einfache Taktung über Timeout
-      speak(ln.it, key);
-      setTimeout(go, Math.max(1400, ln.it.length * 90));
+    for (let i = 0; i < dl.lines.length; i++) {
+      if (token !== seqToken) return;
+      await speakWait(dl.lines[i].it, `dlg_${dl.id}_${i}`, rate);
+    }
+  }
+
+  /* ============================================================
+     PERCORSO (Lernpfad) & STORY-PLAYER
+     Jede Story durchläuft: Entdecken → Hören → Erkennen →
+     Bauen → Szene → Produzieren → Abschluss (XP + Badge).
+     Neue Stories kommen ausschließlich in stories.js hinzu.
+     ============================================================ */
+  const STORIES = window.IT_STORIES || [];
+  const POOL_BY_SLUG = {};
+  POOL.forEach(p => { const s = p.key.slice(5); if (!POOL_BY_SLUG[s]) POOL_BY_SLUG[s] = p; });
+  // Wörter mit passendem Bestandseintrag teilen dessen SRS/Audio-Schlüssel
+  function storyWordKey(story, w) {
+    if (w.key) return w.key;
+    const s = slug(w.it);
+    return POOL_BY_SLUG[s] ? POOL_BY_SLUG[s].key : `story_${story.id}_${s}`;
+  }
+  const storySentKey = (story, i) => `story_${story.id}_sent_${i}`;
+  function sentenceTokens(it) { return it.replace(/[.!?,;:]/g, "").split(/\s+/).filter(Boolean); }
+
+  /* ---------- Reale Mission pro Story (Piazza-Schleife) ---------- */
+  function storyMission(story) {
+    if (story.missionId) {
+      const m = S.missions.find(x => x.id === story.missionId);
+      if (m && m.say) return { id: m.id, title: m.title, say: m.say, source: "Reise-Mission", audioKey: `mis_${m.id}` };
+    }
+    const si = (story.produce || [0])[0] || 0;
+    const s = story.sentences[si] || story.sentences[0];
+    return { id: `st_${story.id}`, title: story.title, say: s.it, de: s.de, source: "Story-Satz", audioKey: `story_${story.id}_sent_${si}` };
+  }
+  function missionDone(id) { return !!missionState()[id]; }
+  function nextRealMission() {
+    for (const st of STORIES) {
+      if (!storyDone(st.id)) continue;
+      const m = storyMission(st);
+      if (!missionDone(m.id)) return { story: st, mission: m };
+    }
+    return null;
+  }
+
+  /* ---------- Bereitschaft (WaniKani-Prinzip: SRS schaltet frei) ---------- */
+  function storyReadiness(story) {
+    const s = srs();
+    const ready = story.words.filter(w => {
+      const r = s[storyWordKey(story, w)];
+      return r && r.box >= 3;
+    }).length;
+    return Math.round(ready / story.words.length * 100);
+  }
+  /* ---------- Espresso del giorno (1 kurze Challenge pro Tag) ---------- */
+  function espressoPick() {
+    // Tagessstabil: die Wahl wird pro Tag gespeichert
+    const today = ymd();
+    const saved = LS.get("ciaoit_espresso", null);
+    if (saved && saved.day === today) return STORIES.find(s => s.id === saved.id) || null;
+    const pool = STORIES.filter(s => !storyDone(s.id));
+    if (!pool.length) return null;
+    const day = Number(today.replace(/-/g, ""));
+    const minis = pool.filter(s => s.mini);
+    const list = (day % 2 === 0 && minis.length) ? minis : pool;
+    const pick = list[day % list.length];
+    LS.set("ciaoit_espresso", { day: today, id: pick.id });
+    return pick;
+  }
+  function espressoDone(pick) { return !pick || storyDone(pick.id); }
+
+  function viewPercorso() {
+    const wrap = el("div");
+    wrap.appendChild(el("h2", "view-title", "Percorso"));
+    wrap.appendChild(el("p", "view-sub", "Dein Lernpfad: kleine Szenen, jede rund sechs Minuten. Level für Level wächst dein Italienisch."));
+    const done = STORIES.filter(s => storyDone(s.id)).length;
+    const xpLine = el("div", "xp-line");
+    xpLine.appendChild(el("span", "xp-chip", `⭐ ${xpState().xp} XP`));
+    xpLine.appendChild(el("span", "xp-chip", `🏅 ${done}/${STORIES.length} Stories`));
+    wrap.appendChild(xpLine);
+    const badgeIds = xpState().badges;
+    if (badgeIds.length) {
+      const shelf = el("div", "badge-shelf");
+      badgeIds.forEach(id => { const st = STORIES.find(s => s.id === id); if (st) shelf.appendChild(el("span", "badge", st.icon)); });
+      wrap.appendChild(shelf);
+    }
+
+    const CURR = window.IT_CURRICULUM || {};
+    const CHAPS = window.IT_CHAPTERS || [];
+    const activeLevels = Object.keys(CURR).filter(lv => STORIES.some(s => s.level === lv));
+    let nextMarked = false;
+    activeLevels.forEach(lv => {
+      const info = CURR[lv];
+      const levelStories = STORIES.filter(s => s.level === lv);
+      const levelDone = levelStories.filter(s => storyDone(s.id)).length;
+      wrap.appendChild(el("div", "section-h level-h",
+        `${lv} · ${info.label} <span class="level-count">${levelDone}/${levelStories.length}</span>`));
+      const path = el("div", "path");
+      // Kapitel-Marken (nur A1): Kapitelname + Meilenstein, wenn komplett
+      levelStories.forEach(story => {
+        const gIdx = STORIES.indexOf(story);
+        if (lv === "A1") {
+          const chap = CHAPS.find(c => c.from === gIdx);
+          if (chap) {
+            const chapStories = STORIES.slice(chap.from, chap.to);
+            const chapDone = chapStories.filter(x => storyDone(x.id)).length;
+            const complete = chapDone === chapStories.length;
+            const head = el("div", "chapter-head");
+            head.appendChild(el("span", "chapter-ico", chap.icon));
+            const cg = el("div", "grow");
+            cg.appendChild(el("div", "chapter-name", chap.name));
+            cg.appendChild(el("div", "story-sub", complete
+              ? "Kapitel geschafft — Meilenstein freigeschaltet 🎯"
+              : `${chapDone}/${chapStories.length} Lektionen`));
+            head.appendChild(cg);
+            if (complete) {
+              head.appendChild(playBtn(chap.say, `chap_${chap.from}`));
+              head.addEventListener("click", () => speak(chap.say, `chap_${chap.from}`));
+            }
+            path.appendChild(head);
+          }
+        }
+        const isDone = storyDone(story.id);
+        const isNext = !isDone && !nextMarked;
+        if (isNext) nextMarked = true;
+        const card = el("button", "story-card" + (isDone ? " done" : "") + (isNext ? " next" : ""));
+        card.appendChild(el("span", "story-ico", isDone ? "✓" : story.icon));
+        const g = el("div", "grow");
+        g.appendChild(el("div", "story-name", `${STORIES.indexOf(story) + 1}. ${story.title}`));
+        const sub = story.mini ? `Mini-Lektion · ${story.words.length} Wörter` : `${story.words.length} Wörter · ${story.sentences.length} Sätze`;
+        let subTxt = isDone ? "Geschafft — zum Wiederholen tippen" : (story.mini ? `Dran: ca. 3 Minuten · ${sub}` : `Dran: ca. 6 Minuten · ${sub}`);
+        if (!isDone && !isNext) subTxt = sub;
+        if (isNext && STORIES.indexOf(story) > 0) {
+          const pct = storyReadiness(story);
+          subTxt = isDone ? subTxt : (pct >= 70
+            ? `Bereit ✓ · ${pct} % der Wörter sitzen — ca. ${story.mini ? 3 : 6} Minuten`
+            : `Noch nicht ganz bereit (${pct} % sitzen) — aufrischen hilft, starten reicht auch`);
+        }
+        g.appendChild(el("div", "story-sub", isDone ? "Geschafft — zum Wiederholen tippen" : subTxt));
+        card.appendChild(g);
+        card.appendChild(el("span", "story-go", isNext ? "▶" : isDone ? "↻" : "•"));
+        card.addEventListener("click", () => startStory(story));
+        path.appendChild(card);
+      });
+      wrap.appendChild(path);
+    });
+
+    // Levels ohne Stories: theoretisch vorgesehen, noch ohne Inhalte
+    const plannedLevels = Object.keys(CURR).filter(lv => !STORIES.some(s => s.level === lv));
+    if (plannedLevels.length) {
+      wrap.appendChild(el("div", "section-h", "Danach: weitere Level"));
+      const levels = el("div", "path");
+      plannedLevels.forEach(lv => {
+        const info = CURR[lv];
+        const card = el("div", "story-card locked");
+        card.appendChild(el("span", "story-ico", "🔒"));
+        const g = el("div", "grow");
+        g.appendChild(el("div", "story-name", `${lv} · ${info.label}`));
+        const topicCount = Array.isArray(info.topics) ? info.topics.length : 0;
+        g.appendChild(el("div", "story-sub", info.goal || (topicCount ? `${topicCount} Themen vorgesehen` : "Inhalte folgen")));
+        card.appendChild(g);
+        levels.appendChild(card);
+      });
+      wrap.appendChild(levels);
+      wrap.appendChild(el("p", "view-sub", "Weitere Level sind als Gerüst vorbereitet — die Stories dafür entstehen level für level. Details im KURRICULUM.md."));
+    }
+    render(wrap);
+  }
+
+  function startStory(story) {
+    const words = story.words.map(w => Object.assign({ skey: storyWordKey(story, w) }, w));
+    // Mini-Lektion: kurzer Ablauf (Entdecken → Hören → Bauen → Produzieren)
+    const mini = !!story.mini;
+    const steps = [{ type: "intro" }, { type: "discover" }];
+    shuffle(words.slice()).slice(0, mini ? 4 : 6).forEach(w => steps.push({ type: "listen", w }));
+    if (!mini) shuffle(words.slice()).slice(0, 4).forEach(w => steps.push({ type: "recognize", w }));
+    (story.build || []).slice(0, mini ? 1 : 3).forEach(i => steps.push({ type: "build", i }));
+    if (!mini && story.dialogueId) {
+      const dl = S.dialogues.find(d => d.id === story.dialogueId);
+      if (dl) steps.push({ type: "dialog", dl });
+    }
+    (story.produce || []).slice(0, mini ? 2 : 3).forEach(i => steps.push({ type: "produce", i }));
+    steps.push({ type: "finale" });
+
+    let idx = 0, xpEarned = 0, graded = 0, right = 0;
+    const wrap = el("div");
+    const back = el("button", "back", "‹ Percorso");
+    back.addEventListener("click", viewPercorso);
+    wrap.appendChild(back);
+    wrap.appendChild(el("h2", "view-title", `${story.icon} ${story.title}`));
+    const head = el("div", "story-head");
+    const bar = el("div", "progbar"); const fill = el("div", "progfill"); bar.appendChild(fill);
+    const xpLive = el("span", "xp-live", "⭐ 0");
+    head.appendChild(bar); head.appendChild(xpLive);
+    wrap.appendChild(head);
+    const host = el("div"); wrap.appendChild(host);
+    render(wrap);
+
+    const bump = (n) => { xpEarned += n; addXP(n); xpLive.textContent = `⭐ ${xpEarned}`; };
+    const result = (ok) => { graded++; if (ok) right++; };
+    const next = () => { idx++; draw(); };
+
+    function draw() {
+      fill.style.width = `${Math.min(100, (idx / (steps.length - 1)) * 100)}%`;
+      host.innerHTML = "";
+      const st = steps[idx];
+      if (!st || st.type === "finale") return finale();
+      if (st.type === "intro") return intro();
+      if (st.type === "discover") return discover();
+      if (st.type === "listen") return listen(st.w);
+      if (st.type === "recognize") return recognize(st.w);
+      if (st.type === "build") return build(st.i);
+      if (st.type === "dialog") return scene(st.dl);
+      if (st.type === "produce") return produce(st.i);
+    }
+
+    function intro() {
+      const card = el("div", "drill-card");
+      card.appendChild(el("div", "scene-it", `${story.icon} ${story.title}`));
+      card.appendChild(el("div", "scene-de", story.scene || "Eine kleine Szene aus Italien."));
+      host.appendChild(card);
+      const goBtn = el("button", "btn btn-primary", "Los geht's ›");
+      goBtn.addEventListener("click", () => { markPractice(1); next(); });
+      host.appendChild(goBtn);
+    }
+
+    function discover() {
+      let i = 0, revealed = false;
+      host.appendChild(el("div", "listen-instr", "Neue Wörter: Bild ansehen, zuhören — erst dann die Bedeutung zeigen."));
+      const card = el("div", "discover-card");
+      const art = el("div", "dc-art");
+      const playRow = el("div"); playRow.style.marginTop = "6px";
+      const reveal = el("div", "dc-reveal hidden");
+      card.appendChild(art); card.appendChild(playRow); card.appendChild(reveal);
+      host.appendChild(card);
+      const action = el("button", "btn btn-primary", "Bedeutung zeigen");
+      action.style.marginTop = "14px";
+      host.appendChild(action);
+
+      function drawCard() {
+        const w = words[i];
+        revealed = false;
+        const svg = window.IT_ART && window.IT_ART.get(w.it);
+        art.innerHTML = svg
+          ? `<span class="dc-svg">${svg}</span>`
+          : `<span class="dc-emoji">${w.emoji || ""}</span>`;
+        playRow.innerHTML = ""; playRow.appendChild(playBtn(w.it, w.skey));
+        reveal.innerHTML = ""; reveal.classList.add("hidden");
+        reveal.appendChild(el("div", "dc-it", w.it));
+        reveal.appendChild(el("div", "dc-de", w.de));
+        action.textContent = "Bedeutung zeigen";
+        speak(w.it, w.skey);
+      }
+      action.addEventListener("click", () => {
+        if (!revealed) {
+          revealed = true;
+          reveal.classList.remove("hidden");
+          speak(words[i].it, words[i].skey);
+          action.textContent = i === words.length - 1 ? "Weiter ›" : "Nächstes Wort ›";
+        } else {
+          markPractice(1); bump(2);
+          i++;
+          if (i < words.length) drawCard(); else next();
+        }
+      });
+      drawCard();
+    }
+
+    function wordOptions(w) {
+      const others = shuffle(words.filter(x => x.skey !== w.skey && x.de !== w.de).slice()).slice(0, 3);
+      return shuffle([w].concat(others));
+    }
+
+    function listen(w) {
+      const card = el("div", "drill-card");
+      card.appendChild(el("div", "listen-instr", "Hör zu — was bedeutet es?"));
+      const big = el("button", "listen-btn", "🔊");
+      big.addEventListener("click", () => speak(w.it, w.skey));
+      card.appendChild(big);
+      host.appendChild(card);
+      speak(w.it, w.skey);
+      const opts = el("div");
+      wordOptions(w).forEach(o => {
+        const b = el("button", "opt", o.de);
+        b.addEventListener("click", () => {
+          const ok = markChoice(opts, o.de, w.de);
+          result(ok); if (ok) { bump(10); bumpSkill("hoeren"); }
+          grade(w.skey, ok);
+          setTimeout(next, 850);
+        });
+        opts.appendChild(b);
+      });
+      host.appendChild(opts);
+    }
+
+    function recognize(w) {
+      const card = el("div", "drill-card");
+      card.appendChild(el("div", "drill-de", w.it));
+      const pw = el("div"); pw.style.textAlign = "center"; pw.appendChild(playBtn(w.it, w.skey));
+      card.appendChild(pw);
+      host.appendChild(card);
+      const opts = el("div");
+      wordOptions(w).forEach(o => {
+        const b = el("button", "opt", o.de);
+        b.addEventListener("click", () => {
+          const ok = markChoice(opts, o.de, w.de);
+          result(ok); if (ok) { bump(10); bumpSkill("lesen"); }
+          grade(w.skey, ok);
+          setTimeout(next, 850);
+        });
+        opts.appendChild(b);
+      });
+      host.appendChild(opts);
+    }
+
+    // Bauen & Produzieren nutzen das Kachel-Format; Produzieren fragt DE→IT ab
+    // und mischt Ablenker-Wörter aus den anderen Story-Sätzen dazu.
+    function build(i) {
+      const s = story.sentences[i];
+      renderTiles(host, { type: "tiles", key: storySentKey(story, i), pt: s.it, de: s.de, tokens: sentenceTokens(s.it) },
+        ok => { result(ok); if (ok) { bump(12); bumpSkill("lesen"); } next(); });
+    }
+
+    function produce(i) {
+      const s = story.sentences[i];
+      const target = sentenceTokens(s.it);
+      const distract = [];
+      story.sentences.forEach((o, oi) => {
+        if (oi === i) return;
+        sentenceTokens(o.it).forEach(t => { if (t.length > 2 && !target.includes(t) && !distract.includes(t)) distract.push(t); });
+      });
+      // 1–5 Ablenker in zufälliger Anzahl — mal mehr, mal weniger übrig
+      const d = withDistractors(target, distract, 1, 5);
+      renderTiles(host, { type: "tiles", key: storySentKey(story, i), pt: s.it, de: s.de, tokens: d.tokens, answer: d.answer },
+        ok => { result(ok); if (ok) { bump(15); bumpSkill("schreiben"); bumpOutput("satze"); } next(); });
+    }
+
+    function scene(dl) {
+      let li = 0, advanced = false;
+      host.appendChild(el("div", "listen-instr", "Die Szene: Die App spricht die Partner — deine Zeilen sagst du selbst."));
+      const card = el("div", "scene-card");
+      host.appendChild(card);
+      const action = el("button", "btn btn-primary");
+      action.style.marginTop = "4px";
+      host.appendChild(action);
+
+      function drawLine() {
+        advanced = false;
+        const ln = dl.lines[li];
+        const mine = ln.who === "Du";
+        const last = li === dl.lines.length - 1;
+        card.className = "scene-card" + (mine ? " mine" : "");
+        card.innerHTML = "";
+        card.appendChild(el("div", "scene-who", ln.who));
+        card.appendChild(el("div", "scene-it" + (mine ? " hidden" : ""), ln.it));
+        card.appendChild(el("div", "scene-de", ln.de));
+        if (mine) {
+          action.textContent = "Auf Italienisch sagen ›";
+        } else {
+          speak(ln.it, `dlg_${dl.id}_${li}`);
+          const pb = playBtn(ln.it, `dlg_${dl.id}_${li}`);
+          pb.style.marginTop = "8px";
+          card.appendChild(pb);
+          action.textContent = last ? "Abschluss ›" : "Weiter ›";
+        }
+      }
+      action.addEventListener("click", () => {
+        const ln = dl.lines[li];
+        if (ln.who === "Du" && !advanced) {
+          advanced = true;
+          card.querySelector(".scene-it").classList.remove("hidden");
+          speak(ln.it, `dlg_${dl.id}_${li}`);
+          action.textContent = li === dl.lines.length - 1 ? "Abschluss ›" : "Weiter ›";
+          return;
+        }
+        markPractice(1); bump(3);
+        li++;
+        if (li < dl.lines.length) drawLine(); else next();
+      });
+      drawLine();
+    }
+
+    function finale() {
+      const pct = graded ? Math.round((right / graded) * 100) : 100;
+      const st = storyState();
+      const first = !(st[story.id] && st[story.id].done);
+      st[story.id] = { done: true, best: Math.max((st[story.id] && st[story.id].best) || 0, pct), at: Date.now() };
+      LS.set("ciaoit_stories", st);
+      if (first) {
+        const x = xpState();
+        if (!x.badges.includes(story.id)) { x.badges.push(story.id); LS.set("ciaoit_xp", x); }
+        bump(25);
+      }
+      const mission = story.missionId ? S.missions.find(m => m.id === story.missionId) : null;
+      fill.style.width = "100%";
+      host.innerHTML = "";
+      host.appendChild(el("div", "empty",
+        `<div style="font-size:44px">${pct >= 70 ? "🎉" : "💪"}</div><p><b>${story.title}</b> geschafft!</p>` +
+        `<p>${right}/${graded} richtig · ⭐ ${xpEarned} XP${first ? ` · Badge ${story.icon}` : ""}</p>` +
+        (mission ? `<p>🎯 Reise-Mission: ${mission.title}</p>` : "")));
+      if (storyDone(story.id)) {
+        const mBtn = el("button", "btn btn-telha", "🎯 Deine echte Aufgabe dazu ›");
+        mBtn.addEventListener("click", () => viewMissione(story));
+        host.appendChild(mBtn);
+      }
+      // Direkt weiter: nächste Lektion des Pfads (Reihenfolge wie im Percorso)
+      const si = STORIES.findIndex(x => x.id === story.id);
+      const nxt = si >= 0 ? STORIES[si + 1] : null;
+      if (nxt) {
+        const label = nxt.level === story.level
+          ? `▶ Nächste Lektion: ${nxt.icon} ${nxt.title}`
+          : `▶ Weiter in ${nxt.level}: ${nxt.icon} ${nxt.title}`;
+        const nextBtn = el("button", "btn btn-primary", label);
+        nextBtn.addEventListener("click", () => startStory(nxt));
+        host.appendChild(nextBtn);
+      } else {
+        host.appendChild(el("p", "view-sub", `🎉 Percorso completo — alle ${STORIES.length} Lektionen geschafft!`));
+      }
+      const again = el("button", "btn btn-ghost", "Nochmal spielen");
+      again.style.marginTop = "10px";
+      again.addEventListener("click", () => startStory(story));
+      const toPath = el("button", "btn btn-ghost", "Zurück zum Pfad");
+      toPath.style.marginTop = "10px";
+      toPath.addEventListener("click", viewPercorso);
+      host.appendChild(again); host.appendChild(toPath);
+    }
+
+    draw();
+  }
+
+  /* ============================================================
+     MISSIONE — die reale Aufgabe hinter jeder Story
+     (Zuhause aussprechen · Vor Ort erleben · Schreiben)
+     ============================================================ */
+  function viewMissione(story) {
+    const m = storyMission(story);
+    const recKey = `memo_${m.id}`;
+    const done = missionDone(m.id);
+    const wrap = el("div");
+    const back = el("button", "back", "‹ Zurück");
+    back.addEventListener("click", viewHome);
+    wrap.appendChild(back);
+    wrap.appendChild(el("h2", "view-title", `${story.icon} ${m.title}`));
+    wrap.appendChild(el("p", "view-sub", done ? "Erledigt — kannst du jederzeit wiederholen." : `Freigeschaltet durch „${story.title}“. Jetzt die echte Welt.`));
+
+    const card = el("div", "drill-card");
+    card.appendChild(el("div", "listen-instr", `Dein Satz (${m.source}):`));
+    card.appendChild(el("div", "scene-it", m.say));
+    if (m.de) card.appendChild(el("div", "scene-de", m.de));
+    const pr = el("div"); pr.style.marginTop = "8px"; pr.appendChild(playBtn(m.say, m.audioKey || recKey));
+    card.appendChild(pr);
+    wrap.appendChild(card);
+
+    /* Variante 1: Zuhause laut sagen + optional Memo */
+    wrap.appendChild(el("div", "section-h", "1 · Zuhause: Sag es laut"));
+    const home1 = el("p", "view-sub", "Spiel den Satz ab und sprich laut nach — dreimal. Dein Ohr ist die Prüfung.");
+    wrap.appendChild(home1);
+    const status = el("p", "tense-note", done ? "Zuvor schon erledigt ✓" : "");
+    let audioEl = null;
+    if (canRecord) {
+      const recBtn = el("button", "btn btn-ghost", "🎙️ Memo aufnehmen");
+      recBtn.addEventListener("click", async () => {
+        if (recBtn.dataset.rec === "1") { recBtn._media.stop(); return; }
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          const mr = new MediaRecorder(stream);
+          const chunks = [];
+          mr.ondataavailable = e => chunks.push(e.data);
+          mr.onstop = async () => {
+            stream.getTracks().forEach(t => t.stop());
+            const blob = new Blob(chunks, { type: mr.mimeType || "audio/webm" });
+            await saveMemo(recKey, blob);
+            recBtn.dataset.rec = "0";
+            recBtn.textContent = "🎙️ Neu aufnehmen";
+            status.textContent = "Memo gespeichert ✓ — hör es dir an und vergleiche mit dem Original.";
+            if (audioEl) audioEl.remove();
+            audioEl = new Audio(URL.createObjectURL(blob));
+            audioEl.controls = true; audioEl.style.width = "100%"; audioEl.style.marginTop = "8px";
+            card.appendChild(audioEl);
+          };
+          mr.start();
+          recBtn.dataset.rec = "1"; recBtn._media = mr;
+          recBtn.textContent = "⏹️ Aufnahme beenden";
+          status.textContent = "Aufnahme läuft … Satz laut sagen!";
+        } catch {
+          status.textContent = "Mikrofon nicht verfügbar — sag den Satz einfach laut und tippe unten ✓.";
+        }
+      });
+      wrap.appendChild(recBtn);
+      MEMODB.get(recKey).then(entry => {
+        if (entry && !audioEl) {
+          status.textContent = "Du hast ein Memo zu dieser Mission.";
+          audioEl = new Audio(URL.createObjectURL(entry.blob));
+          audioEl.controls = true; audioEl.style.width = "100%"; audioEl.style.marginTop = "8px";
+          card.appendChild(audioEl);
+        }
+      }).catch(() => {});
+    } else {
+      wrap.appendChild(el("p", "view-sub", "Aufnahmen funktionieren in dieser Umgebung nicht — sag den Satz laut und bestätige unten."));
+    }
+    wrap.appendChild(status);
+
+    /* Variante 2: Vor Ort (mit Reisedatum) */
+    if (settings.tripDate) {
+      wrap.appendChild(el("div", "section-h", "2 · Vor Ort in Italien"));
+      wrap.appendChild(el("p", "view-sub", `Reise geplant ab ${settings.tripDate}. Nutze diesen Satz echt — an der Bar, am Schalter, wo immer er passt. Vor Ort zählt: mutig sein, nicht perfekt.`));
+    }
+
+    /* Abschluss */
+    const doneRow = el("div", "grade-row");
+    const okBtn = el("button", "btn btn-primary", done ? "✓ Wiederholt — zählt" : "✓ Geschafft (laut gesagt)");
+    okBtn.addEventListener("click", () => {
+      const st = missionState(); st[m.id] = { when: Date.now() }; LS.set("ciaoit_missions", st);
+      bumpOutput("missionen"); bumpSkill("sprechen"); markPractice(1); addXP(25);
+      toast("Mission erledigt! +25 XP 🎯");
+      setTimeout(viewHome, 700);
+    });
+    doneRow.appendChild(okBtn);
+    wrap.appendChild(doneRow);
+
+    /* Variante 3: Schreiben (eigene Variante → Tagebuch) */
+    wrap.appendChild(el("div", "section-h", "3 · Schreiben: Deine eigene Variante"));
+    wrap.appendChild(el("p", "view-sub", "Formuliere den Satz auf deine Art — eigene Sätze bleiben am besten hängen."));
+    const ta = el("textarea", "search-input diario-input");
+    ta.rows = 2; ta.placeholder = "z. B. " + m.say;
+    ta.setAttribute("aria-label", "Eigener italienischer Satz");
+    wrap.appendChild(ta);
+    const saveBtn = el("button", "btn btn-ghost", "📝 In mein Sprachtagebuch");
+    saveBtn.style.marginTop = "8px";
+    saveBtn.addEventListener("click", () => {
+      const t = (ta.value || "").trim();
+      if (t.length < 4) { toast("Schreib zuerst einen Satz"); return; }
+      diarioAdd(t);
+      toast("Im Tagebuch — kommt ins Wiederholen ✓");
+      ta.value = "";
+    });
+    wrap.appendChild(saveBtn);
+    render(wrap);
+  }
+
+  /* ============================================================
+     PASSAPORTO — dein Können als Profil (statt Zeit-in-App)
+     ============================================================ */
+  function viewPassaporto() {
+    const wrap = el("div");
+    wrap.appendChild(el("h2", "view-title", "Passaporto"));
+    wrap.appendChild(el("p", "view-sub", "Was du schon kannst — deine Ausgaben, deine Sätze, deine Missionen."));
+
+    /* Serie (entgiftet): Rekord für immer */
+    const s = streak();
+    const sc = el("div", "streak-card");
+    sc.appendChild(el("div", "streak-flame", s.count > 0 ? "🔥" : "💤"));
+    const sinfo = el("div", "streak-info grow");
+    sinfo.appendChild(el("div", "streak-num", `Aktuell ${s.count} · Rekord ${s.best || 0} Tage`));
+    sinfo.appendChild(el("div", "streak-sub", "Der Rekord bleibt für immer — ein ruhender Tag pro Woche ist eingeplant."));
+    sc.appendChild(sinfo);
+    wrap.appendChild(sc);
+
+    /* Kompetenz-Radar (Balken) */
+    wrap.appendChild(el("div", "section-h", "Kompetenzen"));
+    const sk = skills();
+    const maxV = Math.max(10, sk.hoeren, sk.lesen, sk.sprechen, sk.schreiben);
+    const rows = [["Hören", sk.hoeren, "🔊"], ["Lesen", sk.lesen, "📖"], ["Sprechen", sk.sprechen, "🗣️"], ["Schreiben", sk.schreiben, "✍️"]];
+    rows.forEach(([label, v, ico]) => {
+      const row = el("div", "skill-row");
+      row.appendChild(el("span", "skill-ico", ico));
+      const bar = el("div", "skill-bar");
+      const fill = el("div", "skill-fill");
+      fill.style.width = `${Math.min(100, Math.round(v / maxV * 100))}%`;
+      bar.appendChild(fill);
+      row.appendChild(bar);
+      row.appendChild(el("span", "skill-num", String(v)));
+      row.setAttribute("title", `${label}: ${v}`);
+      wrap.appendChild(row);
+    });
+    wrap.appendChild(el("p", "view-sub", "Aus echten Übungen: Hören = Hör-Aufgaben, Lesen = Erkennen/Bauen, Sprechen = Missionen & Memos, Schreiben = Produzieren & Tagebuch."));
+
+    /* Ausgabe-Zähler */
+    const o = output();
+    const wk = (o.week && o.week.start === isoWeekKey()) ? o.week : { satze: 0, missionen: 0, memos: 0, diario: 0 };
+    const statGrid = el("div", "stat-grid");
+    statGrid.appendChild(stat(o.total, "Sätze produziert"));
+    statGrid.appendChild(stat((wk.satze || 0) + (wk.diario || 0), "diese Woche"));
+    statGrid.appendChild(stat(wk.missionen || 0, "Missionen / Woche"));
+    wrap.appendChild(statGrid);
+
+    /* Szenarien (abgeschlossene Lektionen = Können) */
+    const doneStories = STORIES.filter(x => storyDone(x.id));
+    wrap.appendChild(el("div", "section-h", `Szenarien gemeistert · ${doneStories.length}/${STORIES.length}`));
+    if (doneStories.length) {
+      const chips = el("div", "badge-shelf");
+      doneStories.forEach(x => chips.appendChild(el("span", "badge", x.icon)));
+      wrap.appendChild(chips);
+      const list = el("div", "card");
+      doneStories.slice(-8).reverse().forEach(x => {
+        const row = el("div", "row");
+        row.appendChild(el("span", "mico", x.icon));
+        row.appendChild(el("div", "grow", `<div class="pt">${x.title}</div><div class="de">${x.level}</div>`));
+        list.appendChild(row);
+      });
+      wrap.appendChild(list);
+    } else {
+      wrap.appendChild(el("p", "view-sub", "Noch keine Lektion abgeschlossen — die erste wartet im Percorso."));
+    }
+
+    /* Missions-Stempel */
+    const st = missionState();
+    const stampIds = Object.keys(st);
+    wrap.appendChild(el("div", "section-h", `Missions-Stempel · ${stampIds.length}`));
+    if (stampIds.length) {
+      const list = el("div", "card");
+      stampIds.forEach(id => {
+        const known = S.missions.find(x => x.id === id);
+        const storyMatch = id.startsWith("st_") ? STORIES.find(x => x.id === id.slice(3)) : null;
+        const label = known ? known.title : storyMatch ? `Eigene Mission: ${storyMatch.title}` : id;
+        const row = el("div", "row");
+        row.appendChild(el("span", "mico", "🎯"));
+        row.appendChild(el("div", "grow", `<div class="pt">${label}</div>`));
+        list.appendChild(row);
+      });
+      wrap.appendChild(list);
+    } else {
+      wrap.appendChild(el("p", "view-sub", "Noch keine Mission in der echten Welt erledigt — die erste wartet auf der Startseite."));
+    }
+
+    /* Memos */
+    wrap.appendChild(el("div", "section-h", "Deine Sprachmemos"));
+    // Immer ein Ergebnis: Liste oder Leer-Hinweis — auch bei IDB-Fehler/Timeout
+    (async () => {
+      const keys = await Promise.race([
+        MEMODB.keys(),
+        new Promise(r => setTimeout(() => r(null), 2000))
+      ]).catch(() => null);
+      if (!keys || !keys.length) {
+        wrap.appendChild(el("p", "view-sub", "Noch keine Aufnahmen. Missions-Seite → 🎙️ Memo aufnehmen."));
+        return;
+      }
+      const list = el("div", "card");
+      keys.forEach(key => {
+        const row = el("div", "row");
+        const play = el("button", "play", "▶");
+        play.addEventListener("click", async () => {
+          const entry = await MEMODB.get(key);
+          if (entry) new Audio(URL.createObjectURL(entry.blob)).play();
+        });
+        row.appendChild(play);
+        row.appendChild(el("div", "grow", `<div class="pt">${key.replace("memo_", "").replace(/_/g, " ")}</div>`));
+        list.appendChild(row);
+      });
+      wrap.appendChild(list);
+    })();
+
+    /* Tagebuch */
+    const dia = diario();
+    wrap.appendChild(el("div", "section-h", "Sprachtagebuch"));
+    if (dia.length) {
+      const list = el("div", "card");
+      dia.slice(-6).reverse().forEach(entry => {
+        const row = el("div", "row");
+        row.appendChild(el("div", "grow", `<div class="pt">${entry.t}</div><div class="de">${entry.d}</div>`));
+        row.appendChild(playBtn(entry.t, `diario_${entry.d}`));
+        list.appendChild(row);
+      });
+      wrap.appendChild(list);
+      const more = el("button", "btn btn-ghost", "✍️ Satz für heute schreiben");
+      more.style.marginTop = "10px";
+      more.addEventListener("click", () => viewMissione(STORIES.find(x => storyDone(x.id)) || STORIES[0]));
+      wrap.appendChild(more);
+    } else {
+      wrap.appendChild(el("p", "view-sub", "Sette giorni, sette frasi: schreibe täglich einen eigenen Satz — auf einer Missions-Seite."));
+    }
+
+    /* Sincronizzazione: Fortschritt auf dem Server sichern */
+    wrap.appendChild(el("div", "section-h", "☁️ Sincronizzazione — Server-Backup"));
+    const syncCard = el("div", "card");
+    syncCard.style.padding = "14px";
+    const codeIn = el("input", "search-input");
+    codeIn.type = "password";
+    codeIn.placeholder = "Sync-Code (mindestens 6 Zeichen)";
+    codeIn.value = settings.syncCode || "";
+    codeIn.style.marginBottom = "10px";
+    codeIn.setAttribute("aria-label", "Sync-Code");
+    const syncStatus = el("div", "view-sub");
+    function drawSyncStatus() {
+      const s = syncState();
+      const fmt = t => t ? new Date(t).toLocaleString("de-DE") : null;
+      syncStatus.innerHTML = s.lastPush
+        ? `Zuletzt gesichert: <b>${fmt(s.lastPush)}</b>${s.lastPull ? ` · geladen: ${fmt(s.lastPull)}` : ""}`
+        : "Noch nicht gesichert — Fortschritt liegt nur auf diesem Gerät.";
+    }
+    drawSyncStatus();
+    const syncBtns = el("div", "btn-row");
+    const connectBtn = el("button", "btn btn-primary", settings.syncCode ? "Jetzt sichern ☁️" : "Verbinden & sichern");
+    connectBtn.addEventListener("click", async () => {
+      const v = codeIn.value.trim();
+      if (v.length < 6) { toast("Sync-Code: mindestens 6 Zeichen"); return; }
+      settings.syncCode = v; saveSettings();
+      connectBtn.disabled = true; syncStatus.textContent = "Sichere auf den Server …";
+      const r = await syncPush(true).catch(e => ({ ok: false, error: String(e && e.message || e) }));
+      connectBtn.disabled = false; drawSyncStatus();
+      toast(r.ok ? "Fortschritt gesichert ✓" : "Sync fehlgeschlagen: " + (r.error || "unbekannt"));
+    });
+    const pullBtn = el("button", "btn btn-ghost", "Vom Server laden");
+    pullBtn.addEventListener("click", async () => {
+      if (!settings.syncCode) {
+        const v = codeIn.value.trim();
+        if (v.length < 6) { toast("Erst Sync-Code eingeben"); return; }
+        settings.syncCode = v; saveSettings();
+      }
+      if (!window.confirm("Der Server-Stand ersetzt die Daten auf diesem Gerät. Weiter?")) return;
+      pullBtn.disabled = true; syncStatus.textContent = "Lade vom Server …";
+      const r = await syncPull(true).catch(() => ({ ok: false }));
+      if (r && r.applied) { location.reload(); return; }
+      pullBtn.disabled = false; drawSyncStatus();
+      toast(r && r.empty ? "Noch keine Daten auf dem Server." : "Laden fehlgeschlagen.");
+    });
+    syncBtns.appendChild(connectBtn); syncBtns.appendChild(pullBtn);
+    syncCard.appendChild(codeIn);
+    syncCard.appendChild(syncBtns);
+    syncCard.appendChild(syncStatus);
+    syncCard.appendChild(el("p", "view-sub", "Alles bleibt zusätzlich lokal (offline nutzbar). Nach jedem Lernen wird automatisch gesichert; beim App-Start wird ein neuerer Server-Stand geladen."));
+    wrap.appendChild(syncCard);
+    render(wrap);
+  }
+
+  /* ============================================================
+     ORECCHIE — Hör-Geschichten (graded input)
+     Drei Tempi, Satz für Satz, Übersetzung per Tap.
+     ============================================================ */
+  function viewOrecchie() {
+    const eps = window.IT_LISTENING || [];
+    const wrap = el("div");
+    const back = el("button", "back", "‹ Allenamento");
+    back.addEventListener("click", viewTrain);
+    wrap.appendChild(back);
+    wrap.appendChild(el("h2", "view-title", "Orecchie"));
+    wrap.appendChild(el("p", "view-sub", "Hör-Geschichten: erst nur hören, dann Satz für Satz aufklappen. Input ist der Dünger für dein Italienisch."));
+    let levelFilter = null;
+    const host = el("div"); wrap.appendChild(host);
+    function drawEps() {
+      host.innerHTML = "";
+      const chips = el("div", "tabs");
+      [["Alle", null], ["A1", "A1"], ["A2", "A2"], ["B1", "B1"]].forEach(([label, lv]) => {
+        const n = lv ? eps.filter(ep => (ep.level || "A1") === lv).length : eps.length;
+        const c = el("button", "chip" + (levelFilter === lv ? " active" : ""), `${label} · ${n}`);
+        c.addEventListener("click", () => { levelFilter = lv; drawEps(); });
+        chips.appendChild(c);
+      });
+      host.appendChild(chips);
+      const list = el("div", "path");
+      eps.filter(ep => !levelFilter || (ep.level || "A1") === levelFilter).forEach(ep => {
+        const lvl = ep.level || "A1";
+        const card = el("button", "story-card");
+        card.appendChild(el("span", "story-ico", ep.icon));
+        const g = el("div", "grow");
+        const name = el("div", "story-name");
+        name.appendChild(document.createTextNode(ep.title));
+        name.appendChild(el("span", "lv " + lvl, lvl));
+        g.appendChild(name);
+        g.appendChild(el("div", "story-sub", `${ep.lines.length} Sätze · ca. 2 Minuten`));
+        card.appendChild(g);
+        card.appendChild(el("span", "story-go", "▶"));
+        card.addEventListener("click", () => viewOrecchieEp(ep));
+        list.appendChild(card);
+      });
+      host.appendChild(list);
+    }
+    drawEps();
+    render(wrap);
+  }
+
+  function viewOrecchieEp(ep) {
+    const wrap = el("div");
+    const back = el("button", "back", "‹ Orecchie");
+    back.addEventListener("click", viewOrecchie);
+    wrap.appendChild(back);
+    wrap.appendChild(el("h2", "view-title", `${ep.icon} ${ep.title}`));
+    const epLevel = ep.level || "A1";
+    const epMeta = el("p", "view-sub lvl-row");
+    epMeta.appendChild(el("span", "lv " + epLevel, epLevel));
+    epMeta.appendChild(el("span", null, "Erst Tempo wählen und hören — dann Satz für Satz die Übersetzung aufklappen."));
+    wrap.appendChild(epMeta);
+
+    let rate = 0.6;
+    const tabs = el("div", "tabs");
+    [["🐢 Lento", 0.6], ["Normale", 0.85], ["Veloce", 1.05]].forEach(([label, r], i) => {
+      const c = el("button", "chip" + (i === 0 ? " active" : ""), label);
+      c.addEventListener("click", () => {
+        rate = r;
+        [...tabs.children].forEach(x => x.classList.remove("active"));
+        c.classList.add("active");
+      });
+      tabs.appendChild(c);
+    });
+    wrap.appendChild(tabs);
+
+    const card = el("div", "card");
+    ep.lines.forEach((ln, i) => {
+      const row = el("div", "row");
+      const play = el("button", "play", "▶");
+      play.addEventListener("click", () => speak(ln.it, `ore_${ep.id}_${i}`, rate));
+      row.appendChild(play);
+      const g = el("div", "grow");
+      g.appendChild(el("div", "pt", ln.it));
+      const de = el("div", "de hidden", ln.de);
+      g.appendChild(de);
+      row.appendChild(g);
+      row.addEventListener("click", () => de.classList.toggle("hidden"));
+      card.appendChild(row);
+    });
+    wrap.appendChild(card);
+
+    const all = el("button", "btn btn-primary", "▶︎ Ganze Geschichte hören");
+    all.addEventListener("click", () => {
+      ep.lines.forEach((ln, i) => setTimeout(() => speak(ln.it, `ore_${ep.id}_${i}`, rate), i * 4200));
+    });
+    all.style.marginTop = "12px";
+    wrap.appendChild(all);
+
+    const fin = el("button", "btn btn-telha", "🎧 Verstanden — abschließen (+15 XP)");
+    fin.style.marginTop = "10px";
+    fin.addEventListener("click", () => {
+      bumpSkill("hoeren"); markPractice(ep.lines.length); addXP(15);
+      toast("Ottimo ascolto! 🎧");
+      setTimeout(viewTrain, 700);
+    });
+    wrap.appendChild(fin);
+    render(wrap);
+    speak(ep.lines[0].it, `ore_${ep.id}_0`, rate);
+  }
+
+  /* ============================================================
+     SAPERE — Aussprache, Grammatik, Redewendungen
+     ============================================================ */
+  const PHRASES = window.IT_PHRASES || [];
+  const phraseKey = (catId, pt) => `phr_${catId}_${slug(pt)}`;
+  const PHRASE_POOL = [];
+  PHRASES.forEach(cat => cat.items.forEach(p => {
+    PHRASE_POOL.push({ key: phraseKey(cat.id, p.it), pt: p.it, de: p.de, hint: p.hint || "", cat: cat.id });
+  }));
+  function frasiStats(pool) {
+    const s = srs(), now = Date.now();
+    let due = 0, fresh = 0, ripe = 0;
+    pool.forEach(p => {
+      const r = s[p.key];
+      if (!r) fresh++; else if (r.due <= now) due++;
+      if (r && r.box >= 5) ripe++;
+    });
+    return { due, fresh, ripe };
+  }
+
+  function viewSapere() {
+    const wrap = el("div");
+    wrap.appendChild(el("h2", "view-title", "Sapere"));
+    wrap.appendChild(el("p", "view-sub", "Verstehen statt raten — Aussprache-Regeln, Grammatik und feste Wendungen, alles mit Audio."));
+    const mkS = (cls, label, fn, sub) => {
+      const b = el("button", "btn " + cls, label); b.addEventListener("click", fn);
+      const w = el("div", "mode-item"); w.appendChild(b);
+      if (sub) w.appendChild(el("div", "mode-sub", sub));
+      return w;
     };
-    go();
+    wrap.appendChild(mkS("btn-telha", "🔤 Aussprache", viewPronuncia,
+      "12 Regeln mit Hörbeispielen: gn, gli, g/ggio, c/ch, sc, Doppelkonsonanten …"));
+    wrap.appendChild(mkS("btn-primary", "✎ Grammatik: Possessivpronomen", viewGrammatica,
+      "il mio, la mia, il suo … — warum die Form zum Ding gehört, nicht zum Besitzer."));
+    const fs = frasiStats(PHRASE_POOL);
+    wrap.appendChild(mkS("btn-ghost", "💬 Redewendungen", viewFrasi,
+      `${PHRASE_POOL.length} Wendungen für den Alltag · Karten & Multiple Choice${fs.due ? ` · ${fs.due} fällig` : ""}`));
+    render(wrap);
+  }
+
+  function viewPronuncia() {
+    const wrap = el("div");
+    const back = el("button", "back", "‹ Sapere"); back.addEventListener("click", viewSapere);
+    wrap.appendChild(back);
+    wrap.appendChild(el("h2", "view-title", "🔤 Aussprache"));
+    wrap.appendChild(el("p", "view-sub", "Die Regeln, mit denen du fast jedes Wort richtig liest — tippe auf ▶ und höre hin."));
+    const card = el("div", "card");
+    (D.pronunciation || []).forEach(rule => {
+      const block = el("div", "pron-rule");
+      block.appendChild(el("div", "pron-title", rule.title));
+      block.appendChild(el("div", "pron-text", rule.rule));
+      rule.examples.forEach(ex => {
+        const row = el("div", "pron-ex");
+        row.appendChild(playBtn(ex.it, `pron_${rule.id}_${slug(ex.it)}`));
+        const t = el("div", "grow");
+        t.appendChild(el("div", "pt", ex.it));
+        t.appendChild(el("div", "de", ex.de));
+        row.appendChild(t);
+        block.appendChild(row);
+      });
+      card.appendChild(block);
+    });
+    wrap.appendChild(card);
+    render(wrap);
+  }
+
+  function viewGrammatica() {
+    const wrap = el("div");
+    const back = el("button", "back", "‹ Sapere"); back.addEventListener("click", viewSapere);
+    wrap.appendChild(back);
+    wrap.appendChild(el("h2", "view-title", "✎ Grammatica"));
+    wrap.appendChild(el("p", "view-sub", "Klare Erklärungen mit Tabelle und Beispielsätzen — zum Nachschlagen und Anhören."));
+    (D.grammar || []).forEach(topic => {
+      wrap.appendChild(el("div", "section-h", topic.title));
+      wrap.appendChild(el("p", "view-sub", topic.intro));
+      const tbl = el("div", "gram-table");
+      tbl.appendChild(el("div", "gh", "Person"));
+      tbl.appendChild(el("div", "gh", "m. Sg."));
+      tbl.appendChild(el("div", "gh", "f. Sg."));
+      tbl.appendChild(el("div", "gh", "m. Pl."));
+      tbl.appendChild(el("div", "gh", "f. Pl."));
+      topic.forms.forEach(f => {
+        tbl.appendChild(el("div", "who", f.who));
+        tbl.appendChild(el("div", null, f.m));
+        tbl.appendChild(el("div", null, f.f));
+        tbl.appendChild(el("div", null, f.mp));
+        tbl.appendChild(el("div", null, f.fp));
+      });
+      wrap.appendChild(tbl);
+      (topic.notes || []).forEach(n => wrap.appendChild(el("div", "gram-note", n)));
+      wrap.appendChild(el("div", "section-h", "Beispiele"));
+      const card = el("div", "card");
+      topic.examples.forEach(ex => {
+        const row = el("div", "pron-ex");
+        row.appendChild(playBtn(ex.it, `gram_${topic.id}_${slug(ex.it)}`));
+        const t = el("div", "grow");
+        t.appendChild(el("div", "pt", ex.it));
+        t.appendChild(el("div", "de", ex.de));
+        row.appendChild(t);
+        card.appendChild(row);
+      });
+      wrap.appendChild(card);
+    });
+    render(wrap);
+  }
+
+  function startFrasiDrill(pool, backFn, backLabel) {
+    runSession("Modi di dire", "Wendung lesen oder hören — die richtige Bedeutung wählen.",
+      deckFrom(pool, 20).map(p => {
+        const options = shuffle([p.de, ...sampleObjs(pool, 3, p.key).map(x => x.de)]);
+        return Math.random() < 0.35
+          ? { type: "listen", key: p.key, audioText: p.pt, options, answer: p.de }
+          : { type: "mc", key: p.key, prompt: p.pt, options, answer: p.de };
+      }), backFn, backLabel);
+  }
+
+  function viewFrasi() {
+    const wrap = el("div");
+    const back = el("button", "back", "‹ Sapere"); back.addEventListener("click", viewSapere);
+    wrap.appendChild(back);
+    wrap.appendChild(el("h2", "view-title", "💬 Modi di dire"));
+    const fs = frasiStats(PHRASE_POOL);
+    wrap.appendChild(el("p", "view-sub",
+      `${PHRASE_POOL.length} Redewendungen für den Alltag — Karten und Multiple Choice, mit Leitner-Wiederholung. ` +
+      `${fs.due ? `${fs.due} fällig · ` : ""}${fs.fresh} noch neu.`));
+    const mixCards = el("button", "btn btn-telha", "🃏 Alle mischen — Karten");
+    mixCards.addEventListener("click", () => runFlash(deckFrom(PHRASE_POOL, 20), "‹ Modi di dire", viewFrasi));
+    wrap.appendChild(mixCards);
+    const mixMc = el("button", "btn btn-primary", "🎲 Alle mischen — Erkennen");
+    mixMc.style.marginTop = "10px";
+    mixMc.addEventListener("click", () => startFrasiDrill(PHRASE_POOL, viewFrasi, "‹ Modi di dire"));
+    wrap.appendChild(mixMc);
+    wrap.appendChild(el("div", "section-h", "Nach Thema"));
+    const grid = el("div", "grid");
+    PHRASES.forEach(cat => {
+      const items = PHRASE_POOL.filter(p => p.cat === cat.id);
+      const st = frasiStats(items);
+      const t = el("button", "cat-tile");
+      t.appendChild(el("span", "emoji", cat.icon));
+      t.appendChild(el("span", "name", cat.title));
+      t.appendChild(el("span", "count", `${items.length} Wendungen · ${st.ripe} gelernt`));
+      const bar = el("div", "tile-bar");
+      const fill = el("div");
+      fill.style.width = `${items.length ? Math.round(st.ripe / items.length * 100) : 0}%`;
+      bar.appendChild(fill);
+      t.appendChild(bar);
+      t.addEventListener("click", () => viewFrasiCat(cat));
+      grid.appendChild(t);
+    });
+    wrap.appendChild(grid);
+    render(wrap);
+  }
+
+  function viewFrasiCat(cat) {
+    const pool = PHRASE_POOL.filter(p => p.cat === cat.id);
+    const wrap = el("div");
+    const back = el("button", "back", "‹ Modi di dire"); back.addEventListener("click", viewFrasi);
+    wrap.appendChild(back);
+    wrap.appendChild(el("h2", "view-title", `${cat.icon} ${cat.title}`));
+    const st = frasiStats(pool);
+    wrap.appendChild(el("p", "view-sub", `${pool.length} Wendungen · ${st.ripe} gelernt · ${st.due} fällig`));
+    const cards = el("button", "btn btn-telha", "🃏 Karten üben");
+    cards.addEventListener("click", () => runFlash(deckFrom(pool, pool.length), `‹ ${cat.title}`, () => viewFrasiCat(cat)));
+    wrap.appendChild(cards);
+    const mc = el("button", "btn btn-primary", "🎲 Erkennen (Multiple Choice)");
+    mc.style.marginTop = "10px";
+    mc.addEventListener("click", () => startFrasiDrill(pool, () => viewFrasiCat(cat), `‹ ${cat.title}`));
+    wrap.appendChild(mc);
+    const card = el("div", "card");
+    card.style.marginTop = "14px";
+    pool.forEach(p => {
+      const row = el("div", "pron-ex");
+      row.appendChild(playBtn(p.pt, p.key));
+      const t = el("div", "grow");
+      t.appendChild(el("div", "pt", p.pt));
+      t.appendChild(el("div", "de", p.de));
+      if (p.hint) t.appendChild(el("div", "de", `💡 ${p.hint}`));
+      row.appendChild(t);
+      card.appendChild(row);
+    });
+    wrap.appendChild(card);
+    render(wrap);
   }
 
   /* ============================================================
      ROUTER
      ============================================================ */
-  const VIEWS = { home: viewHome, vocab: viewVocab, verbs: viewVerbs, train: viewTrain, viaggio: viewViaggio };
+  const VIEWS = { percorso: viewPercorso, home: viewHome, vocab: viewVocab, verbs: viewVerbs, sapere: viewSapere, train: viewTrain, viaggio: viewViaggio, passaporto: viewPassaporto };
   function go(name) {
-    (VIEWS[name] || viewHome)();
+    (VIEWS[name] || viewPercorso)();
     document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.dataset.view === name));
-    history.replaceState({ v: name }, "", "#" + name);
+    history.pushState({ v: name }, "", "#" + name);
   }
   document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => go(t.dataset.view)));
+  window.addEventListener("hashchange", () => {
+    const name = (location.hash || "#percorso").slice(1);
+    go(VIEWS[name] ? name : "percorso");
+  });
 
   // Speak toggle
   const st = $("#speakToggle");
@@ -1040,9 +2481,17 @@
   st.addEventListener("click", () => { settings.speak = !settings.speak; saveSettings(); syncSpeak(); toast(settings.speak ? "Ton an" : "Ton aus"); });
   syncSpeak();
 
+  // Passaporto (Topbar)
+  $("#passaportoBtn").addEventListener("click", () => go("passaporto"));
+
   // Start
-  const initial = (location.hash || "#home").slice(1);
-  go(VIEWS[initial] ? initial : "home");
+  const initial = (location.hash || "#percorso").slice(1);
+  go(VIEWS[initial] ? initial : "percorso");
+
+  // Server-Sync: beim Start neueren Server-Stand holen (falls Code gesetzt)
+  if (settings.syncCode && navigator.onLine) {
+    syncPull(false).then(r => { if (r && r.applied) location.reload(); }).catch(() => {});
+  }
 
   // Service Worker
   if ("serviceWorker" in navigator) {

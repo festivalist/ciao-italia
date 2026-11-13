@@ -15,7 +15,9 @@
 window.IT_DATA = {
   meta: {
     variant: "Italienisch (it-IT)",
-    pronouns: ["io", "tu", "lui/lei", "noi", "loro"],
+    // Reihenfolge = SRS-Personenindex. „voi" steht absichtlich am Ende
+    // (Index 5): bestehende Fortschritts-Keys verb_*_*_0…4 bleiben stabil.
+    pronouns: ["io", "tu", "lui/lei", "noi", "loro", "voi"],
     tenses: [
       { id: "presente", label: "Presente", de: "Gegenwart" },
       { id: "passato", label: "Passato prossimo", de: "Vergangenheit" },
@@ -227,5 +229,142 @@ window.IT_DATA = {
     { inf: "restare", de: "bleiben", presente: ["resto","resti","resta","restiamo","restano"], passato: ["sono restato/a","sei restato/a","è restato/a","siamo restati/e","sono restati/e"], futuro: ["resterò","resterai","resterà","resteremo","resteranno"] },
     { inf: "aprire", de: "öffnen", presente: ["apro","apri","apre","apriamo","aprono"], passato: ["ho aperto","hai aperto","ha aperto","abbiamo aperto","hanno aperto"], futuro: ["aprirò","aprirai","aprirà","apriremo","apriranno"] },
     { inf: "partire", de: "abfahren / abreisen", presente: ["parto","parti","parte","partiamo","partono"], passato: ["sono partito/a","sei partito/a","è partito/a","siamo partiti/e","sono partiti/e"], futuro: ["partirò","partirai","partirà","partiremo","partiranno"] }
+  ],
+
+  /* Aussprache-Regeln (Sapere → Pronuncia). Audio-Keys:
+     pron_<regel>_<slug(beispiel)> — muss zu app.js (viewPronuncia)
+     und tools/generate-audio-manifest.js passen. */
+  pronunciation: [
+    {
+      id: "gn", title: "gn → nj",
+      rule: "gn klingt wie nj: gnocchi = njokki, signora = sinjora — nie getrennt als n-g.",
+      examples: [
+        { it: "gnocchi", de: "Gnocchi (Kartoffelklöße)" }, { it: "il bagno", de: "das Bad / die Toilette" },
+        { it: "la signora", de: "die Dame / Frau" }, { it: "la montagna", de: "der Berg" }
+      ]
+    },
+    {
+      id: "gli", title: "gli → weiches glj",
+      rule: "gli ist ein einziger weicher Laut wie glj in „famiglia“ — nicht g-l-i getrennt. Nur der Artikel gli klingt wie li: gli amici.",
+      examples: [
+        { it: "la famiglia", de: "die Familie" }, { it: "il figlio", de: "der Sohn" },
+        { it: "la bottiglia", de: "die Flasche" }, { it: "gli amici", de: "die Freunde (Artikel: li)" }
+      ]
+    },
+    {
+      id: "g-dolce", title: "g vor e/i → dsch",
+      rule: "Vor e und i wird g weich wie dsch in „Dschungel“: gelato = dschelato. Darum enden viele Wörter auf -gio/-gia: viaggio klingt „viadscho“.",
+      examples: [
+        { it: "il gelato", de: "das Eis" }, { it: "il giorno", de: "der Tag" },
+        { it: "il viaggio", de: "die Reise" }, { it: "il parco giochi", de: "der Spielplatz" },
+        { it: "la gente", de: "die Leute" }
+      ]
+    },
+    {
+      id: "gg", title: "gg vor e/i → langes, kräftiges dsch",
+      rule: "Doppel-g vor e/i wird gedehnt und kräftig gesprochen — der Laut dauert doppelt so lang: campeggio = kam-ped-dschio.",
+      examples: [
+        { it: "il campeggio", de: "das Camping / der Zeltplatz" }, { it: "oggi", de: "heute" },
+        { it: "il formaggio", de: "der Käse" }, { it: "leggere", de: "lesen" }
+      ]
+    },
+    {
+      id: "c-dolce", title: "c vor e/i → tsch",
+      rule: "Vor e und i wird c weich wie tsch in „Tschüss“: ciao = tschau. Vor a, o, u bleibt es hart wie k (casa = kasa).",
+      examples: [
+        { it: "ciao", de: "hallo / tschüss" }, { it: "il cinema", de: "das Kino" },
+        { it: "la cena", de: "das Abendessen" }, { it: "la cioccolata", de: "die Schokolade" }
+      ]
+    },
+    {
+      id: "ch", title: "ch → k",
+      rule: "Das h macht das c hart: ch klingt immer wie k — chiesa heißt „kiesa“, perché „perke“.",
+      examples: [
+        { it: "la chiave", de: "der Schlüssel" }, { it: "perché", de: "warum / weil" },
+        { it: "la chiesa", de: "die Kirche" }, { it: "il bicchiere", de: "das Glas" }
+      ]
+    },
+    {
+      id: "gh", title: "gh → hartes g",
+      rule: "Das h macht auch das g hart: gh klingt wie g in „gut“ — spaghetti = spagetti, das h selbst ist stumm.",
+      examples: [
+        { it: "gli spaghetti", de: "die Spaghetti" }, { it: "i laghi", de: "die Seen" },
+        { it: "il ghiaccio", de: "das Eis (Gefrorenes)" }
+      ]
+    },
+    {
+      id: "sc", title: "sc → sch oder sk",
+      rule: "Vor e und i klingt sc wie sch (pesce = pesche), vor a, o und u hart wie sk (scuola = skola).",
+      examples: [
+        { it: "il pesce", de: "der Fisch" }, { it: "l'uscita", de: "der Ausgang" },
+        { it: "la scuola", de: "die Schule (sk!)" }, { it: "la sciarpa", de: "der Schal (sch!)" }
+      ]
+    },
+    {
+      id: "h", title: "h ist immer stumm",
+      rule: "Das italienische h wird nie gesprochen: ho, hai, hanno klingen wie o, ai, anno — geschrieben wird es nur, um Wörter zu unterscheiden.",
+      examples: [
+        { it: "ho", de: "ich habe" }, { it: "hai", de: "du hast" },
+        { it: "hanno", de: "sie haben" }, { it: "l'hotel", de: "das Hotel" }
+      ]
+    },
+    {
+      id: "doppio", title: "Doppelkonsonanten halten länger",
+      rule: "Verdoppelte Konsonanten deutlich länger und kräftiger sprechen — oft ändert die Länge die Bedeutung: nonno (Großvater) ≠ nono (neunter).",
+      examples: [
+        { it: "il nonno", de: "der Großvater" }, { it: "nono", de: "neunter" },
+        { it: "la palla", de: "der Ball" }, { it: "la mamma", de: "die Mama" }
+      ]
+    },
+    {
+      id: "accento", title: "Betonung: meist vorletzte Silbe",
+      rule: "Fast alle Wörter betonen die vorletzte Silbe (TA-vo-lo). Endet das Wort auf einem betonten Vokal, trägt er einen Akzent: città, caffè.",
+      examples: [
+        { it: "il tavolo", de: "der Tisch (TA-vo-lo)" }, { it: "la città", de: "die Stadt" },
+        { it: "il caffè", de: "der Kaffee" }, { it: "l'università", de: "die Universität" }
+      ]
+    },
+    {
+      id: "z", title: "z → ts oder weiches dz",
+      rule: "z klingt meist wie ts (pizza = pitsa), bei einigen Wörtern weich und stimmhaft wie dz (zero, zaino) — höre auf die Beispiele.",
+      examples: [
+        { it: "la pizza", de: "die Pizza" }, { it: "il pranzo", de: "das Mittagessen" },
+        { it: "lo zio", de: "der Onkel" }, { it: "lo zero", de: "die Null (weiches dz)" }
+      ]
+    }
+  ],
+
+  /* Grammatik-Themen (Sapere → Grammatica). Audio-Keys:
+     gram_<thema>_<slug(beispiel)> — muss zu app.js (viewGrammatica)
+     und tools/generate-audio-manifest.js passen. */
+  grammar: [
+    {
+      id: "possessivi", title: "Possessivpronomen",
+      intro: "Mein, dein, sein: Die Form richtet sich nach dem besessenen Ding (Geschlecht + Zahl) — nicht nach dem Besitzer. il suo bedeutet darum „sein“ UND „ihr“; der Kontext entscheidet.",
+      forms: [
+        { who: "io", m: "il mio", f: "la mia", mp: "i miei", fp: "le mie" },
+        { who: "tu", m: "il tuo", f: "la tua", mp: "i tuoi", fp: "le tue" },
+        { who: "lui/lei", m: "il suo", f: "la sua", mp: "i suoi", fp: "le sue" },
+        { who: "noi", m: "il nostro", f: "la nostra", mp: "i nostri", fp: "le nostre" },
+        { who: "voi", m: "il vostro", f: "la vostra", mp: "i vostri", fp: "le vostre" },
+        { who: "loro", m: "il loro", f: "la loro", mp: "i loro", fp: "le loro" }
+      ],
+      notes: [
+        "Artikel + Endung zeigen den Besitz: la mia valigia — la verrät das weibliche Ding, -ia verrät „mein“.",
+        "Verwandte im Singular verlieren den Artikel: mia madre (meine Mutter), suo fratello (sein Bruder). Im Plural kommt er zurück: i suoi genitori (seine Eltern).",
+        "loro ändert sich nie — nur der Artikel passt sich an: il loro hotel, la loro casa, le loro valigie."
+      ],
+      examples: [
+        { it: "Questa è la mia valigia.", de: "Das ist mein Koffer. (valigia ist weiblich!)" },
+        { it: "Dov'è il tuo passaporto?", de: "Wo ist dein Pass?" },
+        { it: "Il suo treno parte alle otto.", de: "Sein / ihr Zug fährt um acht Uhr." },
+        { it: "La sua camera è molto bella.", de: "Sein / ihr Zimmer ist sehr schön." },
+        { it: "Le nostre valigie sono pesanti.", de: "Unsere Koffer sind schwer." },
+        { it: "Dove sono i vostri biglietti?", de: "Wo sind eure Tickets?" },
+        { it: "Il loro hotel è vicino alla stazione.", de: "Ihr Hotel ist in der Nähe des Bahnhofs." },
+        { it: "Mia sorella abita a Roma.", de: "Meine Schwester wohnt in Rom. (Verwandte: ohne Artikel)" },
+        { it: "I miei amici sono simpatici.", de: "Meine Freunde sind nett." }
+      ]
+    }
   ]
 };

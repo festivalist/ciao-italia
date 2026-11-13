@@ -1,6 +1,6 @@
 /* Offline-Cache für Ciao Italia. Bei Inhaltsänderungen die
    Versionsnummer erhöhen, damit installierte Geräte aktualisieren. */
-const CACHE = "ciaoit-v2";
+const CACHE = "ciaoit-v24";
 const SHELL = [
   ".",
   "index.html",
@@ -8,8 +8,15 @@ const SHELL = [
   "app.js",
   "data.js",
   "vocabulary-a1.js",
+  "vocabulary-a2.js",
+  "vocabulary-b1.js",
   "verbs-a1.js",
+  "verbs-a2.js",
+  "verbs-b1.js",
   "sentences.js",
+  "phrases.js",
+  "stories.js",
+  "illustrations.js",
   "manifest.webmanifest",
   "icons/icon-192.png",
   "icons/icon-512.png",
@@ -35,6 +42,12 @@ self.addEventListener("fetch", (event) => {
   const request = event.request;
   if (request.method !== "GET") return;
   const url = new URL(request.url);
+
+  // Sync-Endpunkt immer frisch vom Netz (niemals cachen)
+  if (url.pathname.endsWith("/sync.php")) {
+    event.respondWith(fetch(request).catch(() => new Response("", { status: 503 })));
+    return;
+  }
 
   if (url.pathname.includes("/audio/")) {
     event.respondWith(

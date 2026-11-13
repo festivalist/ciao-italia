@@ -21,16 +21,21 @@
     <header class="topbar">
       <div class="topbar-inner">
         <span class="brand"><span class="brand-dot"></span>Ciao&nbsp;Italia</span>
-        <button id="speakToggle" class="icon-btn" title="Aussprache an/aus" aria-label="Aussprache an/aus">🔊</button>
+        <div style="display:flex;gap:8px">
+          <button id="passaportoBtn" class="icon-btn" title="Passaporto — dein Können" aria-label="Passaporto öffnen">🛂</button>
+          <button id="speakToggle" class="icon-btn" title="Aussprache an/aus" aria-label="Aussprache an/aus">🔊</button>
+        </div>
       </div>
     </header>
 
     <main id="view" class="view" tabindex="-1"></main>
 
     <nav class="tabbar" role="tablist" aria-label="Hauptnavigation">
+      <button class="tab" data-view="percorso" role="tab"><span class="tab-ico">◉</span><span>Percorso</span></button>
       <button class="tab" data-view="home" role="tab"><span class="tab-ico">⌂</span><span>Inizio</span></button>
       <button class="tab" data-view="vocab" role="tab"><span class="tab-ico">Aa</span><span>Parole</span></button>
       <button class="tab" data-view="verbs" role="tab"><span class="tab-ico">↻</span><span>Verbi</span></button>
+      <button class="tab" data-view="sapere" role="tab"><span class="tab-ico">✎</span><span>Sapere</span></button>
       <button class="tab" data-view="train" role="tab"><span class="tab-ico">◎</span><span>Allenamento</span></button>
       <button class="tab" data-view="viaggio" role="tab"><span class="tab-ico">◇</span><span>Viaggio</span></button>
     </nav>
@@ -38,8 +43,15 @@
 
   <script src="data.js"></script>
   <script src="vocabulary-a1.js"></script>
+  <script src="vocabulary-a2.js"></script>
+  <script src="vocabulary-b1.js"></script>
   <script src="verbs-a1.js"></script>
+  <script src="verbs-a2.js"></script>
+  <script src="verbs-b1.js"></script>
   <script src="sentences.js"></script>
+  <script src="phrases.js"></script>
+  <script src="stories.js"></script>
+  <script src="illustrations.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
