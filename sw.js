@@ -1,6 +1,6 @@
 /* Offline-Cache für Ciao Italia. Bei Inhaltsänderungen die
    Versionsnummer erhöhen, damit installierte Geräte aktualisieren. */
-const CACHE = "ciaoit-v29";
+const CACHE = "ciaoit-v30";
 const SHELL = [
   ".",
   "index.html",
@@ -25,8 +25,13 @@ const SHELL = [
 ];
 
 self.addEventListener("install", (event) => {
+  // Einzelne fehlgeschlagene Shell-Dateien (z. B. Binärdateien, die der
+  // Hoster nicht ausliefert) dürfen die Installation nicht blockieren —
+  // sonst bekämen installierte Geräte keine Updates mehr.
   event.waitUntil(
-    caches.open(CACHE).then((cache) => cache.addAll(SHELL)).then(() => self.skipWaiting())
+    caches.open(CACHE)
+      .then((cache) => Promise.allSettled(SHELL.map((file) => cache.add(file))))
+      .then(() => self.skipWaiting())
   );
 });
 
@@ -50,6 +55,25 @@ self.addEventListener("fetch", (event) => {
   }
 
   if (url.pathname.includes("/audio/")) {
+    event.respondWith(
+      caches.open(CACHE).then(async (cache) => {
+        const hit = await cache.match(request);
+        if (hit) return hit;
+        try {
+          const response = await fetch(request);
+          if (response.ok) cache.put(request, response.clone());
+          return response;
+        } catch {
+          return new Response("", { status: 404 });
+        }
+      })
+    );
+    return;
+  }
+
+  // CDN-Audio (jsDelivr liefert die Neural-MP3s aus dem GitHub-Repo):
+  // beim ersten Hören in den Offline-Cache übernehmen.
+  if (url.origin === "https://cdn.jsdelivr.net") {
     event.respondWith(
       caches.open(CACHE).then(async (cache) => {
         const hit = await cache.match(request);

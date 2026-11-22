@@ -1,0 +1,939 @@
+# M4a-Upload 22.11.2026 — alle diese Dateien wurden per FTP STOR hochgeladen,
+# vom Server mit 226 bestaetigt und STILL VERWORFEN (nicht auffindbar: RETR 0 B, SIZE 550).
+# Einzige Ausnahme des Laufs: sw.js (Text) blieb liegen.
+# Gesamt: 934 Dateien, 10.2 MB
+
+dlg_acquisti_0.mp3   11232 B  | Quanto costa questo?
+dlg_acquisti_1.mp3   11232 B  | Costa cinque euro.
+dlg_acquisti_2.mp3   11232 B  | È troppo caro.
+dlg_acquisti_3.mp3   11232 B  | Accettate la carta?
+dlg_acquisti_4.mp3   11232 B  | Sì, certamente.
+dlg_aeroporto_0.mp3   17136 B  | Mi scusi, il mio bagaglio non è arrivato.
+dlg_aeroporto_1.mp3   24912 B  | Mi mostri la carta d'imbarco e l'etichetta della valigia, per favore.
+dlg_aeroporto_2.mp3   21744 B  | Eccole qui. All'imbarco c'era una fila lunghissima.
+dlg_aeroporto_3.mp3   31968 B  | Purtroppo capita spesso in alta stagione. Compili questo modulo, per cortesia.
+dlg_aeroporto_4.mp3   17568 B  | E la valigia? Verrà spedita in albergo?
+dlg_aeroporto_5.mp3   36000 B  | Sì, entro domani mattina. Le auguriamo un buon soggiorno e ci scusiamo per il disagio.
+dlg_aiuto_0.mp3   12816 B  | Scusi, può aiutarmi?
+dlg_aiuto_1.mp3   11232 B  | Mi sono perso.
+dlg_aiuto_2.mp3   11232 B  | Dov'è la farmacia?
+dlg_aiuto_3.mp3   11232 B  | Ho bisogno di un medico.
+dlg_aiuto_4.mp3   11232 B  | Chiamo aiuto.
+dlg_albergo_0.mp3   17856 B  | Buonasera, ho una prenotazione.
+dlg_albergo_1.mp3   11232 B  | A che nome?
+dlg_albergo_2.mp3   11232 B  | A nome Müller.
+dlg_albergo_3.mp3   17856 B  | Ecco la chiave. Camera dodici.
+dlg_albergo_4.mp3   11232 B  | A che ora è la colazione?
+dlg_bar_0.mp3   18288 B  | Buongiorno! Un caffè, per favore.
+dlg_bar_1.mp3   11232 B  | Desidera altro?
+dlg_bar_2.mp3   11952 B  | Un cornetto, per favore.
+dlg_bar_3.mp3   11232 B  | Sono due euro.
+dlg_bar_4.mp3   12384 B  | Ecco a Lei. Grazie!
+dlg_binario_0.mp3   21888 B  | Scusi, da quale binario parte il treno per Venezia?
+dlg_binario_1.mp3   24624 B  | Dal binario due, ma il treno è in ritardo di dieci minuti.
+dlg_binario_2.mp3   16416 B  | Meno male, allora ho tempo per un caffè.
+dlg_binario_3.mp3   18864 B  | Attenzione: la partenza è tra un minuto!
+dlg_binario_4.mp3   21312 B  | Oh no, corro subito! Non voglio perdere il treno.
+dlg_binario_5.mp3   11232 B  | Buon viaggio!
+dlg_casa_0.mp3   15984 B  | Benvenuto! Questa è la mia casa.
+dlg_casa_1.mp3   18432 B  | Che bella casa! Il soggiorno è grande.
+dlg_casa_2.mp3   14832 B  | Sì, e la cucina è là a destra.
+dlg_casa_3.mp3   16272 B  | Il quadro sopra il divano è bellissimo.
+dlg_casa_4.mp3   15840 B  | Grazie! È un regalo di mia nonna.
+dlg_casa_5.mp3   16560 B  | Ora ti lascio, è tardi. Ciao!
+dlg_colloquio_0.mp3   20736 B  | Ci parli della sua esperienza nel settore alberghiero.
+dlg_colloquio_1.mp3   29520 B  | Ho lavorato per tre anni in un albergo a Berlino, dove mi occupavo della reception.
+dlg_colloquio_2.mp3   14544 B  | Perché vorrebbe lavorare proprio con noi?
+dlg_colloquio_3.mp3   31392 B  | Perché la vostra azienda investe nella formazione e io voglio crescere professionalmente.
+dlg_colloquio_4.mp3   11664 B  | Che aspettative di stipendio ha?
+dlg_colloquio_5.mp3   25920 B  | Penso che possiamo trovare un'intesa. Quando ci darebbe una risposta?
+dlg_discussione_0.mp3   16416 B  | Secondo me, questo film è bellissimo.
+dlg_discussione_1.mp3   19152 B  | Non sono d'accordo! Penso che sia noioso.
+dlg_discussione_2.mp3   17856 B  | Noioso? Ma se non hai visto la fine!
+dlg_discussione_3.mp3   16704 B  | Ho provato, ma mi sono addormentata.
+dlg_discussione_4.mp3   13248 B  | Spero che tu cambi idea un giorno.
+dlg_famiglia_0.mp3   12960 B  | Ciao Marco! Come stai?
+dlg_famiglia_1.mp3   12096 B  | Bene grazie! E tu?
+dlg_famiglia_2.mp3   19152 B  | Tutto bene. Questa è mia sorella, Anna.
+dlg_famiglia_3.mp3   16704 B  | Piacere, Anna. Di dove sei?
+dlg_famiglia_4.mp3   15264 B  | Sono di Berlino, sono tedesca.
+dlg_famiglia_5.mp3   17856 B  | Che bello! La mia famiglia viene da Napoli.
+dlg_farmacia_0.mp3   19296 B  | Buongiorno, ho mal di gola e un po' di febbre.
+dlg_farmacia_1.mp3   13392 B  | Da quanti giorni si sente così?
+dlg_farmacia_2.mp3   15408 B  | Da tre giorni. Ho anche la tosse.
+dlg_farmacia_3.mp3   22176 B  | Le do qualcosa per la tosse e delle pastiglie per la gola.
+dlg_farmacia_4.mp3   19152 B  | Quanto costa tutto? Posso pagare con la carta?
+dlg_farmacia_5.mp3   28224 B  | Dodici euro. Se non passa entro una settimana, vada dal medico.
+dlg_medico_0.mp3   13392 B  | Dottore, non mi sento bene.
+dlg_medico_1.mp3   11232 B  | Che cosa ha esattamente?
+dlg_medico_2.mp3   14112 B  | Ho la gola infiammata e tossisco.
+dlg_medico_3.mp3   11952 B  | Le prescrivo una medicina.
+dlg_medico_4.mp3   11232 B  | Devo stare a casa?
+dlg_medico_5.mp3   13680 B  | Sì, tre giorni di riposo.
+dlg_notizie_0.mp3   19584 B  | Hai letto l'articolo sul traffico nel centro storico?
+dlg_notizie_1.mp3   16560 B  | Sì, l'ho visto anche al telegiornale.
+dlg_notizie_2.mp3   20592 B  | Secondo me la zona pedonale è la soluzione giusta.
+dlg_notizie_3.mp3   29376 B  | Non sono d'accordo: i negozi perdono clienti se nessuno trova parcheggio.
+dlg_notizie_4.mp3   24624 B  | Tuttavia così l'inquinamento diminuisce, e questo conta di più.
+dlg_notizie_5.mp3   23040 B  | Hai ragione, anche se il problema della folla resta aperto.
+dlg_ristorante_0.mp3   17424 B  | Buonasera! Avete una prenotazione?
+dlg_ristorante_1.mp3   11232 B  | No, siamo in due.
+dlg_ristorante_2.mp3   13680 B  | Certamente. Ecco il menù.
+dlg_ristorante_3.mp3   13680 B  | Vorrei il pesce, per favore.
+dlg_ristorante_4.mp3   12384 B  | Il conto, per favore.
+dlg_ristorante_5.mp3   11232 B  | Posso pagare con la carta?
+dlg_ritardo_0.mp3   18720 B  | Scusi, il treno per Firenze è in ritardo?
+dlg_ritardo_1.mp3   26496 B  | Sì, ha venti minuti di ritardo. Arriva al binario sette.
+dlg_ritardo_2.mp3   19584 B  | Devo cambiare a Bologna: perdo la coincidenza?
+dlg_ritardo_3.mp3   22464 B  | No, quello per Roma parte alle quattordici e dieci.
+dlg_ritardo_4.mp3   22608 B  | Meno male! Dov'è il binario sette, per favore?
+dlg_ritardo_5.mp3   20592 B  | Laggiù in fondo: prenda la scala mobile a destra.
+dlg_telefono_0.mp3   26352 B  | Pronto, buonasera! Vorrei prenotare un tavolo per stasera.
+dlg_telefono_1.mp3   18144 B  | Buonasera! Per quante persone e a che ora?
+dlg_telefono_2.mp3   29520 B  | Per quattro persone, alle otto. Sarebbe possibile un tavolo tranquillo?
+dlg_telefono_3.mp3   21600 B  | Certamente, quello in fondo alla sala. A nome?
+dlg_telefono_4.mp3   17136 B  | A nome Weber. E il coperto è incluso?
+dlg_telefono_5.mp3   21312 B  | Sì, due euro a persona. Vi aspettiamo!
+dlg_tempo_0.mp3   11376 B  | Che tempo fa oggi qui da voi?
+dlg_tempo_1.mp3   15264 B  | È umido e al mattino c'è un po' di nebbia.
+dlg_tempo_2.mp3   19728 B  | E in montagna? Vale la pena prendere la funivia?
+dlg_tempo_3.mp3   22176 B  | Domani è prevista pioggia, ma oggi il cielo è sereno.
+dlg_tempo_4.mp3   22896 B  | Però fa piuttosto fresco, no? Quanti gradi ci sono?
+dlg_tempo_5.mp3   20016 B  | Dieci. Portati una sciarpa e dei guanti!
+dlg_trasporti_0.mp3   14112 B  | Scusi, dov'è la stazione?
+dlg_trasporti_1.mp3   11664 B  | È lì, sulla destra.
+dlg_trasporti_2.mp3   14400 B  | Un biglietto per Roma, per favore.
+dlg_trasporti_3.mp3   11232 B  | Andata e ritorno?
+dlg_trasporti_4.mp3   13968 B  | Solo andata. Quanto costa?
+word_abbigliamento_alto.mp3   11232 B  | alto
+word_abbigliamento_basso.mp3   11232 B  | basso
+word_abbigliamento_biondo.mp3   11232 B  | biondo
+word_abbigliamento_borsa.mp3   11232 B  | borsa
+word_abbigliamento_calza.mp3   11232 B  | calza
+word_abbigliamento_camicia.mp3   11232 B  | camicia
+word_abbigliamento_capello.mp3   11232 B  | capello
+word_abbigliamento_cappello.mp3   11232 B  | cappello
+word_abbigliamento_cappotto.mp3   11232 B  | cappotto
+word_abbigliamento_castano.mp3   11232 B  | castano
+word_abbigliamento_giacca.mp3   11232 B  | giacca
+word_abbigliamento_gonna.mp3   11232 B  | gonna
+word_abbigliamento_guanto.mp3   11232 B  | guanto
+word_abbigliamento_maglietta.mp3   11232 B  | maglietta
+word_abbigliamento_maglione.mp3   11232 B  | maglione
+word_abbigliamento_magro.mp3   11232 B  | magro
+word_abbigliamento_occhiali.mp3   11232 B  | occhiali
+word_abbigliamento_ombrello.mp3   11232 B  | ombrello
+word_abbigliamento_pantaloni.mp3   11232 B  | pantaloni
+word_abbigliamento_scarpa.mp3   11232 B  | scarpa
+word_abbigliamento_sciarpa.mp3   11232 B  | sciarpa
+word_abbigliamento_taglia.mp3   11232 B  | taglia
+word_abbigliamento_vestiti.mp3   11232 B  | vestiti
+word_abbigliamento_vestito.mp3   11232 B  | vestito
+word_abitare_ammobiliato.mp3   11232 B  | ammobiliato
+word_abitare_il_citofono.mp3   11232 B  | il citofono
+word_abitare_il_contratto.mp3   11232 B  | il contratto
+word_abitare_il_monolocale.mp3   11232 B  | il monolocale
+word_abitare_il_portone.mp3   11232 B  | il portone
+word_abitare_il_rumore.mp3   11232 B  | il rumore
+word_abitare_il_vicino.mp3   11232 B  | il vicino
+word_abitare_l_affitto.mp3   11232 B  | l'affitto
+word_abitare_la_cauzione.mp3   11232 B  | la cauzione
+word_abitare_la_spesa.mp3   11232 B  | la spesa
+word_abitare_la_zona.mp3   11232 B  | la zona
+word_abitare_silenzioso.mp3   11232 B  | silenzioso
+word_abiti2_comodo.mp3   11232 B  | comodo
+word_abiti2_di_cotone.mp3   11232 B  | di cotone
+word_abiti2_di_lana.mp3   11232 B  | di lana
+word_abiti2_elegante.mp3   11232 B  | elegante
+word_abiti2_i_guanti.mp3    6768 B  | i guanti
+word_abiti2_il_bottone.mp3   11232 B  | il bottone
+word_abiti2_la_cintura.mp3   11232 B  | la cintura
+word_abiti2_la_sciarpa.mp3   11232 B  | la sciarpa
+word_abiti2_la_tasca.mp3   11232 B  | la tasca
+word_abiti2_sportivo.mp3   11232 B  | sportivo
+word_acquisti_caro.mp3    5040 B  | caro
+word_acquisti_carta.mp3   11232 B  | carta
+word_acquisti_economico.mp3   11232 B  | economico
+word_acquisti_euro.mp3   11232 B  | euro
+word_acquisti_mercato.mp3   11232 B  | mercato
+word_acquisti_negozio.mp3   11232 B  | negozio
+word_acquisti_quanto_costa.mp3   11232 B  | quanto costa?
+word_acquisti_soldi.mp3   11232 B  | soldi
+word_aggettivi_a1_bravo.mp3   11232 B  | bravo
+word_aggettivi_a1_contento.mp3   11232 B  | contento
+word_aggettivi_a1_corto.mp3   11232 B  | corto
+word_aggettivi_a1_difficile.mp3   11232 B  | difficile
+word_aggettivi_a1_divertente.mp3   11232 B  | divertente
+word_aggettivi_a1_facile.mp3   11232 B  | facile
+word_aggettivi_a1_falso.mp3   11232 B  | falso
+word_aggettivi_a1_felice.mp3   11232 B  | felice
+word_aggettivi_a1_gentile.mp3   11232 B  | gentile
+word_aggettivi_a1_giovane.mp3   11232 B  | giovane
+word_aggettivi_a1_importante.mp3   11232 B  | importante
+word_aggettivi_a1_intelligente.mp3   11232 B  | intelligente
+word_aggettivi_a1_interessante.mp3   11232 B  | interessante
+word_aggettivi_a1_largo.mp3   11232 B  | largo
+word_aggettivi_a1_libero.mp3   11232 B  | libero
+word_aggettivi_a1_lungo.mp3   11232 B  | lungo
+word_aggettivi_a1_malato.mp3   11232 B  | malato
+word_aggettivi_a1_noioso.mp3   11232 B  | noioso
+word_aggettivi_a1_pericoloso.mp3   11232 B  | pericoloso
+word_aggettivi_a1_pronto.mp3   11232 B  | pronto
+word_aggettivi_a1_pulito.mp3   11232 B  | pulito
+word_aggettivi_a1_ricco.mp3   11232 B  | ricco
+word_aggettivi_a1_sicuro.mp3   11232 B  | sicuro
+word_aggettivi_a1_simpatico.mp3   11232 B  | simpatico
+word_aggettivi_a1_sporco.mp3   11232 B  | sporco
+word_aggettivi_a1_stanco.mp3   11232 B  | stanco
+word_aggettivi_a1_straniero.mp3   11232 B  | straniero
+word_aggettivi_a1_stretto.mp3   11232 B  | stretto
+word_aggettivi_a1_vecchio.mp3   11232 B  | vecchio
+word_aggettivi_a1_vero.mp3   11232 B  | vero
+word_aggettivi_aperto.mp3   11232 B  | aperto
+word_aggettivi_bello.mp3   11232 B  | bello
+word_aggettivi_buona.mp3   11232 B  | buona
+word_aggettivi_buono.mp3   11232 B  | buono
+word_aggettivi_caldo.mp3   11232 B  | caldo
+word_aggettivi_cattivo.mp3   11232 B  | cattivo
+word_aggettivi_chiuso.mp3   11232 B  | chiuso
+word_aggettivi_freddo.mp3   11232 B  | freddo
+word_aggettivi_grande.mp3   11232 B  | grande
+word_aggettivi_molto.mp3   11232 B  | molto
+word_aggettivi_piccolo.mp3   11232 B  | piccolo
+word_aggettivi_poco.mp3   11232 B  | poco
+word_ambiente_il_cambiamento.mp3   11232 B  | il cambiamento
+word_ambiente_il_clima.mp3   11232 B  | il clima
+word_ambiente_il_riciclo.mp3   11232 B  | il riciclo
+word_ambiente_il_riscaldamento.mp3   11232 B  | il riscaldamento
+word_ambiente_il_risparmio.mp3   11232 B  | il risparmio
+word_ambiente_l_ambiente.mp3   11232 B  | l'ambiente
+word_ambiente_l_energia.mp3   11232 B  | l'energia
+word_ambiente_l_inquinamento.mp3   11232 B  | l'inquinamento
+word_ambiente_la_bolletta.mp3   11232 B  | la bolletta
+word_ambiente_la_protezione.mp3   11232 B  | la protezione
+word_ambiente_la_spazzatura.mp3   11232 B  | la spazzatura
+word_ambiente_sostenibile.mp3   11232 B  | sostenibile
+word_animali_anatra.mp3   11232 B  | anatra
+word_animali_ape.mp3    5040 B  | ape
+word_animali_capra.mp3    5040 B  | capra
+word_animali_cavallo.mp3   11232 B  | cavallo
+word_animali_coniglio.mp3   11232 B  | coniglio
+word_animali_elefante.mp3   11232 B  | elefante
+word_animali_farfalla.mp3   11232 B  | farfalla
+word_animali_leone.mp3   11232 B  | leone
+word_animali_mucca.mp3   11232 B  | mucca
+word_animali_orso.mp3   11232 B  | orso
+word_animali_pecora.mp3   11232 B  | pecora
+word_animali_tigre.mp3   11232 B  | tigre
+word_animali_topo.mp3    4896 B  | topo
+word_animali_uccello.mp3   11232 B  | uccello
+word_articoli_pronomi_ci.mp3    3312 B  | ci
+word_articoli_pronomi_gli.mp3    4464 B  | gli
+word_articoli_pronomi_i.mp3    4752 B  | i
+word_articoli_pronomi_il.mp3    4176 B  | il
+word_articoli_pronomi_la.mp3    4464 B  | la
+word_articoli_pronomi_le.mp3    4464 B  | le
+word_articoli_pronomi_lo.mp3    4464 B  | lo
+word_articoli_pronomi_me.mp3    4752 B  | me
+word_articoli_pronomi_mi.mp3    4320 B  | mi
+word_articoli_pronomi_mio.mp3    5040 B  | mio
+word_articoli_pronomi_nostro.mp3   11232 B  | nostro
+word_articoli_pronomi_quello.mp3   11232 B  | quello
+word_articoli_pronomi_questo.mp3    6048 B  | questo
+word_articoli_pronomi_si.mp3    5040 B  | si
+word_articoli_pronomi_suo.mp3   11232 B  | suo
+word_articoli_pronomi_te.mp3    3888 B  | te
+word_articoli_pronomi_ti.mp3    4032 B  | ti
+word_articoli_pronomi_tuo.mp3    4752 B  | tuo
+word_articoli_pronomi_un_uno_una.mp3   11232 B  | un / uno / una
+word_articoli_pronomi_voi.mp3   11232 B  | voi
+word_articoli_pronomi_vostro.mp3   11232 B  | vostro
+word_avverbi_a1_ancora.mp3   11232 B  | ancora
+word_avverbi_a1_avanti.mp3   11232 B  | avanti
+word_avverbi_a1_davanti.mp3   11232 B  | davanti
+word_avverbi_a1_dentro.mp3   11232 B  | dentro
+word_avverbi_a1_dietro.mp3   11232 B  | dietro
+word_avverbi_a1_fuori.mp3   11232 B  | fuori
+word_avverbi_a1_gia.mp3    4464 B  | già
+word_avverbi_a1_giu.mp3    4176 B  | giù
+word_avverbi_a1_indietro.mp3   11232 B  | indietro
+word_avverbi_a1_insieme.mp3   11232 B  | insieme
+word_avverbi_a1_la.mp3    4464 B  | là
+word_avverbi_a1_lentamente.mp3    7920 B  | lentamente
+word_avverbi_a1_mai.mp3   11232 B  | mai
+word_avverbi_a1_poi.mp3    4896 B  | poi
+word_avverbi_a1_presto.mp3   11232 B  | presto
+word_avverbi_a1_prima.mp3    4896 B  | prima
+word_avverbi_a1_qua.mp3    4320 B  | qua
+word_avverbi_a1_quasi.mp3   11232 B  | quasi
+word_avverbi_a1_sempre.mp3   11232 B  | sempre
+word_avverbi_a1_sopra.mp3   11232 B  | sopra
+word_avverbi_a1_sotto.mp3   11232 B  | sotto
+word_avverbi_a1_spesso.mp3   11232 B  | spesso
+word_avverbi_a1_subito.mp3   11232 B  | subito
+word_avverbi_a1_tardi.mp3   11232 B  | tardi
+word_calendario_agosto.mp3   11232 B  | agosto
+word_calendario_anno.mp3   11232 B  | anno
+word_calendario_aprile.mp3   11232 B  | aprile
+word_calendario_data.mp3   11232 B  | data
+word_calendario_dicembre.mp3   11232 B  | dicembre
+word_calendario_febbraio.mp3   11232 B  | febbraio
+word_calendario_fine_settimana.mp3   11232 B  | fine settimana
+word_calendario_gennaio.mp3   11232 B  | gennaio
+word_calendario_giugno.mp3   11232 B  | giugno
+word_calendario_luglio.mp3   11232 B  | luglio
+word_calendario_maggio.mp3    5904 B  | maggio
+word_calendario_marzo.mp3    6624 B  | marzo
+word_calendario_mattina.mp3   11232 B  | mattina
+word_calendario_mese.mp3   11232 B  | mese
+word_calendario_mezzanotte.mp3   11232 B  | mezzanotte
+word_calendario_mezzogiorno.mp3   11232 B  | mezzogiorno
+word_calendario_minuto.mp3   11232 B  | minuto
+word_calendario_momento.mp3   11232 B  | momento
+word_calendario_natale.mp3   11232 B  | Natale
+word_calendario_notte.mp3   11232 B  | notte
+word_calendario_novembre.mp3   11232 B  | novembre
+word_calendario_ottobre.mp3   11232 B  | ottobre
+word_calendario_pasqua.mp3   11232 B  | Pasqua
+word_calendario_pomeriggio.mp3   11232 B  | pomeriggio
+word_calendario_sera.mp3   11232 B  | sera
+word_calendario_settembre.mp3   11232 B  | settembre
+word_casa_appartamento.mp3   11232 B  | appartamento
+word_casa_armadio.mp3   11232 B  | armadio
+word_casa_asciugamano.mp3   11232 B  | asciugamano
+word_casa_bicchiere.mp3   11232 B  | bicchiere
+word_casa_bottiglia.mp3   11232 B  | bottiglia
+word_casa_camera.mp3   11232 B  | camera
+word_casa_casa.mp3   11232 B  | casa
+word_casa_coltello.mp3   11232 B  | coltello
+word_casa_computer.mp3   11232 B  | computer
+word_casa_cucchiaio.mp3   11232 B  | cucchiaio
+word_casa_cucina.mp3   11232 B  | cucina
+word_casa_divano.mp3   11232 B  | divano
+word_casa_doccia.mp3   11232 B  | doccia
+word_casa_finestra.mp3   11232 B  | finestra
+word_casa_forchetta.mp3   11232 B  | forchetta
+word_casa_giardino.mp3   11232 B  | giardino
+word_casa_letto.mp3   11232 B  | letto
+word_casa_orologio.mp3   11232 B  | orologio
+word_casa_piano.mp3   11232 B  | piano
+word_casa_pianta.mp3   11232 B  | pianta
+word_casa_porta.mp3   11232 B  | porta
+word_casa_posto.mp3   11232 B  | posto
+word_casa_quadro.mp3   11232 B  | quadro
+word_casa_radio.mp3   11232 B  | radio
+word_casa_sedia.mp3   11232 B  | sedia
+word_casa_soggiorno.mp3   11232 B  | soggiorno
+word_casa_specchio.mp3   11232 B  | specchio
+word_casa_tavolo.mp3   11232 B  | tavolo
+word_casa_televisione.mp3   11232 B  | televisione
+word_cibo_a1_aceto.mp3   11232 B  | aceto
+word_cibo_a1_aglio.mp3   11232 B  | aglio
+word_cibo_a1_cipolla.mp3   11232 B  | cipolla
+word_cibo_a1_insalata.mp3   11232 B  | insalata
+word_cibo_a1_limone.mp3   11232 B  | limone
+word_cibo_a1_olio.mp3   11232 B  | olio
+word_cibo_a1_panino.mp3   11232 B  | panino
+word_cibo_a1_pasta.mp3   11232 B  | pasta
+word_cibo_a1_patata.mp3   11232 B  | patata
+word_cibo_a1_pepe.mp3   11232 B  | pepe
+word_cibo_a1_pizza.mp3   11232 B  | pizza
+word_cibo_a1_pollo.mp3   11232 B  | pollo
+word_cibo_a1_pomodoro.mp3   11232 B  | pomodoro
+word_cibo_a1_riso.mp3   11232 B  | riso
+word_cibo_a1_spaghetti.mp3   11232 B  | spaghetti
+word_cibo_a1_tovagliolo.mp3    6768 B  | tovagliolo
+word_cibo_a1_uovo.mp3   11232 B  | uovo
+word_cibo_a1_verdura.mp3   11232 B  | verdura
+word_cibo_a1_zucchero.mp3   11232 B  | zucchero
+word_citta3_il_centro_storico.mp3   11232 B  | il centro storico
+word_citta3_il_monumento.mp3   11232 B  | il monumento
+word_citta3_il_quartiere.mp3   11232 B  | il quartiere
+word_citta3_il_semaforo.mp3   11232 B  | il semaforo
+word_citta3_il_traffico.mp3   11232 B  | il traffico
+word_citta3_l_incrocio.mp3   11232 B  | l'incrocio
+word_citta3_la_folla.mp3   11232 B  | la folla
+word_citta3_la_metropolitana.mp3   11232 B  | la metropolitana
+word_citta3_la_periferia.mp3   11232 B  | la periferia
+word_citta3_la_serata.mp3   11232 B  | la serata
+word_citta3_la_zona_pedonale.mp3   11232 B  | la zona pedonale
+word_citta_ambasciata.mp3   11232 B  | ambasciata
+word_citta_banca.mp3   11232 B  | banca
+word_citta_bar.mp3    4896 B  | bar
+word_citta_biblioteca.mp3   11232 B  | biblioteca
+word_citta_centro.mp3   11232 B  | centro
+word_citta_chiesa.mp3   11232 B  | chiesa
+word_citta_cinema.mp3   11232 B  | cinema
+word_citta_citta.mp3   11232 B  | città
+word_citta_consolato.mp3   11232 B  | consolato
+word_citta_duomo.mp3   11232 B  | duomo
+word_citta_fiume.mp3   11232 B  | fiume
+word_citta_isola.mp3   11232 B  | isola
+word_citta_museo.mp3   11232 B  | museo
+word_citta_parcheggio.mp3   11232 B  | parcheggio
+word_citta_parco.mp3   11232 B  | parco
+word_citta_piazza.mp3   11232 B  | piazza
+word_citta_pizzeria.mp3   11232 B  | pizzeria
+word_citta_porto.mp3    5616 B  | porto
+word_citta_posta.mp3   11232 B  | posta
+word_citta_ristorante.mp3   11232 B  | ristorante
+word_citta_segreteria.mp3   11232 B  | segreteria
+word_citta_supermercato.mp3   11232 B  | supermercato
+word_citta_teatro.mp3   11232 B  | teatro
+word_citta_trattoria.mp3   11232 B  | trattoria
+word_citta_via.mp3    4896 B  | via
+word_colori_arancione.mp3   11232 B  | arancione
+word_colori_azzurro.mp3   11232 B  | azzurro
+word_colori_bianco.mp3   11232 B  | bianco
+word_colori_blu.mp3    4032 B  | blu
+word_colori_chiaro.mp3   11232 B  | chiaro
+word_colori_giallo.mp3   11232 B  | giallo
+word_colori_grigio.mp3   11232 B  | grigio
+word_colori_nero.mp3   11232 B  | nero
+word_colori_rosa.mp3   11232 B  | rosa
+word_colori_rosso.mp3   11232 B  | rosso
+word_colori_scuro.mp3   11232 B  | scuro
+word_colori_verde.mp3   11232 B  | verde
+word_colori_viola.mp3   11232 B  | viola
+word_comunicare_il_codice.mp3   11232 B  | il codice
+word_comunicare_il_messaggio.mp3   11232 B  | il messaggio
+word_comunicare_il_segnale.mp3   11232 B  | il segnale
+word_comunicare_l_impegno.mp3   11232 B  | l'impegno
+word_comunicare_la_chat.mp3   11232 B  | la chat
+word_comunicare_la_chiamata.mp3    7344 B  | la chiamata
+word_comunicare_la_linea.mp3   11232 B  | la linea
+word_comunicare_la_rete.mp3   11232 B  | la rete
+word_comunicare_la_segreteria.mp3   11232 B  | la segreteria
+word_comunicare_la_suoneria.mp3   11232 B  | la suoneria
+word_comunicare_la_videochiamata.mp3   11232 B  | la videochiamata
+word_comunicare_occupato.mp3   11232 B  | occupato
+word_conversazione_che_cos_e.mp3   11232 B  | che cos'è?
+word_conversazione_come_si_chiama.mp3   11232 B  | come si chiama?
+word_conversazione_come_sta.mp3   11232 B  | come sta?
+word_conversazione_mi_chiamo.mp3   11232 B  | mi chiamo…
+word_conversazione_non_capisco.mp3   11232 B  | non capisco
+word_conversazione_parla_inglese.mp3   11232 B  | parla inglese?
+word_conversazione_parla_tedesco.mp3   11232 B  | parla tedesco?
+word_conversazione_perche.mp3   11232 B  | perché?
+word_conversazione_quando_parte.mp3   11232 B  | quando parte?
+word_conversazione_tutto_bene.mp3   11232 B  | tutto bene?
+word_corpo_avere_bisogno_di.mp3   11232 B  | avere bisogno di
+word_corpo_bocca.mp3   11232 B  | bocca
+word_corpo_braccio.mp3   11232 B  | braccio
+word_corpo_dente.mp3   11232 B  | dente
+word_corpo_dito.mp3   11232 B  | dito
+word_corpo_fame.mp3   11232 B  | fame
+word_corpo_febbre.mp3   11232 B  | febbre
+word_corpo_gamba.mp3   11232 B  | gamba
+word_corpo_ginocchio.mp3   11232 B  | ginocchio
+word_corpo_gola.mp3   11232 B  | gola
+word_corpo_mal_di_pancia.mp3   11232 B  | mal di pancia
+word_corpo_mal_di_testa.mp3   11232 B  | mal di testa
+word_corpo_mano.mp3   11232 B  | mano
+word_corpo_medicina.mp3   11232 B  | medicina
+word_corpo_naso.mp3   11232 B  | naso
+word_corpo_occhio.mp3   11232 B  | occhio
+word_corpo_orecchio.mp3   11232 B  | orecchio
+word_corpo_piede.mp3   11232 B  | piede
+word_corpo_raffreddore.mp3   11232 B  | raffreddore
+word_corpo_ricetta.mp3   11232 B  | ricetta
+word_corpo_schiena.mp3   11232 B  | schiena
+word_corpo_sete.mp3   11232 B  | sete
+word_corpo_sonno.mp3   11232 B  | sonno
+word_corpo_stomaco.mp3   11232 B  | stomaco
+word_corpo_testa.mp3   11232 B  | testa
+word_corpo_tosse.mp3   11232 B  | tosse
+word_corpo_viso.mp3   11232 B  | viso
+word_cucina2_fresco.mp3   11232 B  | fresco
+word_cucina2_il_barattolo.mp3   11232 B  | il barattolo
+word_cucina2_il_forno.mp3   11232 B  | il forno
+word_cucina2_il_grammo.mp3   11232 B  | il grammo
+word_cucina2_il_litro.mp3   11232 B  | il litro
+word_cucina2_il_piatto.mp3   11232 B  | il piatto
+word_cucina2_il_sapore.mp3   11232 B  | il sapore
+word_cucina2_l_ingrediente.mp3   11232 B  | l'ingrediente
+word_cucina2_la_cottura.mp3   11232 B  | la cottura
+word_cucina2_la_padella.mp3   11232 B  | la padella
+word_cucina2_la_scatola.mp3   11232 B  | la scatola
+word_cucina2_piccante.mp3   11232 B  | piccante
+word_emergenza_aiuto.mp3   11232 B  | aiuto
+word_emergenza_aiuto_esclamazione.mp3   11232 B  | aiuto!
+word_emergenza_dolore.mp3   11232 B  | dolore
+word_emergenza_farmacia.mp3   11232 B  | farmacia
+word_emergenza_medico.mp3   11232 B  | medico
+word_emergenza_ospedale.mp3   11232 B  | ospedale
+word_emergenza_polizia.mp3   11232 B  | polizia
+word_emergenza_sto_male.mp3   11232 B  | sto male
+word_emozioni_arrabbiato.mp3   11232 B  | arrabbiato
+word_emozioni_curioso.mp3   11232 B  | curioso
+word_emozioni_debole.mp3   11232 B  | debole
+word_emozioni_disponibile.mp3   11232 B  | disponibile
+word_emozioni_forte.mp3   11232 B  | forte
+word_emozioni_generoso.mp3   11232 B  | generoso
+word_emozioni_innamorato.mp3   11232 B  | innamorato
+word_emozioni_nervoso.mp3   11232 B  | nervoso
+word_emozioni_pazzo.mp3   11232 B  | pazzo
+word_emozioni_pigro.mp3    4896 B  | pigro
+word_emozioni_preoccupato.mp3   11232 B  | preoccupato
+word_emozioni_serio.mp3   11232 B  | serio
+word_emozioni_sorpreso.mp3   11232 B  | sorpreso
+word_emozioni_timido.mp3   11232 B  | timido
+word_emozioni_tranquillo.mp3   11232 B  | tranquillo
+word_emozioni_triste.mp3   11232 B  | triste
+word_famiglia_amore.mp3   11232 B  | amore
+word_famiglia_bambina.mp3   11232 B  | bambina
+word_famiglia_bambino.mp3   11232 B  | bambino
+word_famiglia_cognome.mp3   11232 B  | cognome
+word_famiglia_compagna.mp3   11232 B  | compagna
+word_famiglia_compagno.mp3   11232 B  | compagno
+word_famiglia_cugina.mp3   11232 B  | cugina
+word_famiglia_cugino.mp3   11232 B  | cugino
+word_famiglia_figlia.mp3   11232 B  | figlia
+word_famiglia_figlio.mp3   11232 B  | figlio
+word_famiglia_fratello.mp3   11232 B  | fratello
+word_famiglia_madre.mp3   11232 B  | madre
+word_famiglia_mamma.mp3   11232 B  | mamma
+word_famiglia_marito.mp3   11232 B  | marito
+word_famiglia_moglie.mp3   11232 B  | moglie
+word_famiglia_nazionalita.mp3   11232 B  | nazionalità
+word_famiglia_nome.mp3   11232 B  | nome
+word_famiglia_nonna.mp3   11232 B  | nonna
+word_famiglia_nonno.mp3   11232 B  | nonno
+word_famiglia_padre.mp3   11232 B  | padre
+word_famiglia_papa.mp3   11232 B  | papà
+word_famiglia_persona.mp3   11232 B  | persona
+word_famiglia_ragazza.mp3   11232 B  | ragazza
+word_famiglia_ragazzo.mp3   11232 B  | ragazzo
+word_famiglia_signora.mp3   11232 B  | signora
+word_famiglia_signore.mp3   11232 B  | signore
+word_famiglia_sorella.mp3   11232 B  | sorella
+word_famiglia_zia.mp3   11232 B  | zia
+word_famiglia_zio.mp3   11232 B  | zio
+word_interrogativi_a_che_ora.mp3   11232 B  | a che ora?
+word_interrogativi_che_cosa.mp3   11232 B  | che cosa?
+word_interrogativi_chi.mp3    4608 B  | chi?
+word_interrogativi_come.mp3    4896 B  | come?
+word_interrogativi_dove.mp3   11232 B  | dove?
+word_interrogativi_quale.mp3   11232 B  | quale?
+word_interrogativi_quando.mp3   11232 B  | quando?
+word_interrogativi_quanto.mp3   11232 B  | quanto?
+word_lavoro2_il_colloquio.mp3   11232 B  | il colloquio
+word_lavoro2_il_curriculum.mp3   11232 B  | il curriculum
+word_lavoro2_il_datore_di_lavoro.mp3   11232 B  | il datore di lavoro
+word_lavoro2_il_turno.mp3   11232 B  | il turno
+word_lavoro2_l_azienda.mp3   11232 B  | l'azienda
+word_lavoro2_l_esperienza.mp3   11232 B  | l'esperienza
+word_lavoro2_la_ditta.mp3   11232 B  | la ditta
+word_lavoro2_la_feria.mp3   11232 B  | la feria
+word_lavoro2_la_paga.mp3   11232 B  | la paga
+word_lavoro2_la_tesi.mp3   11232 B  | la tesi
+word_lavoro2_lo_sciopero.mp3   11232 B  | lo sciopero
+word_lavoro2_lo_stipendio.mp3   11232 B  | lo stipendio
+word_lavoro3_il_cliente.mp3   11232 B  | il cliente
+word_lavoro3_il_progetto.mp3   11232 B  | il progetto
+word_lavoro3_il_ruolo.mp3   11232 B  | il ruolo
+word_lavoro3_il_stage.mp3   11232 B  | il stage
+word_lavoro3_il_successo.mp3   11232 B  | il successo
+word_lavoro3_la_carriera.mp3   11232 B  | la carriera
+word_lavoro3_la_formazione.mp3   11232 B  | la formazione
+word_lavoro3_la_laurea.mp3   11232 B  | la laurea
+word_lavoro3_la_posizione.mp3   11232 B  | la posizione
+word_lavoro3_la_riunione.mp3   11232 B  | la riunione
+word_lavoro3_la_sfida.mp3   11232 B  | la sfida
+word_lavoro3_le_competenze.mp3   11232 B  | le competenze
+word_lavoro_appuntamento.mp3   11232 B  | appuntamento
+word_lavoro_capo.mp3    4896 B  | capo
+word_lavoro_cellulare.mp3   11232 B  | cellulare
+word_lavoro_documento.mp3   11232 B  | documento
+word_lavoro_e_mail.mp3   11232 B  | e-mail
+word_lavoro_fabbrica.mp3   11232 B  | fabbrica
+word_lavoro_fax.mp3   11232 B  | fax
+word_lavoro_firma.mp3   11232 B  | firma
+word_lavoro_fotografia.mp3   11232 B  | fotografia
+word_lavoro_giornale.mp3   11232 B  | giornale
+word_lavoro_impiegata.mp3   11232 B  | impiegata
+word_lavoro_impiegato.mp3   11232 B  | impiegato
+word_lavoro_indirizzo.mp3   11232 B  | indirizzo
+word_lavoro_industria.mp3   11232 B  | industria
+word_lavoro_informazione.mp3   11232 B  | informazione
+word_lavoro_internet.mp3   11232 B  | internet
+word_lavoro_lavoro.mp3   11232 B  | lavoro
+word_lavoro_orario.mp3   11232 B  | orario
+word_lavoro_telefono.mp3   11232 B  | telefono
+word_lavoro_ufficio.mp3   11232 B  | ufficio
+word_media_il_commento.mp3   11232 B  | il commento
+word_media_il_giornalista.mp3   11232 B  | il giornalista
+word_media_il_notiziario.mp3   11232 B  | il notiziario
+word_media_il_podcast.mp3   11232 B  | il podcast
+word_media_il_telegiornale.mp3   11232 B  | il telegiornale
+word_media_il_titolo.mp3   11232 B  | il titolo
+word_media_l_articolo.mp3   11232 B  | l'articolo
+word_media_l_edizione.mp3   11232 B  | l'edizione
+word_media_la_notizia.mp3   11232 B  | la notizia
+word_media_la_puntata.mp3   11232 B  | la puntata
+word_media_la_rivista.mp3   11232 B  | la rivista
+word_media_la_stampa.mp3   11232 B  | la stampa
+word_mente_anche_se.mp3   11232 B  | anche se
+word_mente_il_desiderio.mp3   11232 B  | il desiderio
+word_mente_il_dubbio.mp3   11232 B  | il dubbio
+word_mente_il_problema.mp3   11232 B  | il problema
+word_mente_l_ipotesi.mp3   11232 B  | l'ipotesi
+word_mente_la_certezza.mp3   11232 B  | la certezza
+word_mente_la_possibilita.mp3   11232 B  | la possibilità
+word_mente_la_soluzione.mp3   11232 B  | la soluzione
+word_mente_la_speranza.mp3   11232 B  | la speranza
+word_mente_nel_caso.mp3   11232 B  | nel caso
+word_mente_nonostante.mp3   11232 B  | nonostante
+word_mente_tuttavia.mp3   11232 B  | tuttavia
+word_natura_albero.mp3   11232 B  | albero
+word_natura_animale.mp3   11232 B  | animale
+word_natura_autunno.mp3   11232 B  | autunno
+word_natura_campagna.mp3   11232 B  | campagna
+word_natura_cane.mp3   11232 B  | cane
+word_natura_cielo.mp3    5040 B  | cielo
+word_natura_estate.mp3   11232 B  | estate
+word_natura_fiore.mp3   11232 B  | fiore
+word_natura_gatto.mp3   11232 B  | gatto
+word_natura_inverno.mp3   11232 B  | inverno
+word_natura_lago.mp3   11232 B  | lago
+word_natura_luce.mp3   11232 B  | luce
+word_natura_mare.mp3   11232 B  | mare
+word_natura_montagna.mp3   11232 B  | montagna
+word_natura_neve.mp3   11232 B  | neve
+word_natura_nuvola.mp3   11232 B  | nuvola
+word_natura_pioggia.mp3   11232 B  | pioggia
+word_natura_primavera.mp3   11232 B  | primavera
+word_natura_sole.mp3   11232 B  | sole
+word_natura_tempo.mp3   11232 B  | tempo
+word_natura_vento.mp3   11232 B  | vento
+word_numeri_cento.mp3   11232 B  | cento
+word_numeri_cinque.mp3   11232 B  | cinque
+word_numeri_dieci.mp3   11232 B  | dieci
+word_numeri_due.mp3   11232 B  | due
+word_numeri_estesi_cinquanta.mp3   11232 B  | cinquanta
+word_numeri_estesi_diciannove.mp3   11232 B  | diciannove
+word_numeri_estesi_diciassette.mp3   11232 B  | diciassette
+word_numeri_estesi_diciotto.mp3   11232 B  | diciotto
+word_numeri_estesi_dodici.mp3   11232 B  | dodici
+word_numeri_estesi_doppio.mp3   11232 B  | doppio
+word_numeri_estesi_meta.mp3   11232 B  | metà
+word_numeri_estesi_novanta.mp3   11232 B  | novanta
+word_numeri_estesi_numero.mp3   11232 B  | numero
+word_numeri_estesi_ottanta.mp3   11232 B  | ottanta
+word_numeri_estesi_paio.mp3   11232 B  | paio
+word_numeri_estesi_primo.mp3    5040 B  | primo
+word_numeri_estesi_quaranta.mp3   11232 B  | quaranta
+word_numeri_estesi_quarto.mp3   11232 B  | quarto
+word_numeri_estesi_quattordici.mp3   11232 B  | quattordici
+word_numeri_estesi_quindici.mp3   11232 B  | quindici
+word_numeri_estesi_secondo.mp3   11232 B  | secondo
+word_numeri_estesi_sedici.mp3   11232 B  | sedici
+word_numeri_estesi_sessanta.mp3   11232 B  | sessanta
+word_numeri_estesi_settanta.mp3   11232 B  | settanta
+word_numeri_estesi_singolo.mp3   11232 B  | singolo
+word_numeri_estesi_terzo.mp3   11232 B  | terzo
+word_numeri_estesi_tredici.mp3   11232 B  | tredici
+word_numeri_estesi_trenta.mp3   11232 B  | trenta
+word_numeri_estesi_undici.mp3   11232 B  | undici
+word_numeri_mille.mp3   11232 B  | mille
+word_numeri_nove.mp3   11232 B  | nove
+word_numeri_otto.mp3   11232 B  | otto
+word_numeri_quattro.mp3   11232 B  | quattro
+word_numeri_sei.mp3   11232 B  | sei
+word_numeri_sette.mp3   11232 B  | sette
+word_numeri_tre.mp3    4176 B  | tre
+word_numeri_uno.mp3   11232 B  | uno
+word_numeri_venti.mp3   11232 B  | venti
+word_numeri_zero.mp3   11232 B  | zero
+word_opinioni_a_mio_parere.mp3   11232 B  | a mio parere
+word_opinioni_d_accordo.mp3   11232 B  | d'accordo
+word_opinioni_davvero.mp3   11232 B  | davvero
+word_opinioni_forse.mp3   11232 B  | forse
+word_opinioni_il_punto_di_vista.mp3   11232 B  | il punto di vista
+word_opinioni_invece.mp3   11232 B  | invece
+word_opinioni_l_opinione.mp3   11232 B  | l'opinione
+word_opinioni_magari.mp3   11232 B  | magari
+word_opinioni_probabilmente.mp3   11232 B  | probabilmente
+word_opinioni_purtroppo.mp3   11232 B  | purtroppo
+word_opinioni_secondo_me.mp3   11232 B  | secondo me
+word_opinioni_sicuramente.mp3   11232 B  | sicuramente
+word_orientamento_a_destra.mp3   11232 B  | a destra
+word_orientamento_a_sinistra.mp3   11232 B  | a sinistra
+word_orientamento_albergo.mp3   11232 B  | albergo
+word_orientamento_bagno.mp3   11232 B  | bagno
+word_orientamento_dove.mp3   11232 B  | dove
+word_orientamento_dritto.mp3   11232 B  | dritto
+word_orientamento_li.mp3    4464 B  | lì
+word_orientamento_lontano.mp3   11232 B  | lontano
+word_orientamento_qui.mp3    4320 B  | qui
+word_orientamento_spiaggia.mp3   11232 B  | spiaggia
+word_orientamento_strada.mp3   11232 B  | strada
+word_orientamento_vicino.mp3   11232 B  | vicino
+word_paesi_firenze.mp3   11232 B  | Firenze
+word_paesi_l_austria.mp3   11232 B  | l'Austria
+word_paesi_l_europa.mp3   11232 B  | l'Europa
+word_paesi_l_inghilterra.mp3   11232 B  | l'Inghilterra
+word_paesi_l_italia.mp3   11232 B  | l'Italia
+word_paesi_la_francia.mp3   11232 B  | la Francia
+word_paesi_la_germania.mp3   11232 B  | la Germania
+word_paesi_la_spagna.mp3   11232 B  | la Spagna
+word_paesi_la_svizzera.mp3   11232 B  | la Svizzera
+word_paesi_napoli.mp3   11232 B  | Napoli
+word_paesi_roma.mp3   11232 B  | Roma
+word_paesi_venezia.mp3   11232 B  | Venezia
+word_parole_funzione_a.mp3    4464 B  | a
+word_parole_funzione_allora.mp3   11232 B  | allora
+word_parole_funzione_anche.mp3   11232 B  | anche
+word_parole_funzione_certo.mp3   11232 B  | certo
+word_parole_funzione_che.mp3    4032 B  | che
+word_parole_funzione_chi.mp3    4320 B  | chi
+word_parole_funzione_come.mp3    5040 B  | come
+word_parole_funzione_con.mp3   11232 B  | con
+word_parole_funzione_di.mp3    4896 B  | di
+word_parole_funzione_e.mp3    4464 B  | e
+word_parole_funzione_in.mp3    4464 B  | in
+word_parole_funzione_ma.mp3    4608 B  | ma
+word_parole_funzione_meno.mp3   11232 B  | meno
+word_parole_funzione_nessuno.mp3   11232 B  | nessuno
+word_parole_funzione_niente.mp3   11232 B  | niente
+word_parole_funzione_o.mp3    4608 B  | o
+word_parole_funzione_peccato.mp3   11232 B  | peccato
+word_parole_funzione_per.mp3    4608 B  | per
+word_parole_funzione_perche.mp3   11232 B  | perché
+word_parole_funzione_piu.mp3    4176 B  | più
+word_parole_funzione_quale.mp3   11232 B  | quale
+word_parole_funzione_quando.mp3   11232 B  | quando
+word_parole_funzione_quanto.mp3   11232 B  | quanto
+word_parole_funzione_senza.mp3   11232 B  | senza
+word_parole_funzione_su.mp3    4752 B  | su
+word_parole_funzione_tanto.mp3   11232 B  | tanto
+word_parole_funzione_troppo.mp3   11232 B  | troppo
+word_parole_funzione_tutto.mp3   11232 B  | tutto
+word_parole_funzione_va_bene.mp3   11232 B  | va bene
+word_persone_amica.mp3   11232 B  | amica
+word_persone_amico.mp3   11232 B  | amico
+word_persone_donna.mp3   11232 B  | donna
+word_persone_famiglia.mp3   11232 B  | famiglia
+word_persone_io.mp3    4752 B  | io
+word_persone_lei.mp3   11232 B  | lei
+word_persone_lei_cortesia.mp3   11232 B  | Lei
+word_persone_loro.mp3   11232 B  | loro
+word_persone_lui.mp3   11232 B  | lui
+word_persone_noi.mp3   11232 B  | noi
+word_persone_tu.mp3    3600 B  | tu
+word_persone_uomo.mp3   11232 B  | uomo
+word_racconto_all_epoca.mp3   11232 B  | all'epoca
+word_racconto_di_solito.mp3   11232 B  | di solito
+word_racconto_il_futuro.mp3   11232 B  | il futuro
+word_racconto_il_passato.mp3   11232 B  | il passato
+word_racconto_il_ricordo.mp3   11232 B  | il ricordo
+word_racconto_l_abitudine.mp3   11232 B  | l'abitudine
+word_racconto_l_infanzia.mp3   11232 B  | l'infanzia
+word_racconto_la_storia.mp3   11232 B  | la storia
+word_racconto_ogni_tanto.mp3   11232 B  | ogni tanto
+word_racconto_una_volta.mp3   11232 B  | una volta
+word_ristorante_acqua.mp3   11232 B  | acqua
+word_ristorante_birra.mp3   11232 B  | birra
+word_ristorante_carne.mp3   11232 B  | carne
+word_ristorante_cena.mp3   11232 B  | cena
+word_ristorante_colazione.mp3   11232 B  | colazione
+word_ristorante_cornetto.mp3   11232 B  | cornetto
+word_ristorante_dolce.mp3   11232 B  | dolce
+word_ristorante_formaggio.mp3   11232 B  | formaggio
+word_ristorante_frutta.mp3   11232 B  | frutta
+word_ristorante_gelato.mp3   11232 B  | gelato
+word_ristorante_il_conto.mp3   11232 B  | il conto
+word_ristorante_il_menu.mp3   11232 B  | il menù
+word_ristorante_latte.mp3   11232 B  | latte
+word_ristorante_pane.mp3    5040 B  | pane
+word_ristorante_pesce.mp3   11232 B  | pesce
+word_ristorante_pranzo.mp3   11232 B  | pranzo
+word_ristorante_prosciutto.mp3   11232 B  | prosciutto
+word_ristorante_sale.mp3   11232 B  | sale
+word_ristorante_succo.mp3   11232 B  | succo
+word_ristorante_un_caffe.mp3   11232 B  | un caffè
+word_ristorante_un_cappuccino.mp3   11232 B  | un cappuccino
+word_ristorante_una_birra_alla_spina.mp3   11232 B  | una birra alla spina
+word_ristorante_vino.mp3   11232 B  | vino
+word_ristorante_zuppa.mp3   11232 B  | zuppa
+word_salute2_ferito.mp3   11232 B  | ferito
+word_salute2_il_farmacista.mp3   11232 B  | il farmacista
+word_salute2_il_pronto_soccorso.mp3   11232 B  | il pronto soccorso
+word_salute2_il_raffreddore.mp3   11232 B  | il raffreddore
+word_salute2_l_ambulanza.mp3   11232 B  | l'ambulanza
+word_salute2_l_influenza.mp3   11232 B  | l'influenza
+word_salute2_la_febbre.mp3   11232 B  | la febbre
+word_salute2_la_pillola.mp3   11232 B  | la pillola
+word_salute2_la_ricetta.mp3   11232 B  | la ricetta
+word_salute2_la_salute.mp3   11232 B  | la salute
+word_salute2_la_tisana.mp3   11232 B  | la tisana
+word_salute2_la_tosse.mp3   11232 B  | la tosse
+word_salute2_la_visita.mp3   11232 B  | la visita
+word_salute2_sano.mp3   11232 B  | sano
+word_saluti_a_dopo.mp3   11232 B  | a dopo
+word_saluti_arrivederci.mp3   11232 B  | arrivederci
+word_saluti_buonanotte.mp3   11232 B  | buonanotte
+word_saluti_buonasera.mp3   11232 B  | buonasera
+word_saluti_buongiorno.mp3   11232 B  | buongiorno
+word_saluti_ciao.mp3    4896 B  | ciao
+word_saluti_di_niente.mp3   11232 B  | di niente
+word_saluti_grazie.mp3   11232 B  | grazie
+word_saluti_grazie_mille.mp3   11232 B  | grazie mille
+word_saluti_no.mp3    4464 B  | no
+word_saluti_per_favore.mp3   11232 B  | per favore
+word_saluti_permesso.mp3   11232 B  | permesso
+word_saluti_prego.mp3   11232 B  | prego
+word_saluti_scusi.mp3   11232 B  | scusi
+word_saluti_si.mp3    5040 B  | sì
+word_scuola_alfabeto.mp3   11232 B  | alfabeto
+word_scuola_classe.mp3   11232 B  | classe
+word_scuola_compito.mp3   11232 B  | compito
+word_scuola_corso.mp3   11232 B  | corso
+word_scuola_dizionario.mp3   11232 B  | dizionario
+word_scuola_domanda.mp3   11232 B  | domanda
+word_scuola_esercizio.mp3   11232 B  | esercizio
+word_scuola_inglese.mp3   11232 B  | inglese
+word_scuola_insegnante.mp3   11232 B  | insegnante
+word_scuola_italiano.mp3   11232 B  | italiano
+word_scuola_lettera.mp3   11232 B  | lettera
+word_scuola_lezione.mp3   11232 B  | lezione
+word_scuola_libro.mp3   11232 B  | libro
+word_scuola_lingua.mp3   11232 B  | lingua
+word_scuola_matita.mp3   11232 B  | matita
+word_scuola_parola.mp3   11232 B  | parola
+word_scuola_penna.mp3   11232 B  | penna
+word_scuola_professore.mp3   11232 B  | professore
+word_scuola_professoressa.mp3   11232 B  | professoressa
+word_scuola_quaderno.mp3   11232 B  | quaderno
+word_scuola_risposta.mp3   11232 B  | risposta
+word_scuola_scuola.mp3   11232 B  | scuola
+word_scuola_studente.mp3   11232 B  | studente
+word_scuola_studentessa.mp3   11232 B  | studentessa
+word_scuola_tedesco.mp3   11232 B  | tedesco
+word_scuola_universita.mp3   11232 B  | università
+word_servizi_i_contanti.mp3   11232 B  | i contanti
+word_servizi_il_bancomat.mp3   11232 B  | il bancomat
+word_servizi_il_bonifico.mp3   11232 B  | il bonifico
+word_servizi_il_francobollo.mp3   11232 B  | il francobollo
+word_servizi_il_modulo.mp3   11232 B  | il modulo
+word_servizi_il_pacco.mp3   11232 B  | il pacco
+word_servizi_il_prelievo.mp3   11232 B  | il prelievo
+word_servizi_la_busta.mp3   11232 B  | la busta
+word_servizi_la_carta_d_identita.mp3   11232 B  | la carta d'identità
+word_servizi_la_fila.mp3   11232 B  | la fila
+word_servizi_la_firma.mp3   11232 B  | la firma
+word_servizi_lo_sportello.mp3   11232 B  | lo sportello
+word_tempo2_afoso.mp3   11232 B  | afoso
+word_tempo2_il_fulmine.mp3   11232 B  | il fulmine
+word_tempo2_il_ghiaccio.mp3   11232 B  | il ghiaccio
+word_tempo2_il_grado.mp3   11232 B  | il grado
+word_tempo2_il_tuono.mp3    6624 B  | il tuono
+word_tempo2_l_arcobaleno.mp3   11232 B  | l'arcobaleno
+word_tempo2_la_nebbia.mp3   11232 B  | la nebbia
+word_tempo2_la_previsione.mp3   11232 B  | la previsione
+word_tempo2_la_temperatura.mp3   11232 B  | la temperatura
+word_tempo2_mite.mp3   11232 B  | mite
+word_tempo2_secco.mp3   11232 B  | secco
+word_tempo2_umido.mp3   11232 B  | umido
+word_tempo_adesso.mp3   11232 B  | adesso
+word_tempo_domani.mp3   11232 B  | domani
+word_tempo_domenica.mp3   11232 B  | domenica
+word_tempo_dopo.mp3   11232 B  | dopo
+word_tempo_giorno.mp3   11232 B  | giorno
+word_tempo_giovedi.mp3   11232 B  | giovedì
+word_tempo_ieri.mp3   11232 B  | ieri
+word_tempo_libero_arte.mp3   11232 B  | arte
+word_tempo_libero_augurio.mp3   11232 B  | augurio
+word_tempo_libero_bacio.mp3   11232 B  | bacio
+word_tempo_libero_calcio.mp3   11232 B  | calcio
+word_tempo_libero_canzone.mp3   11232 B  | canzone
+word_tempo_libero_cin_cin.mp3   11232 B  | cin cin
+word_tempo_libero_compleanno.mp3   11232 B  | compleanno
+word_tempo_libero_festa.mp3   11232 B  | festa
+word_tempo_libero_film.mp3   11232 B  | film
+word_tempo_libero_gioco.mp3   11232 B  | gioco
+word_tempo_libero_gita.mp3   11232 B  | gita
+word_tempo_libero_hobby.mp3   11232 B  | hobby
+word_tempo_libero_mostra.mp3   11232 B  | mostra
+word_tempo_libero_musica.mp3   11232 B  | musica
+word_tempo_libero_sport.mp3   11232 B  | sport
+word_tempo_lunedi.mp3   11232 B  | lunedì
+word_tempo_martedi.mp3   11232 B  | martedì
+word_tempo_mercoledi.mp3   11232 B  | mercoledì
+word_tempo_oggi.mp3   11232 B  | oggi
+word_tempo_ora.mp3    5040 B  | ora
+word_tempo_sabato.mp3   11232 B  | sabato
+word_tempo_settimana.mp3   11232 B  | settimana
+word_tempo_venerdi.mp3   11232 B  | venerdì
+word_trasporti2_diretto.mp3   11232 B  | diretto
+word_trasporti2_il_binario.mp3   11232 B  | il binario
+word_trasporti2_il_cambio.mp3   11232 B  | il cambio
+word_trasporti2_il_controllo.mp3   11232 B  | il controllo
+word_trasporti2_il_controllore.mp3   11232 B  | il controllore
+word_trasporti2_il_passeggero.mp3   11232 B  | il passeggero
+word_trasporti2_il_ritardo.mp3   11232 B  | il ritardo
+word_trasporti2_il_trasporto.mp3   11232 B  | il trasporto
+word_trasporti2_in_orario.mp3   11232 B  | in orario
+word_trasporti2_la_coincidenza.mp3   11232 B  | la coincidenza
+word_trasporti2_la_funivia.mp3   11232 B  | la funivia
+word_trasporti2_la_multa.mp3   11232 B  | la multa
+word_uhrzeit_a_mezzanotte.mp3   11232 B  | a mezzanotte
+word_uhrzeit_a_mezzogiorno.mp3   11232 B  | a mezzogiorno
+word_uhrzeit_che_ora_e.mp3   11232 B  | che ora è?
+word_uhrzeit_che_ore_sono.mp3   11232 B  | che ore sono?
+word_uhrzeit_e_presto.mp3   11232 B  | è presto
+word_uhrzeit_e_tardi.mp3   11232 B  | è tardi
+word_uhrzeit_in_ritardo.mp3   11232 B  | in ritardo
+word_uhrzeit_mezz_ora.mp3   11232 B  | mezz'ora
+word_uhrzeit_un_quarto_d_ora.mp3   11232 B  | un quarto d'ora
+word_uscire_al_dente.mp3   11232 B  | al dente
+word_uscire_ben_cotto.mp3   11232 B  | ben cotto
+word_uscire_il_cameriere.mp3   11232 B  | il cameriere
+word_uscire_il_contorno.mp3   11232 B  | il contorno
+word_uscire_il_coperto.mp3   11232 B  | il coperto
+word_uscire_il_primo.mp3   11232 B  | il primo
+word_uscire_il_secondo.mp3   11232 B  | il secondo
+word_uscire_il_vino_della_casa.mp3   11232 B  | il vino della casa
+word_uscire_l_antipasto.mp3   11232 B  | l'antipasto
+word_uscire_la_cameriera.mp3   11232 B  | la cameriera
+word_uscire_la_porzione.mp3   11232 B  | la porzione
+word_uscire_la_specialita.mp3   11232 B  | la specialità
+word_viaggi2_il_bagaglio_a_mano.mp3   11232 B  | il bagaglio a mano
+word_viaggi2_il_volo.mp3   11232 B  | il volo
+word_viaggi2_l_imbarco.mp3   11232 B  | l'imbarco
+word_viaggi2_l_itinerario.mp3   11232 B  | l'itinerario
+word_viaggi2_la_classe.mp3   11232 B  | la classe
+word_viaggi2_la_conferma.mp3   11232 B  | la conferma
+word_viaggi2_la_destinazione.mp3   11232 B  | la destinazione
+word_viaggi2_la_dogana.mp3   11232 B  | la dogana
+word_viaggi2_la_frontiera.mp3   11232 B  | la frontiera
+word_viaggi2_lo_scalo.mp3   11232 B  | lo scalo
+word_viaggio_a1_agenzia.mp3   11232 B  | agenzia
+word_viaggio_a1_arrivo.mp3    5760 B  | arrivo
+word_viaggio_a1_bicicletta.mp3   11232 B  | bicicletta
+word_viaggio_a1_biglietteria.mp3   11232 B  | biglietteria
+word_viaggio_a1_binario.mp3   11232 B  | binario
+word_viaggio_a1_check_in.mp3   11232 B  | check-in
+word_viaggio_a1_moto.mp3   11232 B  | moto
+word_viaggio_a1_partenza.mp3   11232 B  | partenza
+word_viaggio_a1_passaporto.mp3   11232 B  | passaporto
+word_viaggio_a1_turista.mp3   11232 B  | turista
+word_viaggio_a1_vacanza.mp3   11232 B  | vacanza
+word_viaggio_a1_viaggio.mp3   11232 B  | viaggio
+word_viaggio_a1_visto.mp3   11232 B  | visto
+word_viaggio_a1_zaino.mp3   11232 B  | zaino
+word_viaggio_a_piedi.mp3   11232 B  | a piedi
+word_viaggio_aereo.mp3   11232 B  | aereo
+word_viaggio_aeroporto.mp3   11232 B  | aeroporto
+word_viaggio_autobus.mp3   11232 B  | autobus
+word_viaggio_biglietto.mp3   11232 B  | biglietto
+word_viaggio_chiave.mp3   11232 B  | chiave
+word_viaggio_fermata.mp3   11232 B  | fermata
+word_viaggio_macchina.mp3   11232 B  | macchina
+word_viaggio_mappa.mp3   11232 B  | mappa
+word_viaggio_stazione.mp3   11232 B  | stazione
+word_viaggio_taxi.mp3   11232 B  | taxi
+word_viaggio_traghetto.mp3   11232 B  | traghetto
+word_viaggio_tram.mp3   11232 B  | tram
+word_viaggio_treno.mp3    5040 B  | treno
+word_viaggio_valigia.mp3   11232 B  | valigia

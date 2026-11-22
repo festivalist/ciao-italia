@@ -33,8 +33,14 @@
     return verb[tense];
   }
 
-  /* ---------- Audio: erst Datei (audio/<key>.mp3), sonst Sprachausgabe ---------- */
-  const audioCache = {};
+  /* ---------- Audio: erst Datei (lokal, dann CDN), sonst Sprachausgabe ----------
+     lima-city erlaubt keine Audiodateien im Hosting — die Neural-MP3s
+     (Wörter + Dialogzeilen, M4a) liegen im GitHub-Repo und werden über
+     den jsDelivr-CDN ausgeliefert; der Service Worker cached sie beim
+     ersten Hören für den Offline-Betrieb. Letzte Stufe bleibt die
+     Gerätesprachausgabe (it-IT). */
+  const AUDIO_CDN = "https://cdn.jsdelivr.net/gh/festivalist/ciao-italia@main/audio/";
+  const audioCache = {}; // key → Audio-Element (Quelle gemerkt) | false (keine Datei, direkt TTS)
   let ttsVoice = null;
   function pickVoice() {
     const vs = window.speechSynthesis ? speechSynthesis.getVoices() : [];
@@ -44,31 +50,44 @@
     pickVoice();
     speechSynthesis.onvoiceschanged = pickVoice;
   }
-  function speak(text, key, rate) {
-    if (!settings.speak) return;
-    // 1) Versuche hinterlegte Audiodatei
-    const url = `audio/${key}.mp3`;
-    let a = audioCache[key];
-    const tryFile = () => new Promise((res, rej) => {
-      a = a || new Audio(url);
-      audioCache[key] = a;
-      a.onerror = () => rej();
-      a.currentTime = 0;
-      a.play().then(res).catch(rej);
-    });
-    tryFile().catch(() => {
-      // 2) Fallback: Gerätesprachausgabe (it-IT); rate für Hör-Geschichten
-      if (!window.speechSynthesis) return;
-      try {
-        speechSynthesis.cancel();
-        const u = new SpeechSynthesisUtterance(text);
-        u.lang = "it-IT"; u.rate = rate || 0.9;
-        if (ttsVoice) u.voice = ttsVoice;
-        speechSynthesis.speak(u);
-      } catch {}
+  function tts(text, rate, onend) {
+    if (!window.speechSynthesis) return onend && onend();
+    try {
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = "it-IT"; u.rate = rate || 0.9;
+      if (ttsVoice) u.voice = ttsVoice;
+      if (onend) u.onend = onend;
+      speechSynthesis.cancel();
+      speechSynthesis.speak(u);
+    } catch { if (onend) onend(); }
+  }
+  // Liefert ein Audio-Element, dessen Quelle existiert (lokal vor CDN),
+  // oder lehnt ab. Negative Ergebnisse werden pro key gemerkt, damit
+  // TTS-only-Keys (z. B. Verbformen) nicht bei jedem Abspielen zwei
+  // Fehlanfragen auslösen.
+  function loadAudio(key) {
+    return new Promise((resolve, reject) => {
+      const c = audioCache[key];
+      if (c === false) return reject();
+      if (c) return resolve(c);
+      const tryUrl = (urls) => {
+        if (!urls.length) { audioCache[key] = false; return reject(); }
+        const a = new Audio(urls[0]);
+        a.addEventListener("loadedmetadata", () => { audioCache[key] = a; resolve(a); }, { once: true });
+        a.addEventListener("error", () => tryUrl(urls.slice(1)), { once: true });
+        a.preload = "auto";
+        a.load();
+      };
+      tryUrl([`audio/${key}.mp3`, AUDIO_CDN + key + ".mp3"]);
     });
   }
-  function hasAudioFlag(key) { return key in audioCache && !audioCache[key].error; }
+  function speak(text, key, rate) {
+    if (!settings.speak) return;
+    loadAudio(key)
+      .then(a => { a.currentTime = 0; a.play().catch(() => tts(text, rate)); })
+      .catch(() => tts(text, rate));
+  }
+  function hasAudioFlag(key) { const c = audioCache[key]; return !!c && c !== false; }
   // Wie speak(), aber als Promise, das am Ende der Wiedergabe auflöst —
   // für Dialog-Ketten ohne überlappende Stimmen.
   function speakWait(text, key, rate) {
@@ -78,22 +97,9 @@
       const done = () => { if (!settled) { settled = true; resolve(); } };
       const guard = setTimeout(done, Math.max(2600, (text.length * 170) / Math.max(0.5, rate || 0.9)));
       const finish = () => { clearTimeout(guard); done(); };
-      const a = audioCache[key] || new Audio(`audio/${key}.mp3`);
-      audioCache[key] = a;
-      a.onended = finish;
-      a.onerror = () => {
-        if (!window.speechSynthesis) return finish();
-        try {
-          const u = new SpeechSynthesisUtterance(text);
-          u.lang = "it-IT"; u.rate = rate || 0.9;
-          if (ttsVoice) u.voice = ttsVoice;
-          u.onend = finish;
-          speechSynthesis.cancel();
-          speechSynthesis.speak(u);
-        } catch { finish(); }
-      };
-      a.currentTime = 0;
-      a.play().catch(() => a.onerror());
+      loadAudio(key)
+        .then(a => { a.onended = finish; a.currentTime = 0; a.play().catch(() => tts(text, rate, finish)); })
+        .catch(() => tts(text, rate, finish));
     });
   }
 
