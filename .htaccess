@@ -1,0 +1,10 @@
+# Ciao Italia — Caching-Steuerung
+# Textdateien immer neu validieren (SW-Precache und Browser dürfen
+# kein veraltetes app.js aus dem HTTP-Cache bekommen; ETags/
+# Last-Modified machen die Revalidierung günstig). Audiodateien liefert
+# der Hoster bewusst nicht (jsDelivr-CDN übernimmt das).
+<IfModule mod_headers.c>
+  <FilesMatch "\.(js|css|html|webmanifest|txt|md)$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+</IfModule>
