@@ -1,5 +1,25 @@
 # ToDo — Stand 12.10.2026
 
+- [x] **Congiuga del giorno — tägliches Konjugations-Ritual** (22.11.2026):
+      Beim ersten App-Start des Tages erscheint ein Overlay: ein Verb × eine
+      Zeit, alle 6 Personen per Tipp-Eingabe in fester Folge (io → tu →
+      lui/lei → noi → voi → loro — voi vor loro trotz Daten-Reihenfolge
+      loro=4/voi=5). Falsch = Lösung zeigen + Nachholrunde bis einmal
+      richtig. Abbrechbar über „Später", aber Terrakotta-Banner auf allen
+      Seiten + erneutes Overlay beim nächsten Start bis zur Tages-Erledigung
+      (+10 XP, zählt aufs Tagesziel). Rotation leicht → schwer, zur Laufzeit
+      abgeleitet: pro Level reg. -are → -ere → -ire (inkl. -isc, -iare,
+      -care/-gare mit h) → unregelmäßige (essere/avere zuerst), A1 → A2 →
+      B1; drei Durchläufe Presente → Passato → Futuro (399 Einträge,
+      unpersönliche Verben ausgenommen). Tipp-Toleranz: Akzente, Groß/Klein,
+      Gender-Slash („sono stato/a"), Reflexiv-Klitikon optional. Neuer
+      Sync-Key ciaoit_conj. Datenfix nebenbei: mancare „manciamo" →
+      „manchiamo". Node-Regressionstest tools/check-conj-queue.js (prüft
+      den app.js-Code zwischen Markern), validate 0 Fehler, sw v24 → v25,
+      Browser-E2E bestanden (7 Szenarien, Screenshots in
+      gui-test-screenshots/). Spec: .scratch/konjugations-ritual/spec.md,
+      ADR: docs/adr/0001.
+
 - [x] **Sechste Runde Minilektionen → Voll-Lektionen (A2: 10 weitere Minis)** (12.10.2026):
       lo la li le, mi ti gli, piacere & Co., ne — davon, ci — dort,
       Seit wann?, più / meno, meglio o migliore?, Es regnete…, Am Telefon II.

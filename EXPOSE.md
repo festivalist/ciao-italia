@@ -9,7 +9,7 @@ Dieses Dokument beschreibt Zweck, Inhalte, Features und Bedienung der App vollst
 - Sie läuft auf **eigenem Webspace** (Shared Hosting mit PHP und HTTPS), Deployment per **FTP**. Kein App-Store, kein Account-Zwang, keine Fremd-Dienste.
 - Sie funktioniert nach dem ersten vollständigen Laden **komplett offline**.
 
-Stand der Beschreibung: Version ciaoit-v24 (November 2026).
+Stand der Beschreibung: Version ciaoit-v25 (November 2026).
 
 ---
 
@@ -19,7 +19,7 @@ Stand der Beschreibung: Version ciaoit-v24 (November 2026).
 
 Leitgedanke: **„Italienisch für die Reise — nach dem Prinzip der kleinsten wirksamen Dosis.“**
 
-- Kein Kurs-Stunden-Denken, sondern **kleine, tägliche Einheiten**: eine Lektion ≈ 6 Minuten, eine Mini-Lektion ≈ 3–4 Minuten, eine Tages-Challenge („Espresso del giorno“) ≈ 3 Minuten.
+- Kein Kurs-Stunden-Denken, sondern **kleine, tägliche Einheiten**: eine Lektion ≈ 6 Minuten, eine Mini-Lektion ≈ 3–4 Minuten, eine Tages-Challenge („Espresso del giorno“) ≈ 3 Minuten, eine Tages-Konjugation („Congiuga del giorno“) ≈ 1–2 Minuten.
 - **Aktives Produzieren statt passivem Konsum**: Wer Sätze sagt, baut und schreibt, behält.
 - **Bezug zur echten Welt**: Jede Lektion schaltet eine reale Aufgabe („Missione“) frei — sagen, bestellen, fragen — vor, während und nach der Italienreise.
 - **Output zählt, nicht Zeit**: Der „Passaporto“ misst produzierte Sätze, erledigte Missionen, Aufnahmen und Kompetenzen — niemals „Minuten in der App“.
@@ -70,8 +70,10 @@ Die App kombiniert mehrere erprobte Methoden zu einem System:
 
 Dazu in der Kopfzeile: **🛂 Passaporto** (Profil & Können, Abschnitt 12) und ein **globaler Ton-Schalter** 🔊/🔇.
 
+**Congiuga del giorno (Tages-Konjugation):** Beim ersten App-Start des Tages öffnet sich ein Abfrage-Overlay: ein Verb wird vollständig durchkonjugiert — sechs Personen in fester Folge (io → tu → lui/lei → noi → voi → loro), Formen werden getippt (Akzente, Groß-/Kleinschreibung und Gender-Alternativen wie „stato/a" sind tolerant). Falsche Formen werden aufgelöst und am Ende der Runde erneut abgefragt, bis sie einmal richtig getippt wurden. Das Ritual ist abbrechbar („Später"), aber ein Terrakotta-Banner bleibt auf allen Seiten stehen, und beim nächsten App-Start erscheint das Overlay erneut — bis die Tages-Konjugation erledigt ist (+10 XP, zählt aufs Tagesziel).
+
 **Typischer Tagesablauf eines Nutzers:**
-1. App öffnen → Startseite zeigt „Weiter mit Story X“ oder den **Espresso del giorno** (genau eine kurze Challenge pro Tag, danach „Espresso getrunken — per oggi basta!“).
+1. App öffnen → **Congiuga del giorno**: das Tages-Verb konjugieren (Overlay; abbrechbar, dann Banner-Erinnerung) → Startseite zeigt „Weiter mit Story X“ oder den **Espresso del giorno** (genau eine kurze Challenge pro Tag, danach „Espresso getrunken — per oggi basta!“).
 2. Lektion spielen (≈ 6 Min) oder Training starten, bis das **Tagesziel** (15 Übungen, Ring-Anzeige) erfüllt ist.
 3. Falls erledigt: die freigeschaltete **echte Mission** ansehen („Sag es laut, draußen oder schreib es“), ggf. Sprachmemo aufnehmen.
 4. Streak (🔥 Tage am Stück) und Wochenbilanz wachsen; nach ca. 8 Sekunden wird der Fortschritt automatisch auf dem Server gesichert (falls Sync-Code gesetzt).
@@ -272,8 +274,9 @@ Der „Reisepass“ zeigt **Können statt Zeit-in-App**:
 - **Reifegrad:** Kategorie-Fortschritt zählt Box ≥ 4 als „gereift“; „gut gelernt“ (Startseite) zählt Box ≥ 5; Story-Bereitschaft zählt Box ≥ 3.
 - **Tagesziel:** **15 Übungen** pro Tag (Ringanzeige; jede abgeschlossene Übung zählt 1).
 - **Streak:** +1 Tag bei Aktivität an Folgetag; **2 Freezes** (ein verpasster Tag verbraucht einen); **1 Pausentag pro Woche** ist erlaubt, ohne die Serie zu brechen; Rekord bleibt dauerhaft.
-- **XP:** Wort entdeckt +2 · Hören/Erkennen richtig +10 · Bauen richtig +12 · Produzieren richtig +15 · Szene-Zeile +3 · Lektion erstmals abgeschlossen +25 (dazu Badge) · Mission +25 · Orecchie abgeschlossen +15 · Tagebuchsatz +20 · Sprachmemo +15.
+- **XP:** Wort entdeckt +2 · Hören/Erkennen richtig +10 · Bauen richtig +12 · Produzieren richtig +15 · Szene-Zeile +3 · Lektion erstmals abgeschlossen +25 (dazu Badge) · Mission +25 · Orecchie abgeschlossen +15 · Tagebuchsatz +20 · Sprachmemo +15 · Tages-Konjugation +10.
 - **Espresso del giorno:** tagstabil (Datum-Seed; gerade Tage bevorzugen Mini-Lektionen), genau einer pro Tag, ~3 Minuten, nach Erledigung: „morgen gibt es den nächsten“.
+- **Congiuga del giorno (Tages-Konjugation):** beim ersten Start des Tages ein Verb × eine Zeit, alle 6 Personen per Tipp-Eingabe in fester Folge (io → tu → lui/lei → noi → voi → loro; Akzente/Großschreibung egal; Gender-Alternativen „stato/a" akzeptiert, Reflexiv-Klitika optional). Falsch = richtige Form zeigen + am Ende der Runde wiederholen, bis einmal richtig. Rotation leicht → schwer: pro Level regelmäßige -are → -ere → -ire (inkl. -isc-Typ, -iare-Kontraktion, h-Einschub bei -care/-gare) → unregelmäßige (essere/avere zuerst); Level A1 → A2 → B1; drei Durchläufe Presente → Passato → Futuro, danach endlos von vorn (399 Einträge; unpersönliche Verben wie piovere ausgenommen). Abbrechbar, aber Banner + erneutes Overlay beim nächsten Start bis zur Erledigung; Fortschritt (Rotationsindex + Erledigungstag) wird gesynchronisiert.
 - **Output-Wochenbilanz** (Startseite): Sätze produziert (Training + Tagebuch), Missionen, Memos der laufenden ISO-Woche.
 
 ---
@@ -293,7 +296,7 @@ Der „Reisepass“ zeigt **Können statt Zeit-in-App**:
 **Local-first:** Der komplette Fortschritt lebt auf dem Gerät (offline nutzbar). Der Server ist nur ein Backup/Ziel für Gerätewechsel.
 
 - **Sync-Code** statt Konto: min. 6 Zeichen, frei gewählt. **Trust-on-first-use**: Der erste Kontakt legt den Code fest (serverseitig wird nur ein Hash gespeichert); danach wird jeder Zugriff code-geprüft. Code vergessen = nicht wiederherstellbar; Code ändern = Serverdaten per FTP löschen (das ist dokumentiert und gewollt).
-- **Was gesichert wird:** das gesamte Fortschritts-Paket — Einstellungen, SRS-Zustand, Streak, XP/Badges, Lektions- und Missionsfortschritt, Checklisten, Output, Kompetenzen, Sprachtagebuch, Espresso-Wahl **und die Sprachmemos** (als Base64-Audio; Notbremse: sind die Daten > ~5,5 MB, werden nur die Fortschrittsdaten gesichert; Serverlimit 6 MB).
+- **Was gesichert wird:** das gesamte Fortschritts-Paket — Einstellungen, SRS-Zustand, Streak, XP/Badges, Lektions- und Missionsfortschritt, Checklisten, Output, Kompetenzen, Sprachtagebuch, Espresso-Wahl, Konjugations-Rotation **und die Sprachmemos** (als Base64-Audio; Notbremse: sind die Daten > ~5,5 MB, werden nur die Fortschrittsdaten gesichert; Serverlimit 6 MB).
 - **Automatik:** ~8 Sekunden nach jeder Änderung wird gesichert (falls online + Code gesetzt); **beim App-Start** wird ein neuerer Server-Stand automatisch geladen (Zeitstempel-Vergleich; „letzter Schreiber gewinnt“ als Konfliktregel).
 - **Schutzmechanismen:** Ein fast leerer Gerätestand überschreibt den Server **nie** automatisch (nur nach ausdrücklicher Bestätigung). Beim Laden wird der eigene Sync-Code niemals ausgelöscht. „Vom Server laden“ fragt nach Bestätigung und lädt die App danach neu.
 - **Gerät wechseln:** App installieren → Passaporto → Code eingeben → „Vom Server laden“.

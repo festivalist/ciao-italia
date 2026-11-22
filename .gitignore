@@ -5,3 +5,4 @@ sync-data/*
 !sync-data/index.html
 deploy-backups/
 .zcode/
+gui-test-screenshots/

@@ -53,7 +53,7 @@
     verb("salire", "steigen / einsteigen", ["salgo","sali","sale","saliamo","salgono","salite"], "salito", "salir", "essere"),
     verb("scendere", "steigen / aussteigen", ["scendo","scendi","scende","scendiamo","scendono","scendete"], "sceso", "scender", "essere"),
     verb("lasciare", "lassen / verlassen", ["lascio","lasci","lascia","lasciamo","lasciano","lasciate"], "lasciato", "lascier"),
-    verb("mancare", "fehlen (mi manchi)", ["manco","manchi","manca","manciamo","mancano","mancate"], "mancato", "mancer", "avere", "Steht oft mit indirektem Pronomen: mi manchi = du fehlst mir."),
+    verb("mancare", "fehlen (mi manchi)", ["manco","manchi","manca","manchiamo","mancano","mancate"], "mancato", "mancer", "avere", "Steht oft mit indirektem Pronomen: mi manchi = du fehlst mir."),
     verb("raggiungere", "erreichen", ["raggiungo","raggiungi","raggiunge","raggiungiamo","raggiungono","raggiungete"], "raggiunto", "raggiunger", "avere", "Partizip: raggiunto."),
     verb("regalare", "schenken", ["regalo","regali","regala","regaliamo","regalano","regalate"], "regalato", "regaler"),
     verb("indossare", "tragen (Kleidung)", ["indosso","indossi","indossa","indossiamo","indossano","indossate"], "indossato", "indosser"),

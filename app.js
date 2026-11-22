@@ -241,7 +241,7 @@
      Schreiber gewinnt (gesamtes Datenpaket, savedAt-Zeitstempel). */
   const SYNC_KEYS = ["ciaoit_settings", "ciaoit_srs", "ciaoit_streak", "ciaoit_xp",
     "ciaoit_stories", "ciaoit_missions", "ciaoit_check", "ciaoit_output",
-    "ciaoit_skills", "ciaoit_diario", "ciaoit_espresso"];
+    "ciaoit_skills", "ciaoit_diario", "ciaoit_espresso", "ciaoit_conj"];
   function syncState() { return LS.get("ciaoit_sync", { savedAt: 0, lastPush: null, lastPull: null }); }
   function bufToB64(buf) {
     let s = ""; const b = new Uint8Array(buf);
@@ -1516,6 +1516,244 @@
   }
   function espressoDone(pick) { return !pick || storyDone(pick.id); }
 
+  /* ============================================================
+     CONGIUGA DEL GIORNO — tägliche Konjugations-Rotation
+     1× täglich beim ersten Start: ein Verb, eine Zeit, alle sechs
+     Personen in fester Folge (Singular 1./2./3., Plural 1./2./3.).
+     Rotation leicht → schwer: pro Level reg. -are → reg. -ere →
+     reg. -ire (inkl. -isc) → unregelmäßige; Level A1 → A2 → B1;
+     drei Durchläufe: Presente, Passato, Futuro (endlos).
+     ============================================================ */
+  /* conj-queue:start
+     Reine Ableitung der Rotation — ohne DOM/Storage, damit
+     tools/check-conj-queue.js exakt denselben Code prüfen kann. */
+  const CONJ_TENSES = ["presente", "passato", "futuro"];
+  const CONJ_LEVELS = [["A1", 0, 99], ["A2", 100, 118], ["B1", 119, Infinity]];
+  const CONJ_PERSONS = ["io", "tu", "lui/lei", "noi", "voi", "loro"]; // Anzeige-Folge; die Daten halten loro=4, voi=5
+  const CONJ_CLITIC = ["mi", "ti", "si", "ci", "si", "vi"];
+  function conjFold(s) {
+    return String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase().trim().replace(/\s+/g, " ");
+  }
+  function conjBase(inf) { return /(a|e|i)rsi$/.test(inf) ? inf.slice(0, -2) + "e" : inf; }
+  function conjClass(inf) {
+    const b = conjBase(inf);
+    // Dritte Konjugation und Reste (-urre, -orre) fallen auf "ire" — sie
+    // bestehen den Regularitäts-Vergleich ohnehin nicht und landen unregelmäßig.
+    return b.endsWith("are") ? "are" : b.endsWith("ere") ? "ere" : "ire";
+  }
+  function conjStem(inf) { return conjBase(inf).slice(0, -3); }
+  // Regelmäßig = Presente folgt der Standard-Endung, inkl. h-Einschub
+  // bei -care/-gare (paghi) und dem -isc-Typ (finisco). Alles andere
+  // zählt als unregelmäßig und kommt in der Rotation zuletzt.
+  function conjIsRegular(verb) {
+    if (verb.impersonal) return false;
+    const st = conjStem(verb.inf), cls = conjClass(verb.inf);
+    // Endungen in Daten-Reihenfolge: io, tu, lui/lei, noi, loro(4), voi(5)
+    const patterns = [];
+    if (cls === "are") {
+      if (/i$/.test(st)) {
+        // -iare-Verben kontrahieren: mangi, mangiamo (kein doppeltes i)
+        patterns.push([st + "o", st, st + "a", st + "amo", st + "ano", st + "ate"]);
+      } else {
+        const h = /[cg]$/.test(st) ? "h" : "";
+        patterns.push([st + "o", st + h + "i", st + "a", st + h + "iamo", st + "ano", st + "ate"]);
+      }
+    } else if (cls === "ere") {
+      patterns.push([st + "o", st + "i", st + "e", st + "iamo", st + "ono", st + "ete"]);
+    } else {
+      patterns.push([st + "o", st + "i", st + "e", st + "iamo", st + "ono", st + "ite"]);              // dormire
+      patterns.push([st + "isco", st + "isci", st + "isce", st + "iamo", st + "iscono", st + "ite"]);  // finire
+    }
+    const actual = verb.presente.map((f, i) => conjFold(String(f || "").replace(CONJ_CLITIC[i] + " ", "")));
+    return patterns.some(p => p.every((f, i) => conjFold(f) === actual[i]));
+  }
+  function conjLevel(idx) {
+    for (const [name, from, to] of CONJ_LEVELS) if (idx >= from && idx <= to) return name;
+    return "A1";
+  }
+  function buildConjQueue(verbs) {
+    const buckets = { A1: { are: [], ere: [], ire: [], irr: [] }, A2: { are: [], ere: [], ire: [], irr: [] }, B1: { are: [], ere: [], ire: [], irr: [] } };
+    verbs.forEach((v, idx) => {
+      if (v.impersonal) return; // piovere, bisognare: keine volle Konjugation
+      const b = buckets[conjLevel(idx)];
+      b[conjIsRegular(v) ? conjClass(v.inf) : "irr"].push(v);
+    });
+    Object.values(buckets).forEach(b => {
+      // essere/avere zuerst (wichtigste unregelmäßige), Rest in stabiler Daten-Reihenfolge
+      const rank = x => (x.inf === "essere" ? 0 : x.inf === "avere" ? 1 : 2);
+      b.irr.sort((x, y) => rank(x) - rank(y));
+    });
+    const queue = [];
+    CONJ_TENSES.forEach(tense => {
+      CONJ_LEVELS.forEach(([lvl]) => {
+        const b = buckets[lvl];
+        [].concat(b.are, b.ere, b.ire, b.irr).forEach(v => queue.push({ v, tense }));
+      });
+    });
+    return queue;
+  }
+  // Tipp-Vergleich: akzeptiert Gender-Varianten („sono stato/a" → stato|stata)
+  // und verzichtet optional auf das Reflexiv-Klitikon („mi chiamo" ≈ „chiamo").
+  function conjVariants(form) {
+    // „stato/a" heißt: Suffix ersetzen → stato|stata (nicht stato|a)
+    const wordVariants = w => {
+      const parts = w.split("/").filter(Boolean);
+      if (parts.length < 2 || !w.includes("/")) return [w];
+      const base = parts[0];
+      return [base].concat(parts.slice(1)
+        .filter(p => p.length <= base.length)
+        .map(p => base.slice(0, base.length - p.length) + p));
+    };
+    let variants = [""];
+    String(form).trim().split(/\s+/).forEach(w => {
+      variants = variants.map(pre => wordVariants(w).map(x => (pre ? pre + " " : "") + x)).flat();
+    });
+    return variants.concat(variants.filter(x => /^(mi|ti|si|ci|vi) /.test(x)).map(x => x.replace(/^(mi|ti|si|ci|vi) /, "")));
+  }
+  function conjAccept(expected, typed) {
+    const t = conjFold(typed);
+    return !!t && conjVariants(expected).some(x => conjFold(x) === t);
+  }
+  // Abfrage-Folge als Daten-Indizes: io→tu→lui/lei→noi→voi→loro
+  // (die Daten halten loro=4, voi=5 — deshalb 5 vor 4)
+  const CONJ_DISPLAY = [0, 1, 2, 3, 5, 4];
+  /* conj-queue:end */
+
+  const CONJ_QUEUE = buildConjQueue(D.verbs);
+  function conjTenseLabel(id) { const t = D.meta.tenses.find(t => t.id === id); return t ? t.label : id; }
+  function conjState() { return LS.get("ciaoit_conj", { qi: 0, doneDay: null }); }
+  function conjDoneToday() { return conjState().doneDay === ymd(); }
+  function conjCurrent() { const len = CONJ_QUEUE.length; return len ? CONJ_QUEUE[conjState().qi % len] : null; }
+
+  /* ---------- Nudge-Banner (Body-Level, bis die Tagesaufgabe erledigt ist) ---------- */
+  function updateConjBanner() {
+    let b = $(".conj-banner");
+    if (conjDoneToday()) { if (b) b.remove(); return; }
+    const item = conjCurrent();
+    if (!item) return;
+    if (!b) {
+      b = el("button", "conj-banner");
+      b.addEventListener("click", openConj);
+      document.body.appendChild(b);
+    }
+    b.innerHTML = `☕ <b>Konjugation des Tages:</b> ${item.v.inf} · ${conjTenseLabel(item.tense)} <span class="arr">›</span>`;
+  }
+
+  /* ---------- Overlay: eine volle Konjugation tippen ---------- */
+  let conjOpen = false;
+  function openConj() {
+    if (conjOpen || conjDoneToday()) return;
+    const item = conjCurrent();
+    if (!item) return;
+    conjOpen = true;
+    const v = item.v, tense = item.tense;
+
+    const overlay = el("div", "conj-overlay");
+    const card = el("div", "conj-card");
+    overlay.appendChild(card);
+    const dots = CONJ_DISPLAY.map(() => el("span", "conj-dot"));
+    const dotsRow = el("div", "conj-dots");
+    dots.forEach(d => dotsRow.appendChild(d));
+    const personEl = el("div", "conj-person", "io");
+    const input = el("input", "conj-input");
+    input.type = "text"; input.autocapitalize = "off"; input.autocomplete = "off"; input.spellcheck = false;
+    input.setAttribute("aria-label", "Verbform für die angezeigte Person eingeben");
+    const feedback = el("div", "conj-feedback");
+    const checkBtn = el("button", "btn btn-primary", "Prüfen");
+    const laterBtn = el("button", "conj-later", "Später");
+
+    card.appendChild(el("div", "conj-kicker", "Coniugazione del giorno"));
+    card.appendChild(el("div", "conj-verb", v.inf));
+    card.appendChild(el("div", "conj-de", v.de));
+    card.appendChild(el("div", "conj-tense", conjTenseLabel(tense)));
+    card.appendChild(dotsRow);
+    card.appendChild(personEl);
+    card.appendChild(input);
+    card.appendChild(feedback);
+    card.appendChild(checkBtn);
+    card.appendChild(laterBtn);
+    document.body.appendChild(overlay);
+
+    let queue = CONJ_DISPLAY.map((_, i) => i); // Abfrage-Slots 0–5 in Anzeige-Folge
+    let retry = [];                            // verhakte Slots
+    let pos = 0, phase = 1, firstTry = 0, advancing = false;
+
+    function close() { overlay.remove(); conjOpen = false; updateConjBanner(); }
+    function finish() {
+      const st = conjState();
+      st.qi = (st.qi + 1) % CONJ_QUEUE.length;
+      st.doneDay = ymd();
+      LS.set("ciaoit_conj", st);
+      addXP(10); markPractice(1);
+      card.innerHTML = "";
+      card.appendChild(el("div", "conj-kicker", "Fatto — fertig!"));
+      card.appendChild(el("div", "conj-verb", `${firstTry}/6`));
+      card.appendChild(el("div", "conj-de", "beim ersten Versuch richtig · +10 XP"));
+      const ok = el("button", "btn btn-primary", "Perfetto");
+      ok.addEventListener("click", () => { close(); toast(`☕ ${v.inf} konjugiert — bravo!`); });
+      card.appendChild(ok);
+      updateConjBanner();
+    }
+    function step() {
+      if (!overlay.isConnected) return;
+      let note = "";
+      if (pos >= queue.length) {
+        if (retry.length) {
+          queue = retry; retry = []; pos = 0; phase = 2;
+          note = "🔁 Noch einmal: die verhakten Formen";
+        } else return finish();
+      }
+      const slot = queue[pos];
+      dots[slot].className = "conj-dot now";
+      personEl.textContent = PRON[CONJ_DISPLAY[slot]];
+      input.className = "conj-input"; input.value = ""; input.disabled = false;
+      feedback.className = "conj-feedback"; feedback.textContent = note;
+      checkBtn.textContent = "Prüfen"; checkBtn.disabled = false;
+      advancing = false;
+      input.focus();
+    }
+    function check() {
+      if (advancing || !overlay.isConnected) return;
+      const slot = queue[pos];
+      const personIdx = CONJ_DISPLAY[slot];
+      const expected = v[tense][personIdx];
+      const audioKey = verbKey(v.inf, tense, personIdx);
+      if (conjAccept(expected, input.value)) {
+        advancing = true;
+        input.disabled = true;
+        input.className = "conj-input ok";
+        feedback.className = "conj-feedback ok";
+        feedback.textContent = "";
+        feedback.appendChild(el("span", null, "✓ giusto"));
+        feedback.appendChild(playBtn(expected, audioKey));
+        dots[slot].className = "conj-dot " + (phase === 1 ? "ok" : "fix");
+        if (phase === 1) firstTry++;
+        speak(expected, audioKey);
+        checkBtn.disabled = true;
+        setTimeout(() => { pos++; step(); }, 750);
+      } else {
+        advancing = true;
+        input.disabled = true;
+        input.className = "conj-input bad";
+        retry.push(slot);
+        feedback.className = "conj-feedback bad";
+        feedback.textContent = "";
+        feedback.appendChild(el("span", null, "Richtig: "));
+        const shown = el("span", "conj-solution");
+        shown.appendChild(el("span", null, expected));
+        shown.appendChild(playBtn(expected, audioKey));
+        feedback.appendChild(shown);
+        checkBtn.textContent = "Weiter"; checkBtn.disabled = false;
+        checkBtn.focus();
+      }
+    }
+    function onCheck() { if (input.disabled) { pos++; step(); } else check(); }
+    checkBtn.addEventListener("click", onCheck);
+    input.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); onCheck(); } });
+    laterBtn.addEventListener("click", close);
+    step();
+  }
+
   function viewPercorso() {
     const wrap = el("div");
     wrap.appendChild(el("h2", "view-title", "Percorso"));
@@ -2468,6 +2706,7 @@
     (VIEWS[name] || viewPercorso)();
     document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.dataset.view === name));
     history.pushState({ v: name }, "", "#" + name);
+    updateConjBanner(); // fängt auch Tageswechsel bei laufender App ab
   }
   document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => go(t.dataset.view)));
   window.addEventListener("hashchange", () => {
@@ -2487,6 +2726,9 @@
   // Start
   const initial = (location.hash || "#percorso").slice(1);
   go(VIEWS[initial] ? initial : "percorso");
+
+  // Congiuga del giorno: beim ersten Start des Tages abfragen
+  if (!conjDoneToday()) openConj();
 
   // Server-Sync: beim Start neueren Server-Stand holen (falls Code gesetzt)
   if (settings.syncCode && navigator.onLine) {

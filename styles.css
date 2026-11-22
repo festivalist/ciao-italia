@@ -546,3 +546,65 @@ body {
   padding: 8px 10px; border-radius: 8px; margin: 8px 0;
 }
 @media (max-width: 420px) { .gram-table > div { font-size: 11.5px; padding: 9px 5px; } }
+
+/* ---------- Congiuga del giorno: Overlay & Nudge-Banner ---------- */
+.conj-overlay {
+  position: fixed; inset: 0; z-index: 60;
+  background: rgba(41,39,33,.58);
+  display: grid; place-items: center; padding: 18px;
+}
+.conj-card {
+  width: min(94vw, 430px);
+  max-height: calc(100vh - 36px); max-height: calc(100dvh - 36px); overflow: auto;
+  background: var(--tile-2); border: 1px solid var(--line); border-radius: 24px;
+  box-shadow: var(--shadow); padding: 24px 20px 18px; text-align: center;
+}
+.conj-kicker { font-size: 10px; letter-spacing: 1.8px; font-weight: 800; color: var(--ink-soft); text-transform: uppercase; }
+.conj-verb { font-family: var(--serif); font-size: 34px; font-weight: 600; color: var(--verde-italia); margin: 4px 0 0; }
+.conj-de { color: var(--ink-soft); font-size: 14px; margin: 2px 0 10px; }
+.conj-tense {
+  display: inline-block; background: var(--verde-italia); color: #fff;
+  font-size: 11px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase;
+  padding: 4px 12px; border-radius: 999px; margin-bottom: 14px;
+}
+.conj-dots { display: flex; justify-content: center; gap: 7px; margin: 2px 0 16px; }
+.conj-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--line); transition: background .2s, transform .2s; }
+.conj-dot.now { background: var(--oro); transform: scale(1.25); }
+.conj-dot.ok  { background: var(--verde); }
+.conj-dot.fix { background: var(--verde); box-shadow: 0 0 0 2px var(--telha); }
+.conj-person { font-family: var(--serif); font-size: 24px; font-weight: 600; margin: 0 0 8px; }
+.conj-input {
+  width: 100%; min-height: 48px; padding: 12px 14px; text-align: center; font-size: 17px;
+  border: 1.5px solid var(--line); border-radius: 14px; background: #fff; color: var(--ink);
+  font-family: var(--sans);
+}
+.conj-input:focus { outline: none; border-color: var(--verde-2); }
+.conj-input.ok  { border-color: var(--verde); background: #E6F2EC; }
+.conj-input.bad { border-color: var(--telha); background: #FBE9E2; }
+.conj-feedback {
+  min-height: 40px; margin-top: 10px; font-size: 14px;
+  display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap;
+}
+.conj-feedback.ok { color: var(--verde); font-weight: 700; }
+.conj-feedback.bad { color: var(--telha); }
+.conj-feedback .play { width: 34px; height: 34px; border-radius: 10px; font-size: 15px; }
+.conj-solution { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 16px; }
+.conj-card .btn { margin-top: 6px; }
+.conj-later {
+  display: block; margin: 10px auto 0; background: none; border: 0; cursor: pointer;
+  color: var(--ink-soft); font-size: 13px; font-weight: 600; text-decoration: underline;
+  padding: 8px; font-family: var(--sans);
+}
+.conj-banner {
+  position: fixed; left: 50%; transform: translateX(-50%);
+  bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 12px);
+  z-index: 35; display: flex; align-items: center; gap: 8px;
+  background: var(--telha); color: #fff; border: 0; cursor: pointer;
+  padding: 11px 16px; border-radius: 999px; font-size: 13.5px; font-weight: 600;
+  box-shadow: var(--shadow); max-width: min(92vw, 480px); font-family: var(--sans);
+  animation: conjSlideUp .3s ease;
+}
+.conj-banner:active { filter: brightness(.95); }
+.conj-banner .arr { font-weight: 800; margin-left: 2px; }
+@keyframes conjSlideUp { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translate(-50%, 0); } }
+@media (prefers-reduced-motion: reduce) { .conj-banner { animation: none; } .conj-dot { transition: none; } }
