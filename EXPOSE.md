@@ -9,7 +9,7 @@ Dieses Dokument beschreibt Zweck, Inhalte, Features und Bedienung der App vollst
 - Sie läuft auf **eigenem Webspace** (Shared Hosting mit PHP und HTTPS), Deployment per **FTP**. Kein App-Store, kein Account-Zwang, keine Fremd-Dienste.
 - Sie funktioniert nach dem ersten vollständigen Laden **komplett offline**.
 
-Stand der Beschreibung: Version ciaoit-v29 (November 2026).
+Stand der Beschreibung: Version ciaoit-v31 (November 2026). Shell-Assets werden mit Versions-Suffix referenziert (`?v=31` in index.html **und** sw.js-SHELL gemeinsam bumpen — der Hoster sendet keine Cache-Control-Header, sonst drohen veraltete app.js aus dem HTTP-Cache).
 
 ---
 
@@ -288,8 +288,8 @@ Der „Reisepass“ zeigt **Können statt Zeit-in-App**:
 
 ## 14. Audio-Konzept
 
-- **Zwei-Stufen-Audio:** Zuerst wird eine hinterlegte Audiodatei (MP3) gesucht; **fehlt sie, fällt die App automatisch auf die Gerätesprachausgabe (TTS) für it-IT zurück** (Geschwindigkeit standardmäßig 0.9; Hör-Geschichten/Dialoge wählbar 0.6/0.85/1.05).
-- **Bestand an hinterlegten MP3s (v29, Stand Repo):** alle 832 Wörter (`word_*`) und alle 102 Dialogzeilen (`dlg_*`) sind als Datei erzeugt — mit der Microsoft-Edge-Neuralstimme **it-IT-ElsaNeural** (edge-tts; Skript `tools/generate-audio-mp3s.py`, resumable). Verbformen, Übungs- und Story-Sätze bleiben beim it-IT-TTS-Fallback. **Einschränkung Live-Server (22.11.2026):** der lima-city-FTP verwirft derzeit Binär-Uploads still (Textdateien bleiben, Binärdateien verschwinden nach erfolgreicher Transferbestätigung; Konto nur ~56 MB belegt, keine Quota-Erschöpfung erkennbar) — bis das geklärt ist, fällt die Live-App wie bisher auf it-IT-TTS zurück; die Dateien liegen vollständig im Repo und ein einziges resumables Nachladen genügt später (`ls audio/*.mp3 | xargs -P4 …`).
+- **Drei-Stufen-Audio (v31):** 1) lokale Datei `audio/<key>.mp3` (falls jemals vorhanden), 2) **jsDelivr-CDN** (`cdn.jsdelivr.net/gh/festivalist/ciao-italia@main/audio/`), 3) **Gerätesprachausgabe (TTS)** it-IT als letzte Stufe. Der Service Worker übernimmt CDN-Audio beim ersten Hören in den Offline-Cache (CORS-Refetch, da Audio-Elemente no-cors fragen). Negative Ergebnisse werden pro Key gemerkt (TTS-only-Keys lösen keine Doppel-Fehlanfragen aus).
+- **Bestand an Neural-MP3s:** alle 832 Wörter (`word_*`) und alle 102 Dialogzeilen (`dlg_*`) — erzeugt mit der Microsoft-Edge-Neuralstimme **it-IT-ElsaNeural** (edge-tts; Skript `tools/generate-audio-mp3s.py`, resumable); sie liegen im Repo und werden über den CDN ausgeliefert, weil lima-city **bewusst keine Audiodateien** im Hosting erlaubt. Verbformen, Übungs- und Story-Sätze bleiben beim it-IT-TTS-Fallback.
 - **Jedes sprechenbare Element hat einen stabilen Audioschlüssel** (Wort, Verbform, Satz, Dialogzeile, Regel-Beispiel, Checklisten-Satz, Missions-Satz, Kapitel-Meilenstein, Tagebuch-Eintrag). Die erwartbaren Dateinamen sind in einer Manifest-Liste erzeugbar — **MP3s bleiben optional**, die App ist ohne eine einzige Audiodatei voll funktionsfähig.
 - **iPhone:** Standardstimme it-IT; in den iOS-Einstellungen kann eine hochwertigere italienische Stimme nachgeladen werden.
 - **Globaler Ton-Schalter** in der Kopfzeile; Ton-aus respektieren alle Auto-Aufrufe.

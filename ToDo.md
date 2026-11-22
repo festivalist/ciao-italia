@@ -1,5 +1,23 @@
 # ToDo — Stand 12.10.2026
 
+- [x] **M4a-Abschluss: Audio-CDN-Hybrid live (ciaoit-v31)** (22.11.2026):
+      lima-city erlaubt bewusst keine Audiodateien → Audio-Kette jetzt
+      Datei → jsDelivr-CDN (GitHub-Repo) → Geräte-TTS; SW cached CDN-
+      Audio beim ersten Hören offline (CORS-Refetch, da Audio no-cors
+      fragt; jsDelivr-Zweig muss VOR dem /audio/-Pfad-Zweig stehen —
+      CDN-URLs enthalten /audio/!). Negativ-Cache pro Key verhindert
+      Doppel-Fehlanfragen. Zusätzlich repariert: SW-Installation war
+      durch 404-Icons (Hoster-Binärproblem) blockiert → fehlertoleranter
+      Precache (allSettled); Updates erreichen Geräte wieder. Server
+      sendet keine Cache-Control-Header → versionierte Asset-URLs
+      (?v=31 in index.html + sw.js-SHELL, gemeinsam bumpen; .htaccess
+      liegt bei, wirkt hinter openresty nicht). Dabei ein Hotfix:
+      Regex-Dopplung „.js.js“ machte frische Loads kurzzeitig kaputt —
+      nach Minuten per lokalem Boot-Check erkannt und live gefixt.
+      E2E live: Boot+Gate ✓, Wort-Klick löst CDN-Request aus ✓,
+      MP3 landet im SW-Cache ✓, 0 JS-Fehler. Commits 8d26358/31f6223/
+      40f0976 + CORS/Branch-Fix.
+
 - [x] **M4a: Audio-Upgrade — 934 Neural-MP3s** (22.11.2026):
       Alle 832 Wörter (word_*) und 102 Dialogzeilen (dlg_*) als echte
       MP3-Dateien mit Microsoft-Edge-Neuralstimme it-IT-ElsaNeural

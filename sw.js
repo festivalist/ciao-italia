@@ -54,13 +54,19 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  if (url.pathname.includes("/audio/")) {
+  // CDN-Audio (jsDelivr liefert die Neural-MP3s aus dem GitHub-Repo) —
+  // ZWINGEND vor dem /audio/-Pfad-Zweig prüfen, denn die CDN-URLs
+  // enthalten ebenfalls „/audio/“ im Pfad. Beim ersten Hören in den
+  // Offline-Cache übernehmen; Audio-Elemente fragen no-cors (Antwort
+  // wäre opaque, response.ok=false) — deshalb expliziter CORS-Refetch
+  // (jsDelivr sendet ACAO: *).
+  if (url.origin === "https://cdn.jsdelivr.net") {
     event.respondWith(
       caches.open(CACHE).then(async (cache) => {
         const hit = await cache.match(request);
         if (hit) return hit;
         try {
-          const response = await fetch(request);
+          const response = await fetch(new Request(request.url, { mode: "cors", credentials: "omit" }));
           if (response.ok) cache.put(request, response.clone());
           return response;
         } catch {
@@ -71,9 +77,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // CDN-Audio (jsDelivr liefert die Neural-MP3s aus dem GitHub-Repo):
-  // beim ersten Hören in den Offline-Cache übernehmen.
-  if (url.origin === "https://cdn.jsdelivr.net") {
+  if (url.pathname.includes("/audio/")) {
     event.respondWith(
       caches.open(CACHE).then(async (cache) => {
         const hit = await cache.match(request);

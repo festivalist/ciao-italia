@@ -42,6 +42,17 @@ auf eine neue Version erhöhen, zum Beispiel "ciaoit-v3". Danach alle
 Dateien neu hochladen. Installierte Geräte übernehmen die neue Version
 beim nächsten Start.
 
+Wichtig seit v31: Die Shell-Dateien sind in index.html UND in der
+sw.js-SHELL mit Versions-Suffix referenziert (z. B. app.js?v=31).
+Bei jedem CACHE-Bump beide Stellen gemeinsam auf dieselbe Nummer
+erhöhen — der Hoster sendet keine Cache-Control-Header, sonst können
+Geräte ein veraltetes app.js aus dem HTTP-Cache behalten.
+
+Wichtig für Audio: lima-city erlaubt KEINE Audiodateien im Hosting.
+Die MP3s (Wörter + Dialogzeilen) liegen im GitHub-Repo und werden über
+den jsDelivr-CDN ausgeliefert (App-Kette: Datei → CDN → TTS). Neue
+MP3s also nur committen+pushen, nie per FTP hochladen.
+
 E) INHALT PFLEGEN
 ---------------------------------------------------------------------
 - Basisdaten: data.js
