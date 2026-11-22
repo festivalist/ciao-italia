@@ -1,6 +1,6 @@
 /* Offline-Cache für Ciao Italia. Bei Inhaltsänderungen die
    Versionsnummer erhöhen, damit installierte Geräte aktualisieren. */
-const CACHE = "ciaoit-v27";
+const CACHE = "ciaoit-v28";
 const SHELL = [
   ".",
   "index.html",

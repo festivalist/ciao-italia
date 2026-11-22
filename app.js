@@ -1582,7 +1582,9 @@
     playAll.addEventListener("click", () => { const t = ++seqToken; speakSequence(dl, rate, t); });
     const stopBtn = el("button", "btn btn-ghost", "⏹ Stop");
     stopBtn.addEventListener("click", () => { seqToken++; if (window.speechSynthesis) speechSynthesis.cancel(); toast("Wiedergabe gestoppt"); });
-    btnRow.appendChild(playAll); btnRow.appendChild(stopBtn);
+    const rpBtn = el("button", "btn btn-telha", "🎭 Rollenspiel — du spielst mit ▶");
+    rpBtn.addEventListener("click", () => { seqToken++; startRoleplay(dl); });
+    btnRow.appendChild(playAll); btnRow.appendChild(stopBtn); btnRow.appendChild(rpBtn);
     wrap.appendChild(btnRow);
     const story = STORIES.find(x => x.dialogueId === dl.id);
     if (story) {
@@ -1617,6 +1619,133 @@
       if (token !== seqToken) return;
       await speakWait(dl.lines[i].it, `dlg_${dl.id}_${i}`, rate);
     }
+  }
+
+  /* ============================================================
+     ROLLENSPIEL — den Dialog selbst sprechen (Viaggio)
+     Die App spielt die Partner-Rollen; „Du"-Zeilen: laut sagen,
+     optional per MediaRecorder aufnehmen, Take anhören und mit
+     dem Original vergleichen, dann selbst bewerten.
+     Aufnahmen bleiben flüchtig (kein MEMODB/Sync) — die
+     Sprachmemos sind das dauerhafte Archiv.
+     ============================================================ */
+  function startRoleplay(dl) {
+    seqToken++;
+    let li = 0, spoken = 0;
+    const duTotal = dl.lines.filter(ln => ln.who === "Du").length;
+    let activeRec = null, activeStream = null;
+    function stopActive() {
+      try { if (activeRec && activeRec.state === "recording") activeRec.stop(); } catch (e) {}
+    }
+    const wrap = el("div");
+    const back = el("button", "back", `‹ ${dl.title}`);
+    back.addEventListener("click", () => { stopActive(); seqToken++; viewDialogue(dl); });
+    wrap.appendChild(back);
+    wrap.appendChild(el("h2", "view-title", `🎭 ${dl.title}`));
+    wrap.appendChild(el("p", "view-sub", "Die App spielt die Partner — deine Zeilen sagst du laut. Nimm sie auf und vergleich mit dem Original."));
+    const host = el("div"); wrap.appendChild(host);
+    render(wrap);
+
+    function step() {
+      if (li >= dl.lines.length) return end();
+      const ln = dl.lines[li];
+      const mine = ln.who === "Du";
+      const key = `dlg_${dl.id}_${li}`;
+      host.innerHTML = "";
+      host.appendChild(el("div", "flash-progress", `<span>Zeile ${li + 1} / ${dl.lines.length}</span><span>${spoken} gesprochen</span>`));
+      const card = el("div", "scene-card" + (mine ? " mine" : ""));
+      card.appendChild(el("div", "scene-who", ln.who));
+      const itEl = el("div", "scene-it" + (mine ? " hidden" : ""), ln.it);
+      card.appendChild(itEl);
+      card.appendChild(el("div", "scene-de", ln.de));
+      const status = el("p", "listen-instr");
+      card.appendChild(status);
+      host.appendChild(card);
+
+      if (!mine) {
+        // Partner-Zeile: App spricht automatisch
+        speak(ln.it, key);
+        const pb = playBtn(ln.it, key);
+        pb.style.marginTop = "8px";
+        card.appendChild(pb);
+        const next = el("button", "btn btn-primary", "Weiter ›");
+        next.addEventListener("click", () => { li++; step(); });
+        host.appendChild(next);
+        return;
+      }
+
+      // Du-Zeile: aufnehmen (optional) → Lösung & Vergleich → bewerten
+      const takeBox = el("div", "role-take");
+      card.appendChild(takeBox);
+      let revealed = false;
+      const recBtn = el("button", "btn btn-ghost", "🎙️ Aufnehmen & sagen");
+      const solveBtn = el("button", "btn btn-primary", "Lösung & anhören ›");
+      const btnRow = el("div", "btn-row");
+      btnRow.appendChild(recBtn); btnRow.appendChild(solveBtn);
+
+      recBtn.addEventListener("click", async () => {
+        if (activeRec && activeRec.state === "recording") { activeRec.stop(); return; }
+        if (!canRecord) { status.textContent = "Mikrofon nicht verfügbar — sag den Satz einfach laut, dann weiter."; return; }
+        try {
+          activeStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          const mr = new MediaRecorder(activeStream);
+          const chunks = [];
+          mr.ondataavailable = e => chunks.push(e.data);
+          mr.onstop = () => {
+            activeStream.getTracks().forEach(t => t.stop());
+            activeRec = null; activeStream = null;
+            const blob = new Blob(chunks, { type: mr.mimeType || "audio/webm" });
+            takeBox.innerHTML = "";
+            const audio = new Audio(URL.createObjectURL(blob));
+            audio.controls = true;
+            takeBox.appendChild(audio);
+            status.textContent = "Dein Take — jetzt mit dem Original vergleichen.";
+            recBtn.textContent = "🎙️ Nochmal aufnehmen";
+          };
+          activeRec = mr;
+          mr.start();
+          recBtn.textContent = "⏹️ Aufnahme beenden";
+          status.textContent = "Aufnahme läuft … sag die Zeile laut auf Italienisch!";
+        } catch {
+          status.textContent = "Mikrofon nicht verfügbar — sag den Satz einfach laut, dann weiter.";
+        }
+      });
+
+      solveBtn.addEventListener("click", () => {
+        if (revealed) return;
+        revealed = true;
+        stopActive();
+        itEl.classList.remove("hidden");
+        speak(ln.it, key);
+        card.appendChild(playBtn(ln.it, key));
+        btnRow.remove();
+        const grades = el("div", "grade-row");
+        const again = el("button", "btn btn-ghost", "↻ Nochmal aufnehmen");
+        const ok = el("button", "btn btn-primary", "✓ Sauber — weiter");
+        again.addEventListener("click", () => {
+          takeBox.innerHTML = "";
+          status.textContent = "Nimm die Zeile noch einmal auf — das Original steht jetzt mit dabei.";
+        });
+        ok.addEventListener("click", () => {
+          spoken++;
+          markPractice(1); bumpSkill("sprechen"); bumpOutput("satze");
+          li++; step();
+        });
+        grades.appendChild(again); grades.appendChild(ok);
+        host.appendChild(grades);
+      });
+      host.appendChild(btnRow);
+    }
+
+    function end() {
+      addXP(15);
+      host.innerHTML = "";
+      host.appendChild(el("div", "empty", `<div style="font-size:40px">🎭</div><p>${spoken} von ${duTotal} Zeilen gesprochen · +15 XP</p>`));
+      const a = el("button", "btn btn-primary", "Nochmal"); a.addEventListener("click", () => startRoleplay(dl));
+      const h = el("button", "btn btn-ghost", "Zurück zum Dialog"); h.style.marginTop = "10px"; h.addEventListener("click", () => viewDialogue(dl));
+      host.appendChild(a); host.appendChild(h);
+    }
+    step();
   }
 
   /* ============================================================

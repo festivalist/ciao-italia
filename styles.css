@@ -624,3 +624,8 @@ body {
 .lv.irr { background: #F7E8E4; color: var(--telha); }
 .view-sub.lvl-row { flex-wrap: wrap; }
 .conj-card .trip-input { max-width: 260px; margin: 6px auto 4px; font-family: var(--sans); }
+
+/* ---------- Rollenspiel (Viaggio-Dialoge) ---------- */
+.role-take { margin-top: 10px; }
+.role-take audio { width: 100%; margin-top: 6px; }
+.scene-card .listen-instr { margin: 10px 0 0; min-height: 18px; }

@@ -1,5 +1,20 @@
 # ToDo — Stand 12.10.2026
 
+- [x] **M3: Dialog-Rollen-Modus (Rollenspiel)** (22.11.2026):
+      „🎭 Rollenspiel"-Button in jedem Viaggio-Dialog: geführter Modus,
+      in dem die App die Partner-Rollen spricht und man die „Du"-Zeilen
+      selbst sagt — Italienisch zuerst versteckt (wie Story-Szenen),
+      optional per MediaRecorder aufnehmen (mehrere Takes, eigener Take
+      abspielbar), dann „Lösung & anhören" + Selbstbewertung
+      (✓ Sauber / ↻ Nochmal). Aufnahmen flüchtig (nichts in MEMODB/Sync);
+      ohne Mikro komplett durchspielbar (Laut-Sprechen-Fallback).
+      Belohnung: +15 XP pro beendetem Rollenspiel; je bewerteter
+      Du-Zeile Sprechen-Skill +1, Tagesziel +1, Wochenbilanz
+      „Sätze produziert" +1. E2E mikro-frei bestanden: „Im Restaurant"
+      4/4 Zeilen, Fallback-Text, +15 XP, Sprechen +4, satze +4,
+      todayCount +4, Endscreen, Zurück zur Lese-Ansicht, 0 JS-Fehler.
+      sw v27 → v28; Spec: .scratch/m3-dialog-rollenspiel/spec.md.
+
 - [x] **M2: XP-Identität + Quick Wins** (22.11.2026):
       XP-Stufen (rein abgeleitet, kein neuer Storage): 🧭 Turista (0) ·
       🎒 Viaggiatore (150) · 🤝 Amico del posto (500) · ☕ Quasi italiano

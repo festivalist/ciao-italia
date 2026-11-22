@@ -9,7 +9,7 @@ Dieses Dokument beschreibt Zweck, Inhalte, Features und Bedienung der App vollst
 - Sie läuft auf **eigenem Webspace** (Shared Hosting mit PHP und HTTPS), Deployment per **FTP**. Kein App-Store, kein Account-Zwang, keine Fremd-Dienste.
 - Sie funktioniert nach dem ersten vollständigen Laden **komplett offline**.
 
-Stand der Beschreibung: Version ciaoit-v27 (November 2026).
+Stand der Beschreibung: Version ciaoit-v28 (November 2026).
 
 ---
 
@@ -233,6 +233,8 @@ Dazu **automatisch eine Mission pro abgeschlossener Lektion** (Story-Satz oder v
 ### 10.3 Reise-Dialoge — 18 Szenen, Level A1–B1
 Jeder Dialog: 5–7 Zeilen mit Rollen (Kellner, Rezeption, Passant, „Du“ …), italienisch + deutsch, einzeln anhörbar oder **am Stück in drei Tempi** (🐢 Lento / Normale / Veloce), Stop-Taste; Sprung in die verknüpfte Story-Szene und zurück.
 
+**🎭 Rollenspiel (v28):** geführter Modus im Dialog — die App spricht die Partner-Rollen automatisch; bei jeder „Du“-Zeile: Italienisch ist zuerst versteckt, de sichtbar; optional per **MediaRecorder aufnehmen** (mehrere Takes, eigener Take abspielbar), dann „Lösung & anhören“ aufdecken + Original (MP3/TTS) und selbst bewerten („✓ Sauber“ / „↻ Nochmal“). Aufnahmen bleiben **flüchtig** (nichts gespeichert — Sprachmemos bleiben das Archiv); ohne Mikro läuft der Modus rein laut-sprechend durch. Belohnung: **+15 XP pro beendetem Rollenspiel**; je bewerteter Du-Zeile wächst Können „Sprechen“, Tagesziel +1 und Wochenbilanz „Sätze produziert“ +1. iOS-Home-Screen-PWA-tauglich (MediaRecorder statt Spracherkennung).
+
 | Level | Dialoge |
 |---|---|
 | **A1 (9)** | Im Restaurant · In der Bar · Bus & Bahn · Im Hotel · Einkaufen · Um Hilfe bitten · Familie vorstellen · Bei mir zuhause · Am Bahnsteig |
@@ -275,7 +277,7 @@ Der „Reisepass“ zeigt **Können statt Zeit-in-App**:
 - **Reifegrad:** Kategorie-Fortschritt zählt Box ≥ 4 als „gereift“; „gut gelernt“ (Startseite) zählt Box ≥ 5; Story-Bereitschaft zählt Box ≥ 3.
 - **Tagesziel:** **15 Übungen** pro Tag (Ringanzeige; jede abgeschlossene Übung zählt 1).
 - **Streak:** +1 Tag bei Aktivität an Folgetag; **2 Freezes** (ein verpasster Tag verbraucht einen); **1 Pausentag pro Woche** ist erlaubt, ohne die Serie zu brechen; Rekord bleibt dauerhaft.
-- **XP:** Wort entdeckt +2 · Hören/Erkennen richtig +10 · Bauen richtig +12 · Produzieren richtig +15 · Szene-Zeile +3 · Lektion erstmals abgeschlossen +25 (dazu Badge) · Mission +25 · Orecchie abgeschlossen +15 · Tagebuchsatz +20 · Sprachmemo +15 · Tages-Konjugation +10.
+- **XP:** Wort entdeckt +2 · Hören/Erkennen richtig +10 · Bauen richtig +12 · Produzieren richtig +15 · Szene-Zeile +3 · Lektion erstmals abgeschlossen +25 (dazu Badge) · Mission +25 · Orecchie abgeschlossen +15 · Rollenspiel abgeschlossen +15 · Tagebuchsatz +20 · Sprachmemo +15 · Tages-Konjugation +10.
 - **XP-Stufen (Identität, v27):** rein aus XP abgeleitet, nichts separat gespeichert — 🧭 Turista (0) · 🎒 Viaggiatore (150) · 🤝 Amico del posto (500) · ☕ Quasi italiano (1.200) · 🏆 Italiano doc (2.500). Passaporto zeigt die Stufenkarte mit Fortschrittsbalken zur nächsten Stufe; der Titel steht klein neben den XP-Zahlen auf Startseite und Percorso.
 - **Espresso del giorno:** tagstabil (Datum-Seed; gerade Tage bevorzugen Mini-Lektionen), genau einer pro Tag, ~3 Minuten, nach Erledigung: „morgen gibt es den nächsten“.
 - **Congiuga del giorno (Tages-Konjugation):** beim ersten Start des Tages ein Verb × eine Zeit, alle 6 Personen per Tipp-Eingabe in fester Folge (io → tu → lui/lei → noi → voi → loro; Akzente/Großschreibung egal; Gender-Alternativen „stato/a" akzeptiert, Reflexiv-Klitika optional). Falsch = richtige Form zeigen + am Ende der Runde wiederholen, bis einmal richtig. Rotation leicht → schwer: pro Level regelmäßige -are → -ere → -ire (inkl. -isc-Typ, -iare-Kontraktion, h-Einschub bei -care/-gare) → unregelmäßige (essere/avere zuerst); Level A1 → A2 → B1; drei Durchläufe Presente → Passato → Futuro, danach endlos von vorn (399 Einträge; unpersönliche Verben wie piovere ausgenommen). Abbrechbar, aber Banner + erneutes Overlay beim nächsten Start bis zur Erledigung; Fortschritt (Rotationsindex + Erledigungstag) wird gesynchronisiert.
