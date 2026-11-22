@@ -11,6 +11,12 @@
       duration > 0, verb_-Kontrolle bleibt TTS-Fallback, App bootet
       fehlerfrei, validate grün. B2 (M4b) bewusst separat geplant.
       Spec: .scratch/m4-audio/spec.md.
+      ⚠️ Offen: Live-Upload — der lima-city-FTP verwirft derzeit
+      Binär-Uploads still (STOR meldet 226, Datei ist sofort weg;
+      Textdateien bleiben; Konto ~56 MB / 1.724 Dateien belegt).
+      MP3s sind vollständig im Repo (Commit 7241b86); App läuft live
+      wie bisher über TTS-Fallback. Nach Klärung beim Hoster:
+      einmalig nachladen (Generator/Skript ist resumable).
 
 - [x] **M3: Dialog-Rollen-Modus (Rollenspiel)** (22.11.2026):
       „🎭 Rollenspiel"-Button in jedem Viaggio-Dialog: geführter Modus,
