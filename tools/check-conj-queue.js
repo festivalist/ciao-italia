@@ -29,8 +29,8 @@ const block = src.slice(a, b + endMarker.length);
 
 const ctx = { console };
 vm.createContext(ctx);
-vm.runInContext(block + "\nglobalThis.__conj = { buildConjQueue, conjIsRegular, conjClass, CONJ_PERSONS, CONJ_DISPLAY, conjVariants, conjAccept };", ctx);
-const { buildConjQueue, conjIsRegular, conjClass, CONJ_PERSONS, CONJ_DISPLAY, conjAccept } = ctx.__conj;
+vm.runInContext(block + "\nglobalThis.__conj = { buildConjQueue, conjIsRegular, conjClass, CONJ_PERSONS, CONJ_DISPLAY, conjVariants, conjAccept, conjSlug, verbKeyParse, verbsBySlugMap };", ctx);
+const { buildConjQueue, conjIsRegular, conjClass, CONJ_PERSONS, CONJ_DISPLAY, conjAccept, conjSlug, verbKeyParse, verbsBySlugMap } = ctx.__conj;
 
 /* ---------- Personen-Folge ---------- */
 // Spread nötig: das Array kommt aus dem vm-Kontext (anderer Realm)
@@ -101,6 +101,27 @@ assert.ok(conjAccept("è", "e"), "Akzent-Toleranz (è ≈ e)");
 assert.ok(conjAccept("dà", "da"), "Akzent-Toleranz (dà ≈ da)");
 assert.ok(conjAccept("parlano", "  PARLANO  "), "Groß/Klein- und Whitespace-Toleranz");
 assert.ok(!conjAccept("parlano", "parlare"), "Infinitiv zählt nicht");
+
+/* ---------- verbKey-Roundtrip (SRS-Verzahnung) ---------- */
+const bySlug = verbsBySlugMap(verbs);
+assert.strictEqual(Object.keys(bySlug).length, verbs.length, "Slugs aller Verben sind eindeutig");
+let roundtrips = 0;
+verbs.forEach(v => ["presente", "passato", "futuro"].forEach(t => v[t].forEach((f, i) => {
+  if (!f) return;
+  const key = `verb_${conjSlug(v.inf)}_${t}_${i}`;
+  const e = verbKeyParse(key, bySlug);
+  assert.ok(e, `Key parst: ${key}`);
+  assert.strictEqual(e.v.inf, v.inf, `Verb stimmt: ${key}`);
+  assert.strictEqual(e.tense, t, `Zeit stimmt: ${key}`);
+  assert.strictEqual(e.person, i, `Person stimmt: ${key}`);
+  roundtrips++;
+})));
+assert.ok(roundtrips > 700, `alle Formen getestet (${roundtrips})`);
+assert.strictEqual(verbKeyParse("verb_parlare_presente_9", bySlug), null, "Person 6–9 ungültig");
+assert.strictEqual(verbKeyParse("verb_parlare_congiuntivo_1", bySlug), null, "unbekannte Zeit ungültig");
+assert.strictEqual(verbKeyParse("verb_nichts_presente_1", bySlug), null, "unbekanntes Verb → null");
+assert.strictEqual(verbKeyParse("word_parlare_presente_1", bySlug), null, "fremdes Key-Präfix → null");
+assert.strictEqual(verbKeyParse("verb__presente_1", bySlug), null, "leerer Slug → null");
 
 console.log(`OK — Rotations-Queue: ${queue.length} Einträge, erster: ${queue[0].v.inf} (${queue[0].tense}),` +
   ` A1-Irregular-Beginn bei Position ${first("irr")} (essere, avere).`);

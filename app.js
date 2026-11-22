@@ -116,13 +116,15 @@
     const s = srs();
     return Object.values(s).filter(r => r.box >= 5).length;
   }
-  function grade(key, knew) {
+  // quiet = wahr: zählt NICHT aufs Tagesziel (z. B. die 6 stillen
+  // Formen-Bewertungen des Konjugations-Rituals, das selbst 1× zählt)
+  function grade(key, knew, quiet) {
     const s = srs();
     const r = s[key] || { box: 1 };
     r.box = knew ? Math.min(INTERVALS.length, (r.box || 1) + 1) : 1;
     r.due = Date.now() + INTERVALS[r.box - 1] * DAY;
     s[key] = r; srsSave(s);
-    markPractice(1);
+    if (!quiet) markPractice(1);
   }
   /* ---------- Streak & Tagesziel (reise-bewusst, läuft danach weiter) ---------- */
   const DAILY_GOAL = 15; // Übungen pro Tag
@@ -730,6 +732,8 @@
     wrap.appendChild(mk("btn-ghost", "🃏 Karteikarten (Wörter)", startFlash));
     wrap.appendChild(mk("btn-ghost", "🗣️ Satz-Drill (DE → IT)", startSentenceDrill, "Pimsleur: erst selbst sagen, dann auflösen."));
     wrap.appendChild(mk("btn-ghost", "🔁 Zeitform-Flip", startTenseFlip, "Derselbe Satz in Presente, Passato prossimo und Futuro semplice."));
+    const vdue = verbDueCount();
+    wrap.appendChild(mk("btn-ghost", "✏️ Verbformen (Tippen)", startVerbDrill, `${vdue} Form${vdue === 1 ? "" : "en"} fällig · Konjugationen selbst schreiben.`));
     wrap.appendChild(mk("btn-ghost", "🎙️ Shadowing", startShadow, "Hören und laut nachsprechen."));
     wrap.appendChild(mk("btn-ghost", "💬 Redewendungen (Modi di dire)", viewFrasi, "Feste Wendungen lesen, hören und wiederholen."));
 
@@ -960,6 +964,108 @@
     const a = el("button", "btn btn-primary", "Nochmal"); a.addEventListener("click", again);
     const h = el("button", "btn btn-ghost", "Zurück"); h.style.marginTop = "10px"; h.addEventListener("click", home);
     host.appendChild(a); host.appendChild(h);
+  }
+
+  /* ============================================================
+     Modus: Verbformen tippen (Konjugations-SRS, due-first)
+     Das Tages-Ritual bewertet alle 6 Formen still ins Leitner-SRS;
+     dieser Drill macht sie wieder fällig — aufgefüllt mit frischen
+     Formen aus der Rotation (Zufallsperson je Verb).
+     ============================================================ */
+  const VERBS_BY_SLUG = verbsBySlugMap(D.verbs);
+  function verbDueCount() {
+    const s = srs(), now = Date.now();
+    return Object.keys(s).filter(k => k.indexOf("verb_") === 0 && s[k].due <= now).length;
+  }
+  function buildVerbDeck(n) {
+    const s = srs(), now = Date.now();
+    const due = [];
+    Object.keys(s).forEach(k => {
+      if (k.indexOf("verb_") !== 0) return;
+      const e = verbKeyParse(k, VERBS_BY_SLUG);
+      if (e && e.v[e.tense][e.person] && s[k].due <= now) due.push({ v: e.v, tense: e.tense, person: e.person, key: k });
+    });
+    due.sort((a, b) => s[a.key].due - s[b.key].due);
+    const deck = due.slice(0, n);
+    if (deck.length < n) {
+      // frische Formen aus der Rotation auffüllen (ab dem kommenden Ritual-Verb)
+      const seen = new Set(deck.map(e => e.key));
+      const st = conjState(), len = CONJ_QUEUE.length;
+      for (let off = 1; deck.length < n && off <= len; off++) {
+        const item = CONJ_QUEUE[(st.qi + off) % len];
+        const person = (Math.random() * 6) | 0;
+        if (!item.v[item.tense][person]) continue;
+        const key = verbKey(item.v.inf, item.tense, person);
+        if (seen.has(key) || s[key]) continue; // schon drin oder schon gelernt
+        seen.add(key);
+        deck.push({ v: item.v, tense: item.tense, person, key });
+      }
+    }
+    return deck;
+  }
+  function startVerbDrill() {
+    const deck = buildVerbDeck(10);
+    if (!deck.length) { toast("Keine Formen verfügbar."); return; }
+    let i = 0, correct = 0;
+    const wrap = el("div");
+    const back = el("button", "back", "‹ Allenamento"); back.addEventListener("click", viewTrain);
+    wrap.appendChild(back);
+    wrap.appendChild(el("h2", "view-title", "Verbformen"));
+    wrap.appendChild(el("p", "view-sub", "Tippe die passende Form — Akzente, Groß-/Kleinschreibung und Gender-Formen sind egal."));
+    const host = el("div"); wrap.appendChild(host);
+    render(wrap);
+
+    function step() {
+      if (i >= deck.length) { host.innerHTML = ""; finish(host, deck.length, startVerbDrill, viewTrain); return; }
+      const e = deck[i];
+      const expected = e.v[e.tense][e.person];
+      host.innerHTML = "";
+      host.appendChild(el("div", "flash-progress", `<span>Form ${i + 1} / ${deck.length}</span><span>${correct} richtig</span>`));
+      const card = el("div", "drill-card");
+      card.appendChild(tenseBadge(e.tense));
+      card.appendChild(el("div", "conj-verb", e.v.inf));
+      card.appendChild(el("div", "conj-de", `${e.v.de} — ${conjTenseLabel(e.tense)}`));
+      card.appendChild(el("div", "conj-person", PRON[e.person]));
+      const input = el("input", "conj-input");
+      input.type = "text"; input.autocapitalize = "off"; input.autocomplete = "off"; input.spellcheck = false;
+      input.setAttribute("aria-label", "Verbform für die angezeigte Person eingeben");
+      const feedback = el("div", "conj-feedback");
+      const checkBtn = el("button", "btn btn-primary", "Prüfen");
+      card.appendChild(input); card.appendChild(feedback); card.appendChild(checkBtn);
+      host.appendChild(card);
+      let advancing = false;
+      function check() {
+        if (advancing) return;
+        if (conjAccept(expected, input.value)) {
+          advancing = true; correct++;
+          grade(e.key, true);
+          input.disabled = true; input.className = "conj-input ok";
+          feedback.className = "conj-feedback ok";
+          feedback.appendChild(el("span", null, "✓ giusto"));
+          feedback.appendChild(playBtn(expected, e.key));
+          speak(expected, e.key);
+          checkBtn.disabled = true;
+          setTimeout(() => { i++; step(); }, 900);
+        } else {
+          advancing = true;
+          grade(e.key, false);
+          input.disabled = true; input.className = "conj-input bad";
+          feedback.className = "conj-feedback bad";
+          feedback.appendChild(el("span", null, "Richtig: "));
+          const shown = el("span", "conj-solution");
+          shown.appendChild(el("span", null, expected));
+          shown.appendChild(playBtn(expected, e.key));
+          feedback.appendChild(shown);
+          checkBtn.textContent = "Weiter";
+          checkBtn.focus();
+        }
+      }
+      function onCheck() { if (input.disabled) { i++; step(); } else check(); }
+      checkBtn.addEventListener("click", onCheck);
+      input.addEventListener("keydown", ev => { if (ev.key === "Enter") { ev.preventDefault(); onCheck(); } });
+      input.focus();
+    }
+    step();
   }
 
   /* ============================================================
@@ -1617,6 +1723,24 @@
   // Abfrage-Folge als Daten-Indizes: io→tu→lui/lei→noi→voi→loro
   // (die Daten halten loro=4, voi=5 — deshalb 5 vor 4)
   const CONJ_DISPLAY = [0, 1, 2, 3, 5, 4];
+  // Slug wie app.js slug() (hier dupliziert, damit der Marker-Block
+  // in Node ohne DOM läuft — siehe ADR-0001)
+  function conjSlug(s) {
+    return String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+  }
+  // verbKey zurückparsen: "verb_<slug>_<tense>_<0-5>" → { v, tense, person }
+  function verbKeyParse(key, verbsBySlug) {
+    const m = /^verb_(.+)_(presente|passato|futuro)_([0-5])$/.exec(String(key || ""));
+    if (!m) return null;
+    const v = verbsBySlug[m[1]];
+    return v ? { v, tense: m[2], person: Number(m[3]) } : null;
+  }
+  function verbsBySlugMap(verbs) {
+    const map = {};
+    verbs.forEach(v => { map[conjSlug(v.inf)] = v; });
+    return map;
+  }
   /* conj-queue:end */
 
   const CONJ_QUEUE = buildConjQueue(D.verbs);
@@ -1624,6 +1748,12 @@
   function conjState() { return LS.get("ciaoit_conj", { qi: 0, doneDay: null }); }
   function conjDoneToday() { return conjState().doneDay === ymd(); }
   function conjCurrent() { const len = CONJ_QUEUE.length; return len ? CONJ_QUEUE[conjState().qi % len] : null; }
+  // Anzeige-Bilanz (Bestandsprofile haben noch kein stats — lazy)
+  function conjStats() {
+    const st = conjState();
+    if (!st.stats) st.stats = { total: 0, first: 0, asked: [0, 0, 0, 0, 0, 0], hit: [0, 0, 0, 0, 0, 0] };
+    return st.stats;
+  }
 
   /* ---------- Nudge-Banner (Body-Level, bis die Tagesaufgabe erledigt ist) ---------- */
   function updateConjBanner() {
@@ -1677,13 +1807,20 @@
     let queue = CONJ_DISPLAY.map((_, i) => i); // Abfrage-Slots 0–5 in Anzeige-Folge
     let retry = [];                            // verhakte Slots
     let pos = 0, phase = 1, firstTry = 0, advancing = false;
+    const firstOk = [false, false, false, false, false, false]; // Erstversuch je Person (Daten-Index)
 
     function close() { overlay.remove(); conjOpen = false; updateConjBanner(); }
     function finish() {
       const st = conjState();
       st.qi = (st.qi + 1) % CONJ_QUEUE.length;
       st.doneDay = ymd();
+      const cs = st.stats || (st.stats = { total: 0, first: 0, asked: [0, 0, 0, 0, 0, 0], hit: [0, 0, 0, 0, 0, 0] });
+      cs.total++; cs.first += firstTry;
+      CONJ_DISPLAY.forEach(p => { cs.asked[p]++; if (firstOk[p]) cs.hit[p]++; });
       LS.set("ciaoit_conj", st);
+      // Alle 6 Formen still ins Leitner-SRS bewerten (Erstversuch → Box rauf,
+      // verhakt → Box 1) — sie werden dann im Verbi-Drill wieder fällig
+      CONJ_DISPLAY.forEach(p => grade(verbKey(v.inf, tense, p), !!firstOk[p], true));
       addXP(10); markPractice(1);
       card.innerHTML = "";
       card.appendChild(el("div", "conj-kicker", "Fatto — fertig!"));
@@ -1727,7 +1864,7 @@
         feedback.appendChild(el("span", null, "✓ giusto"));
         feedback.appendChild(playBtn(expected, audioKey));
         dots[slot].className = "conj-dot " + (phase === 1 ? "ok" : "fix");
-        if (phase === 1) firstTry++;
+        if (phase === 1) { firstTry++; firstOk[personIdx] = true; }
         speak(expected, audioKey);
         checkBtn.disabled = true;
         setTimeout(() => { pos++; step(); }, 750);
@@ -2240,6 +2377,28 @@
     sinfo.appendChild(el("div", "streak-sub", "Der Rekord bleibt für immer — ein ruhender Tag pro Woche ist eingeplant."));
     sc.appendChild(sinfo);
     wrap.appendChild(sc);
+
+    /* Coniugazione: Bilanz des Tages-Rituals */
+    const cs = conjStats();
+    if (cs.total > 0) {
+      const pct = Math.round(cs.first / (cs.total * 6) * 100);
+      let weakest = null;
+      for (let p = 0; p < 6; p++) {
+        if (cs.asked[p] >= 3) {
+          const q = cs.hit[p] / cs.asked[p];
+          if (!weakest || q < weakest.q) weakest = { p, q };
+        }
+      }
+      const cc = el("div", "streak-card");
+      cc.appendChild(el("div", "streak-flame", "☕"));
+      const cinfo = el("div", "streak-info grow");
+      cinfo.appendChild(el("div", "streak-num", `${cs.total} Konjugation${cs.total === 1 ? "" : "en"} · ${pct} % beim ersten Versuch`));
+      cinfo.appendChild(el("div", "streak-sub", weakest
+        ? `Schwächste Person: ${PRON[weakest.p]} (${Math.round(weakest.q * 100)} %)`
+        : "Jede Person kommt dran — die Bilanz wächst Tag für Tag."));
+      cc.appendChild(cinfo);
+      wrap.appendChild(cc);
+    }
 
     /* Kompetenz-Radar (Balken) */
     wrap.appendChild(el("div", "section-h", "Kompetenzen"));

@@ -1,5 +1,22 @@
 # ToDo — Stand 12.10.2026
 
+- [x] **M1: Conj vertiefen — SRS-Verzahnung, Statistik, Freiübung** (22.11.2026):
+      Das Tages-Ritual bewertet jetzt alle 6 Formen still ins Leitner-SRS
+      (verb_<slug>_<zeit>_<person>; Erstversuch → Box rauf, verhakt → Box 1;
+      zählt nicht extra aufs Tagesziel — grade() hat dafür den quiet-
+      Parameter). Neuer Allenamento-Modus „✏️ Verbformen (Tippen)": 10
+      Formen due-first, aufgefüllt mit frischen Formen aus der Rotation
+      (Zufallsperson, kommende Verben, heutiges Ritual-Verb ausgenommen),
+      Tipp-Prüfung mit Akzent-/Gender-Toleranz wie im Ritual, keine XP
+      (wie bei allen Trainings). Passaporto zeigt nach der Streak-Karte
+      eine ☕-Bilanz: Konjugationen gesamt · Ø-Erstversuchs-Quote ·
+      schwächste Person (ab 3 Anfragen je Person). verbKeyParse/
+      verbsBySlugMap im Node-getesteten Marker-Block (Roundtrip über
+      alle ~2.400 Formen, Slug-Eindeutigkeit). E2E bestanden: Ritual-
+      Grading (Box 1/2, todayCount 1), Drill due-first + Endscreen,
+      Statistik-Karte, Sync-Roundtrip (Push/Pull), kein Drill-XP,
+      0 JS-Fehler. sw v25 → v26.
+
 - [x] **Congiuga del giorno — tägliches Konjugations-Ritual** (22.11.2026):
       Beim ersten App-Start des Tages erscheint ein Overlay: ein Verb × eine
       Zeit, alle 6 Personen per Tipp-Eingabe in fester Folge (io → tu →

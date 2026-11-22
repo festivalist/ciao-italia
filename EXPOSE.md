@@ -9,7 +9,7 @@ Dieses Dokument beschreibt Zweck, Inhalte, Features und Bedienung der App vollst
 - Sie läuft auf **eigenem Webspace** (Shared Hosting mit PHP und HTTPS), Deployment per **FTP**. Kein App-Store, kein Account-Zwang, keine Fremd-Dienste.
 - Sie funktioniert nach dem ersten vollständigen Laden **komplett offline**.
 
-Stand der Beschreibung: Version ciaoit-v25 (November 2026).
+Stand der Beschreibung: Version ciaoit-v26 (November 2026).
 
 ---
 
@@ -65,7 +65,7 @@ Die App kombiniert mehrere erprobte Methoden zu einem System:
 | Aa | **Parole** | Wortschatz: 832 Wörter in 52 Kategorien, Suche, Level-Filter |
 | ↻ | **Verbi** | 135 Verben mit Konjugationstabellen (3 Zeiten × 6 Personen) |
 | ✎ | **Sapere** | Wissen: Aussprache-Regeln, Grammatik, 84 Redewendungen |
-| ◎ | **Allenamento** | Freies Training: 8 Trainingsmodi |
+| ◎ | **Allenamento** | Freies Training: 9 Trainingsmodi |
 | ◇ | **Viaggio** | Reisematerial: Checklisten, Missionen, 18 Dialoge |
 
 Dazu in der Kopfzeile: **🛂 Passaporto** (Profil & Können, Abschnitt 12) und ein **globaler Ton-Schalter** 🔊/🔇.
@@ -198,9 +198,10 @@ Freies Training außerhalb des Pfads; alle Modi speisen sich automatisch aus dem
 3. **🃏 Karteikarten (Wörter, bis 40):** klassisches Umdrehen IT→DE mit Selbstbewertung („✓ Wusste ich“ / „↻ Nochmal“), Akzent-Lautsprecher, Antwort zählt sofort.
 4. **🗣️ Satz-Drill (DE→IT, 24):** Pimsleur-Stil — deutschen Satz lesen, italienisch **laut sagen**, dann „Lösung & anhören“ aufdecken und selbst bewerten. Zeitform-Badge zeigt Presente/Passato/Futuro.
 5. **🔁 Zeitform-Flip (minimal pairs):** derselbe Satz in einer Person — erst Presente, dann Vergangenheit, dann Zukunft; Verbform hervorgehoben; man formt jeweils um, bevor man weiterklickt.
-6. **🎙️ Shadowing (24):** hören → laut nachsprechen → Text zeigen (IT + DE). Trainiert Aussprache und Hörverstehen.
-7. **💬 Redewendungen:** siehe 8.3.
-8. **🎧 Orecchie (Hör-Geschichten):** siehe Abschnitt 11.
+6. **✏️ Verbformen (Tippen, 10):** Konjugations-SRS — das Tages-Ritual bewertet alle 6 Formen still ins Leitner-System; dieser Drill macht fällige Formen wieder dran (due-first) und füllt mit frischen Formen aus der Rotation auf (Zufallsperson). Getippt wird wie im Ritual (Akzent-/Gender-Toleranz); keine XP, wie bei allen Trainings.
+7. **🎙️ Shadowing (24):** hören → laut nachsprechen → Text zeigen (IT + DE). Trainiert Aussprache und Hörverstehen.
+8. **💬 Redewendungen:** siehe 8.3.
+9. **🎧 Orecchie (Hör-Geschichten):** siehe Abschnitt 11.
 
 **Satz-Engine (inhaltliches Prinzip):** Aus 14 kuratierten SVO-Mustern (*mangiare il pane, bere l'acqua, pagare il conto, comprare un biglietto, avere tempo* …) entstehen durch Kombination mit 6 Personen × 3 Zeiten **210 vollständige Satzpaare** — die deutsche Seite wird dabei grammatisch passend erzeugt (Präsens/Präteritum/perfekt-artiges „haben + Partizip“/Futur mit *werden*). Zusätzlich entstehen daraus Verneinungen („Io non mangio pane.“) und Fragen („Mangi il pane?“). Zusammen mit den 1.540 Story-Sätzen (dedupliziert) bildet das den Drillsatz-Pool. Lückentext-Ablenker stammen ausschließlich aus echten Verbformen.
 
@@ -277,6 +278,7 @@ Der „Reisepass“ zeigt **Können statt Zeit-in-App**:
 - **XP:** Wort entdeckt +2 · Hören/Erkennen richtig +10 · Bauen richtig +12 · Produzieren richtig +15 · Szene-Zeile +3 · Lektion erstmals abgeschlossen +25 (dazu Badge) · Mission +25 · Orecchie abgeschlossen +15 · Tagebuchsatz +20 · Sprachmemo +15 · Tages-Konjugation +10.
 - **Espresso del giorno:** tagstabil (Datum-Seed; gerade Tage bevorzugen Mini-Lektionen), genau einer pro Tag, ~3 Minuten, nach Erledigung: „morgen gibt es den nächsten“.
 - **Congiuga del giorno (Tages-Konjugation):** beim ersten Start des Tages ein Verb × eine Zeit, alle 6 Personen per Tipp-Eingabe in fester Folge (io → tu → lui/lei → noi → voi → loro; Akzente/Großschreibung egal; Gender-Alternativen „stato/a" akzeptiert, Reflexiv-Klitika optional). Falsch = richtige Form zeigen + am Ende der Runde wiederholen, bis einmal richtig. Rotation leicht → schwer: pro Level regelmäßige -are → -ere → -ire (inkl. -isc-Typ, -iare-Kontraktion, h-Einschub bei -care/-gare) → unregelmäßige (essere/avere zuerst); Level A1 → A2 → B1; drei Durchläufe Presente → Passato → Futuro, danach endlos von vorn (399 Einträge; unpersönliche Verben wie piovere ausgenommen). Abbrechbar, aber Banner + erneutes Overlay beim nächsten Start bis zur Erledigung; Fortschritt (Rotationsindex + Erledigungstag) wird gesynchronisiert.
+- **Konjugations-SRS-Verzahnung (v26):** das Ritual bewertet alle 6 Formen still ins Leitner-SRS (`verb_<slug>_<zeit>_<person>`; Erstversuch richtig → Box rauf, verhakt → Box 1 — zählt nicht extra aufs Tagesziel). Der Allenamento-Modus „Verbformen (Tippen)" wiederholt fällige Formen due-first und füllt mit frischen Formen der Rotation auf (10 pro Session, keine XP). Passaporto zeigt eine ☕-Bilanz: Konjugationen gesamt · Ø-Erstversuchs-Quote · schwächste Person (ab 3 Anfragen).
 - **Output-Wochenbilanz** (Startseite): Sätze produziert (Training + Tagebuch), Missionen, Memos der laufenden ISO-Woche.
 
 ---

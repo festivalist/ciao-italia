@@ -608,3 +608,11 @@ body {
 .conj-banner .arr { font-weight: 800; margin-left: 2px; }
 @keyframes conjSlideUp { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translate(-50%, 0); } }
 @media (prefers-reduced-motion: reduce) { .conj-banner { animation: none; } .conj-dot { transition: none; } }
+
+/* ---------- Verbformen-Drill (Allenamento, nutzt conj-Bausteine) ---------- */
+.drill-card .conj-verb { font-size: 28px; margin-top: 8px; }
+.drill-card .conj-de { margin: 2px 0 8px; }
+.drill-card .conj-person { font-size: 20px; margin: 0 0 8px; }
+.drill-card .conj-input { max-width: 340px; }
+.drill-card .conj-feedback { min-height: 36px; }
+.drill-card > .btn { margin-top: 4px; }

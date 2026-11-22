@@ -33,7 +33,17 @@ Personen in fester Folge **io → tu → lui/lei → noi → voi → loro** (Anz
 - `sw.js`: Bump auf `ciaoit-v25`.
 - Datenfix nebenbei: `manciamo → manchiamo` (verbs-a2.js).
 
+## M1 — Conj vertiefen (SRS-Verzahnung, Statistik, Freiübung; 22.11.2026)
+
+Entscheidungen (Grilling):
+1. **Freiübung:** 10 Formen pro Session, due-first, Rest aus der Rotation aufgefüllt (auch neue Formen, Zufallsperson).
+2. **Ritual → SRS:** alle 6 Formen werden still bewertet (Erstversuch → Box rauf, verhakt → Box 1); `grade(key, knew, quiet)` zählt stille Bewertungen nicht aufs Tagesziel.
+3. **Statistik (kompakt):** `ciaoit_conj.stats { total, first, asked[6], hit[6] }`; Passaporto-☕-Karte nach der Streak-Karte (gesamt · %-Erstversuch · schwächste Person ab 3 Anfragen).
+4. **XP:** keine für die Freiübung (wie bei allen Trainings-Modi).
+
+Umsetzung: `verbKeyParse`/`verbsBySlugMap`/`conjSlug` im Marker-Block (Node-getestet), `startVerbDrill` + `buildVerbDeck` + `verbDueCount` im Allenamento (Menü-Eintrag nach Zeitform-Flip), sw → v26.
+
 ## Verifikation
 
-- Node: `node tools/check-conj-queue.js` (grün) + `node tools/validate.js` (grün).
-- Browser-E2E: frisches Profil, Reihenfolge inkl. voi-vor-loro, Fehler-/Wiederholungspfad, Abbruch + Banner + Re-Overlay, Tagesfortschritt, XP, Sync-Key-Registrierung.
+- Node: `node tools/check-conj-queue.js` (grün, inkl. verbKey-Roundtrip) + `node tools/validate.js` (grün).
+- Browser-E2E: frisches Profil, Reihenfolge inkl. voi-vor-loro, Fehler-/Wiederholungspfad, Abbruch + Banner + Re-Overlay, Tagesfortschritt, XP, Sync-Key-Registrierung; M1: Ritual-Grading (6 verb_*-Keys, Boxen), Statistik-Karte, Drill due-first, kein Drill-XP.
