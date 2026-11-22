@@ -1,5 +1,17 @@
 # ToDo — Stand 12.10.2026
 
+- [x] **M4a: Audio-Upgrade — 934 Neural-MP3s** (22.11.2026):
+      Alle 832 Wörter (word_*) und 102 Dialogzeilen (dlg_*) als echte
+      MP3-Dateien mit Microsoft-Edge-Neuralstimme it-IT-ElsaNeural
+      erzeugt (tools/generate-audio-mp3s.py, edge-tts, resumable,
+      --limit/--voice). App unverändert (speak() nutzt Datei vor TTS),
+      nur sw v28 → v29. Verifikation: 934/934 Dateien vorhanden und
+      nicht leer (12 MB), ffprobe-Dauern plausibel (Wörter ~0,8–1,9 s,
+      Dialogzeilen ~2–3 s), Browser-E2E: echte Keys laden mit
+      duration > 0, verb_-Kontrolle bleibt TTS-Fallback, App bootet
+      fehlerfrei, validate grün. B2 (M4b) bewusst separat geplant.
+      Spec: .scratch/m4-audio/spec.md.
+
 - [x] **M3: Dialog-Rollen-Modus (Rollenspiel)** (22.11.2026):
       „🎭 Rollenspiel"-Button in jedem Viaggio-Dialog: geführter Modus,
       in dem die App die Partner-Rollen spricht und man die „Du"-Zeilen

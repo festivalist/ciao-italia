@@ -9,7 +9,7 @@ Dieses Dokument beschreibt Zweck, Inhalte, Features und Bedienung der App vollst
 - Sie läuft auf **eigenem Webspace** (Shared Hosting mit PHP und HTTPS), Deployment per **FTP**. Kein App-Store, kein Account-Zwang, keine Fremd-Dienste.
 - Sie funktioniert nach dem ersten vollständigen Laden **komplett offline**.
 
-Stand der Beschreibung: Version ciaoit-v28 (November 2026).
+Stand der Beschreibung: Version ciaoit-v29 (November 2026).
 
 ---
 
@@ -289,6 +289,7 @@ Der „Reisepass“ zeigt **Können statt Zeit-in-App**:
 ## 14. Audio-Konzept
 
 - **Zwei-Stufen-Audio:** Zuerst wird eine hinterlegte Audiodatei (MP3) gesucht; **fehlt sie, fällt die App automatisch auf die Gerätesprachausgabe (TTS) für it-IT zurück** (Geschwindigkeit standardmäßig 0.9; Hör-Geschichten/Dialoge wählbar 0.6/0.85/1.05).
+- **Bestand an hinterlegten MP3s (v29):** alle 832 Wörter (`word_*`) und alle 102 Dialogzeilen (`dlg_*`) sind als Datei vorhanden — erzeugt mit der Microsoft-Edge-Neuralstimme **it-IT-ElsaNeural** (edge-tts; Skript `tools/generate-audio-mp3s.py`, resumable). Verbformen, Übungs- und Story-Sätze bleiben beim it-IT-TTS-Fallback. Dateinamen weiterhin gemäß AUDIO-MANIFEST.
 - **Jedes sprechenbare Element hat einen stabilen Audioschlüssel** (Wort, Verbform, Satz, Dialogzeile, Regel-Beispiel, Checklisten-Satz, Missions-Satz, Kapitel-Meilenstein, Tagebuch-Eintrag). Die erwartbaren Dateinamen sind in einer Manifest-Liste erzeugbar — **MP3s bleiben optional**, die App ist ohne eine einzige Audiodatei voll funktionsfähig.
 - **iPhone:** Standardstimme it-IT; in den iOS-Einstellungen kann eine hochwertigere italienische Stimme nachgeladen werden.
 - **Globaler Ton-Schalter** in der Kopfzeile; Ton-aus respektieren alle Auto-Aufrufe.
