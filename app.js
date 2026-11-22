@@ -159,6 +159,21 @@
   /* ---------- XP, Badges & Story-Fortschritt ---------- */
   function xpState() { return LS.get("ciaoit_xp", { xp: 0, badges: [] }); }
   function addXP(n) { const x = xpState(); x.xp += n; LS.set("ciaoit_xp", x); }
+  // Identitäts-Stufen — rein aus XP abgeleitet, nichts zusätzlich gespeichert.
+  // Zur Größenordnung: Lektion ≈ +25–30, Tages-Ritual +10, Mission +25.
+  const XP_RANKS = [
+    { min: 0,    title: "Turista",         ico: "🧭" },
+    { min: 150,  title: "Viaggiatore",     ico: "🎒" },
+    { min: 500,  title: "Amico del posto", ico: "🤝" },
+    { min: 1200, title: "Quasi italiano",  ico: "☕" },
+    { min: 2500, title: "Italiano doc",    ico: "🏆" }
+  ];
+  function xpRank() {
+    const xp = xpState().xp || 0;
+    let idx = 0;
+    XP_RANKS.forEach((r, i) => { if (xp >= r.min) idx = i; });
+    return { rank: XP_RANKS[idx], next: XP_RANKS[idx + 1] || null, xp };
+  }
   function storyState() { return LS.get("ciaoit_stories", {}); }
   function storyDone(id) { const st = storyState()[id]; return !!(st && st.done); }
 
@@ -404,7 +419,7 @@
     const xps = xpState();
     const storiesDone = STORIES.filter(s => storyDone(s.id)).length;
     const badgeIcons = xps.badges.map(id => { const st = STORIES.find(s => s.id === id); return st ? st.icon : ""; }).join(" ");
-    wrap.appendChild(el("p", "xp-line home", `⭐ ${xps.xp} XP · 🏅 ${storiesDone}/${STORIES.length} Stories${badgeIcons ? "  " + badgeIcons : ""}`));
+    wrap.appendChild(el("p", "xp-line home", `⭐ ${xps.xp} XP · ${xpRank().rank.title} · 🏅 ${storiesDone}/${STORIES.length} Stories${badgeIcons ? "  " + badgeIcons : ""}`));
 
     // Streak + Tagesziel
     const stk = streak(); const todayN = goalToday();
@@ -530,11 +545,38 @@
     if (days === 0) return "✈️ Buon viaggio — heute!";
     return "🌴 Reise vorbei — dranbleiben!";
   }
+  let tripOpen = false;
   function setTrip() {
-    const cur = settings.tripDate || "";
-    const v = window.prompt("Reisedatum (JJJJ-MM-TT):", cur);
-    if (v === null) return;
-    settings.tripDate = v.trim() || null; saveSettings(); viewHome();
+    if (tripOpen) return;
+    tripOpen = true;
+    const overlay = el("div", "conj-overlay");
+    const card = el("div", "conj-card");
+    overlay.appendChild(card);
+    card.appendChild(el("div", "conj-kicker", "Quando parti?"));
+    card.appendChild(el("div", "conj-verb", "✈️"));
+    card.appendChild(el("div", "conj-de", "Reisedatum für den Countdown auf der Startseite."));
+    const input = el("input", "conj-input trip-input");
+    input.type = "date";
+    input.value = settings.tripDate || "";
+    input.setAttribute("aria-label", "Reisedatum wählen");
+    const save = el("button", "btn btn-primary", "Speichern");
+    card.appendChild(input);
+    card.appendChild(save);
+    if (settings.tripDate) {
+      const del = el("button", "conj-later", "Datum löschen");
+      card.appendChild(del);
+      del.addEventListener("click", () => { settings.tripDate = null; saveSettings(); close(); viewHome(); });
+    }
+    const cancel = el("button", "conj-later", "Abbrechen");
+    card.appendChild(cancel);
+    document.body.appendChild(overlay);
+    function close() { overlay.remove(); tripOpen = false; }
+    save.addEventListener("click", () => {
+      settings.tripDate = input.value || null; // input[type=date] liefert JJJJ-MM-TT oder leer
+      saveSettings(); close(); viewHome();
+    });
+    cancel.addEventListener("click", close);
+    setTimeout(() => input.focus(), 50);
   }
 
   /* ---------- VOCAB ---------- */
@@ -647,21 +689,36 @@
     const wrap = el("div");
     wrap.appendChild(el("h2", "view-title", "Verbi"));
     wrap.appendChild(el("p", "view-sub", `${D.verbs.length} häufige Verben in Presente, Passato prossimo und Futuro semplice.`));
+    let levelFilter = null;
+    const chipsRow = el("div", "tabs");
+    wrap.appendChild(chipsRow);
     const search = el("input", "search-input");
     search.type = "search";
     search.placeholder = "Verb oder Bedeutung suchen …";
     search.setAttribute("aria-label", "Verben durchsuchen");
     wrap.appendChild(search);
     const card = el("div", "card");
+    function drawChips() {
+      chipsRow.innerHTML = "";
+      if (fold(search.value).trim()) { chipsRow.classList.add("hidden"); return; }
+      chipsRow.classList.remove("hidden");
+      [["Alle", null], ["A1", "A1"], ["A2", "A2"], ["B1", "B1"]].forEach(([label, lv]) => {
+        const c = el("button", "chip" + (levelFilter === lv ? " active" : ""), label);
+        c.addEventListener("click", () => { levelFilter = lv; draw(search.value); });
+        chipsRow.appendChild(c);
+      });
+    }
     function draw(query) {
+      drawChips();
       card.innerHTML = "";
       const q = fold(query).trim();
-      D.verbs.filter(v => !q || fold(`${v.inf} ${v.de}`).includes(q)).forEach(v => {
+      D.verbs.filter(v => (!levelFilter || VERB_LEVEL.get(v) === levelFilter) && (!q || fold(`${v.inf} ${v.de}`).includes(q))).forEach(v => {
         const row = el("div", "row");
         const g = el("div", "grow");
         g.appendChild(el("div", "pt", v.inf));
         g.appendChild(el("div", "de", v.de));
         row.appendChild(g);
+        row.appendChild(el("span", "lv " + VERB_LEVEL.get(v), VERB_LEVEL.get(v)));
         row.appendChild(el("span", "play", "›"));
         row.addEventListener("click", () => viewVerb(v));
         card.appendChild(row);
@@ -679,7 +736,11 @@
     back.addEventListener("click", viewVerbs);
     wrap.appendChild(back);
     wrap.appendChild(el("h2", "view-title", v.inf));
-    wrap.appendChild(el("p", "view-sub", v.de));
+    const lvlRow = el("p", "view-sub lvl-row");
+    lvlRow.appendChild(el("span", "lv " + VERB_LEVEL.get(v), VERB_LEVEL.get(v)));
+    lvlRow.appendChild(el("span", "lv " + (conjIsRegular(v) ? "reg" : "irr"), conjIsRegular(v) ? "regelmäßig" : "unregelmäßig"));
+    lvlRow.appendChild(document.createTextNode(v.de));
+    wrap.appendChild(lvlRow);
 
     const tabs = el("div", "tabs");
     const body = el("div", "card");
@@ -1744,10 +1805,15 @@
   /* conj-queue:end */
 
   const CONJ_QUEUE = buildConjQueue(D.verbs);
+  // Level je Verb (implizit über Array-Position, siehe ADR-0001) — für Verbi-Filter/Badges
+  const VERB_LEVEL = new Map();
+  D.verbs.forEach((v, i) => VERB_LEVEL.set(v, conjLevel(i)));
   function conjTenseLabel(id) { const t = D.meta.tenses.find(t => t.id === id); return t ? t.label : id; }
   function conjState() { return LS.get("ciaoit_conj", { qi: 0, doneDay: null }); }
   function conjDoneToday() { return conjState().doneDay === ymd(); }
   function conjCurrent() { const len = CONJ_QUEUE.length; return len ? CONJ_QUEUE[conjState().qi % len] : null; }
+  // Readiness: Ritual (und Banner) erst nach der ersten abgeschlossenen Lektion
+  function conjRitualUnlocked() { return STORIES.some(s => storyDone(s.id)); }
   // Anzeige-Bilanz (Bestandsprofile haben noch kein stats — lazy)
   function conjStats() {
     const st = conjState();
@@ -1758,7 +1824,7 @@
   /* ---------- Nudge-Banner (Body-Level, bis die Tagesaufgabe erledigt ist) ---------- */
   function updateConjBanner() {
     let b = $(".conj-banner");
-    if (conjDoneToday()) { if (b) b.remove(); return; }
+    if (conjDoneToday() || !conjRitualUnlocked()) { if (b) b.remove(); return; }
     const item = conjCurrent();
     if (!item) return;
     if (!b) {
@@ -1772,7 +1838,7 @@
   /* ---------- Overlay: eine volle Konjugation tippen ---------- */
   let conjOpen = false;
   function openConj() {
-    if (conjOpen || conjDoneToday()) return;
+    if (conjOpen || conjDoneToday() || !conjRitualUnlocked()) return;
     const item = conjCurrent();
     if (!item) return;
     conjOpen = true;
@@ -1897,7 +1963,7 @@
     wrap.appendChild(el("p", "view-sub", "Dein Lernpfad: kleine Szenen, jede rund sechs Minuten. Level für Level wächst dein Italienisch."));
     const done = STORIES.filter(s => storyDone(s.id)).length;
     const xpLine = el("div", "xp-line");
-    xpLine.appendChild(el("span", "xp-chip", `⭐ ${xpState().xp} XP`));
+    xpLine.appendChild(el("span", "xp-chip", `⭐ ${xpState().xp} XP · ${xpRank().rank.title}`));
     xpLine.appendChild(el("span", "xp-chip", `🏅 ${done}/${STORIES.length} Stories`));
     wrap.appendChild(xpLine);
     const badgeIds = xpState().badges;
@@ -2367,6 +2433,25 @@
     const wrap = el("div");
     wrap.appendChild(el("h2", "view-title", "Passaporto"));
     wrap.appendChild(el("p", "view-sub", "Was du schon kannst — deine Ausgaben, deine Sätze, deine Missionen."));
+
+    /* Identitäts-Stufe (rein aus XP abgeleitet) */
+    const xr = xpRank();
+    const rc = el("div", "streak-card");
+    rc.appendChild(el("div", "streak-flame", xr.rank.ico));
+    const rinfo = el("div", "streak-info grow");
+    rinfo.appendChild(el("div", "streak-num", `${xr.rank.title} · ${xr.xp} XP`));
+    if (xr.next) {
+      const bar = el("div", "progbar");
+      const fill = el("div", "progfill");
+      fill.style.width = `${Math.min(100, Math.round((xr.xp - xr.rank.min) / (xr.next.min - xr.rank.min) * 100))}%`;
+      bar.appendChild(fill);
+      rinfo.appendChild(bar);
+      rinfo.appendChild(el("div", "streak-sub", `Noch ${xr.next.min - xr.xp} XP bis „${xr.next.title}“ ${xr.next.ico}`));
+    } else {
+      rinfo.appendChild(el("div", "streak-sub", "Höchste Stufe erreicht — benvenuto in famiglia!"));
+    }
+    rc.appendChild(rinfo);
+    wrap.appendChild(rc);
 
     /* Serie (entgiftet): Rekord für immer */
     const s = streak();
@@ -2886,8 +2971,8 @@
   const initial = (location.hash || "#percorso").slice(1);
   go(VIEWS[initial] ? initial : "percorso");
 
-  // Congiuga del giorno: beim ersten Start des Tages abfragen
-  if (!conjDoneToday()) openConj();
+  // Congiuga del giorno: beim ersten Start des Tages abfragen (erst nach Lektion 1)
+  if (!conjDoneToday() && conjRitualUnlocked()) openConj();
 
   // Server-Sync: beim Start neueren Server-Stand holen (falls Code gesetzt)
   if (settings.syncCode && navigator.onLine) {

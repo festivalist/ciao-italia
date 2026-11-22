@@ -9,7 +9,7 @@ Dieses Dokument beschreibt Zweck, Inhalte, Features und Bedienung der App vollst
 - Sie läuft auf **eigenem Webspace** (Shared Hosting mit PHP und HTTPS), Deployment per **FTP**. Kein App-Store, kein Account-Zwang, keine Fremd-Dienste.
 - Sie funktioniert nach dem ersten vollständigen Laden **komplett offline**.
 
-Stand der Beschreibung: Version ciaoit-v26 (November 2026).
+Stand der Beschreibung: Version ciaoit-v27 (November 2026).
 
 ---
 
@@ -63,14 +63,14 @@ Die App kombiniert mehrere erprobte Methoden zu einem System:
 | ◉ | **Percorso** | Der Lernpfad: alle 250 Lektionen, Level für Level, mit Fortschritt |
 | ⌂ | **Inizio** | Startseite: Countdown zur Reise, Tagesziel, Espresso del giorno, nächste echte Mission, Wochenbilanz, Kategorie-Fortschritt, Ferriss-Sätze |
 | Aa | **Parole** | Wortschatz: 832 Wörter in 52 Kategorien, Suche, Level-Filter |
-| ↻ | **Verbi** | 135 Verben mit Konjugationstabellen (3 Zeiten × 6 Personen) |
+| ↻ | **Verbi** | 135 Verben mit Konjugationstabellen (3 Zeiten × 6 Personen), Level-Filter (A1/A2/B1) und Regelmäßigkeits-Badge |
 | ✎ | **Sapere** | Wissen: Aussprache-Regeln, Grammatik, 84 Redewendungen |
 | ◎ | **Allenamento** | Freies Training: 9 Trainingsmodi |
 | ◇ | **Viaggio** | Reisematerial: Checklisten, Missionen, 18 Dialoge |
 
 Dazu in der Kopfzeile: **🛂 Passaporto** (Profil & Können, Abschnitt 12) und ein **globaler Ton-Schalter** 🔊/🔇.
 
-**Congiuga del giorno (Tages-Konjugation):** Beim ersten App-Start des Tages öffnet sich ein Abfrage-Overlay: ein Verb wird vollständig durchkonjugiert — sechs Personen in fester Folge (io → tu → lui/lei → noi → voi → loro), Formen werden getippt (Akzente, Groß-/Kleinschreibung und Gender-Alternativen wie „stato/a" sind tolerant). Falsche Formen werden aufgelöst und am Ende der Runde erneut abgefragt, bis sie einmal richtig getippt wurden. Das Ritual ist abbrechbar („Später"), aber ein Terrakotta-Banner bleibt auf allen Seiten stehen, und beim nächsten App-Start erscheint das Overlay erneut — bis die Tages-Konjugation erledigt ist (+10 XP, zählt aufs Tagesziel).
+**Congiuga del giorno (Tages-Konjugation):** Beim ersten App-Start des Tages öffnet sich ein Abfrage-Overlay: ein Verb wird vollständig durchkonjugiert — sechs Personen in fester Folge (io → tu → lui/lei → noi → voi → loro), Formen werden getippt (Akzente, Groß-/Kleinschreibung und Gender-Alternativen wie „stato/a" sind tolerant). Falsche Formen werden aufgelöst und am Ende der Runde erneut abgefragt, bis sie einmal richtig getippt wurden. Das Ritual ist abbrechbar („Später"), aber ein Terrakotta-Banner bleibt auf allen Seiten stehen, und beim nächsten App-Start erscheint das Overlay erneut — bis die Tages-Konjugation erledigt ist (+10 XP, zählt aufs Tagesziel). **Readiness:** Overlay und Banner erscheinen erst nach der ersten abgeschlossenen Lektion — frische Profile starten sanft mit dem Percorso.
 
 **Typischer Tagesablauf eines Nutzers:**
 1. App öffnen → **Congiuga del giorno**: das Tages-Verb konjugieren (Overlay; abbrechbar, dann Banner-Erinnerung) → Startseite zeigt „Weiter mit Story X“ oder den **Espresso del giorno** (genau eine kurze Challenge pro Tag, danach „Espresso getrunken — per oggi basta!“).
@@ -276,6 +276,7 @@ Der „Reisepass“ zeigt **Können statt Zeit-in-App**:
 - **Tagesziel:** **15 Übungen** pro Tag (Ringanzeige; jede abgeschlossene Übung zählt 1).
 - **Streak:** +1 Tag bei Aktivität an Folgetag; **2 Freezes** (ein verpasster Tag verbraucht einen); **1 Pausentag pro Woche** ist erlaubt, ohne die Serie zu brechen; Rekord bleibt dauerhaft.
 - **XP:** Wort entdeckt +2 · Hören/Erkennen richtig +10 · Bauen richtig +12 · Produzieren richtig +15 · Szene-Zeile +3 · Lektion erstmals abgeschlossen +25 (dazu Badge) · Mission +25 · Orecchie abgeschlossen +15 · Tagebuchsatz +20 · Sprachmemo +15 · Tages-Konjugation +10.
+- **XP-Stufen (Identität, v27):** rein aus XP abgeleitet, nichts separat gespeichert — 🧭 Turista (0) · 🎒 Viaggiatore (150) · 🤝 Amico del posto (500) · ☕ Quasi italiano (1.200) · 🏆 Italiano doc (2.500). Passaporto zeigt die Stufenkarte mit Fortschrittsbalken zur nächsten Stufe; der Titel steht klein neben den XP-Zahlen auf Startseite und Percorso.
 - **Espresso del giorno:** tagstabil (Datum-Seed; gerade Tage bevorzugen Mini-Lektionen), genau einer pro Tag, ~3 Minuten, nach Erledigung: „morgen gibt es den nächsten“.
 - **Congiuga del giorno (Tages-Konjugation):** beim ersten Start des Tages ein Verb × eine Zeit, alle 6 Personen per Tipp-Eingabe in fester Folge (io → tu → lui/lei → noi → voi → loro; Akzente/Großschreibung egal; Gender-Alternativen „stato/a" akzeptiert, Reflexiv-Klitika optional). Falsch = richtige Form zeigen + am Ende der Runde wiederholen, bis einmal richtig. Rotation leicht → schwer: pro Level regelmäßige -are → -ere → -ire (inkl. -isc-Typ, -iare-Kontraktion, h-Einschub bei -care/-gare) → unregelmäßige (essere/avere zuerst); Level A1 → A2 → B1; drei Durchläufe Presente → Passato → Futuro, danach endlos von vorn (399 Einträge; unpersönliche Verben wie piovere ausgenommen). Abbrechbar, aber Banner + erneutes Overlay beim nächsten Start bis zur Erledigung; Fortschritt (Rotationsindex + Erledigungstag) wird gesynchronisiert.
 - **Konjugations-SRS-Verzahnung (v26):** das Ritual bewertet alle 6 Formen still ins Leitner-SRS (`verb_<slug>_<zeit>_<person>`; Erstversuch richtig → Box rauf, verhakt → Box 1 — zählt nicht extra aufs Tagesziel). Der Allenamento-Modus „Verbformen (Tippen)" wiederholt fällige Formen due-first und füllt mit frischen Formen der Rotation auf (10 pro Session, keine XP). Passaporto zeigt eine ☕-Bilanz: Konjugationen gesamt · Ø-Erstversuchs-Quote · schwächste Person (ab 3 Anfragen).

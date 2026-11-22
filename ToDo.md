@@ -1,5 +1,24 @@
 # ToDo — Stand 12.10.2026
 
+- [x] **M2: XP-Identität + Quick Wins** (22.11.2026):
+      XP-Stufen (rein abgeleitet, kein neuer Storage): 🧭 Turista (0) ·
+      🎒 Viaggiatore (150) · 🤝 Amico del posto (500) · ☕ Quasi italiano
+      (1.200) · 🏆 Italiano doc (2.500). Passaporto-Stufenkarte mit
+      Fortschrittsbalken vor der Streak-Karte; Titel zusätzlich in
+      Home-XP-Zeile und Percorso-Chip. Verbi-Tab: Level-Chips
+      (Alle/A1/A2/B1, Parole-Muster) + Level-Badge je Zeile via
+      VERB_LEVEL-Map (conjLevel); Detail zeigt Level +
+      „regelmäßig/unregelmäßig" (conjIsRegular) — schließt die
+      dokumentierte Lücke „Verben ohne Level". Reisedatum: Overlay mit
+      input[type=date] (Speichern/Abbrechen/Löschen) ersetzt das letzte
+      blockierende window.prompt und repariert die Datums-Validierung.
+      Ritual-Gate (Readiness): Overlay + Banner erst nach der ersten
+      abgeschlossenen Lektion (Bestandsprofile unberührt). E2E bestanden:
+      Gate hält/löst, Stufenkarte rechnet (23 % bei 230 XP), Filter-Zählung
+      100/19/16/135,essere-Detail „A1 · unregelmäßig", Trip-Dialog komplett
+      ohne nativen Dialog, 0 JS-Fehler. sw v26 → v27; Spec:
+      .scratch/m2-identitaet-quickwins/spec.md.
+
 - [x] **M1: Conj vertiefen — SRS-Verzahnung, Statistik, Freiübung** (22.11.2026):
       Das Tages-Ritual bewertet jetzt alle 6 Formen still ins Leitner-SRS
       (verb_<slug>_<zeit>_<person>; Erstversuch → Box rauf, verhakt → Box 1;
