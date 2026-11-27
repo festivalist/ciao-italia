@@ -1,4 +1,27 @@
-# ToDo — Stand 12.10.2026
+# ToDo — Stand 27.11.2026
+
+- [x] **Siebte Runde Minilektionen → Voll-Lektionen (A2: 10 weitere Minis)** (27.11.2026):
+      m2b-posta (Einschreiben), m2b-sentimenti (Gefühle gestern), m2b-medico
+      (Beim Arzt sagen), m2b-ristorante (Gedeck & Co.), m2b-appartamento
+      (Wohnungsdaten), m2b-streik (Streik-Meldung), m2b-notte (Eine Nacht),
+      m2b-vestiti (Anprobe), m2b-lavoro (Berufs-Smalltalk), m2b-messaggi
+      (Schreib mir) — gleiche Methode wie Runden 1–6: Indizes 0–3 stabil,
+      je 8 Wörter / 7 Sätze, build [0,4,5] / produce [1,2,6], Szene +1 Satz.
+      Neue Wortkarten: 19 per key:-Verweise auf den Bestand (modulo,
+      sportello, preoccupato, sorpreso, visita, ricetta, contorno,
+      vino della casa, monolocale, silenzioso, passeggero, controllore,
+      abitudine, all'epoca, comodo, bottone, stipendio, curriculum,
+      chiamata, rete) + 1 bewusst story-lokal (la festa). Pre-Check fischte
+      2 Satz-Duplikate mit den Themen-Stories („Compili questo modulo…“ in
+      posta → variiert; „Il monolocale è piccolo ma luminoso.“ in
+      appartamento → variiert). Grammatik-Vertiefung: Lei-Imperativ +
+      bisogna (posta), Imperfetto × Passato (sentimenti), passato prossimo
+      con essere (medico), si-Imperfetto (notte), Passivo prossimo
+      (streik), Comparativi (appartamento). A2 jetzt 70 Voll / 5 Minis.
+      validate 0 Fehler, Audit 0 Lücken, Manifest 5.959 → 5.990 (+30 Sätze,
+      +1 Karte), sw v31 → v32 (?v=32 in index.html + SW-SHELL gemeinsam
+      gebumpt), Browser-E2E bestanden (m2b-ristorante komplett,
+      Fortschritt/XP byte-stabil, SRS-Keys sent_0/1/2/4/5/6).
 
 - [x] **M4a-Abschluss: Audio-CDN-Hybrid live (ciaoit-v31)** (22.11.2026):
       lima-city erlaubt bewusst keine Audiodateien → Audio-Kette jetzt
@@ -270,9 +293,10 @@
 - [x] **Portugal-Relikte bereinigt** (DE→PT, PT→DE, „Muito bem“ → italienisch) und **Allenamento skalier**: Story-Sätze (~1.350) in alle Drill-Pools integriert (Pool 350 → 1.696 Sätze), Session-Größen erhöht (Misch 24, Satzbau 20, Karteikarten 40, Drill 24, Shadowing 24).
 - [x] **Viaggio & Parole modernisiert:** Missions-Liste mit allen 258 Missionen (Reise + Lektionen, je +25 XP), Checkliste mit SRS-Grading (alte Häkchen migriert), Dialog-Wiedergabe ohne Überlappung (Tempo + Stop), Story-Verweise; Parole mit Level-Filtern, Lernstand-Balken, Lernpunkte pro Wort und Kategorie-Üben.
 - [x] **Release-Check komplett:** Alle Reiter + Klickpfade getestet. Gefunden & gefixt: IDBRequest-Bug (Memo-Liste/tx lieferte immer undefined), MEMODB.open gehärtet (onblocked + Timeout), Audio-Manifest um Kapitel- und Orecchie-Keys erweitert (4.823), Sync-Erstkontakt/Gerätewechsel erneut verifiziert.
-- [ ] **Später:** Minilektionen schrittweise zu Voll-Lektionen ausbauen — als
-      Nächstes die letzten 15 A2-Minis, dann B1 ab 43 (36 „m-"-Minis);
-      A1 offen: 82–100 (19 Minis). Insgesamt noch ~70 Minis
+- [ ] **Später:** Minilektionen schrittweise zu Voll-Lektionen ausbauen — A2
+      offen: 71–75 (5 Minis: Opas Geschichten, Wetter morgen, Ich käme
+      gern…, Doppel-Pronomen, Umsteigen), dann B1 ab 43 (36 „m-"-Minis);
+      A1 offen: 82–100 (19 Minis). Insgesamt noch 60 Minis
       (kein Generator, alle handgeschrieben).
 - [ ] **Später:** Web-Push, echte Audioaufnahmen, ggf. B2-Gerüst befüllen.
 - [ ] **Optional später:** Web-Push-Erinnerungen (iOS 16.4+), echte Audioaufnahmen

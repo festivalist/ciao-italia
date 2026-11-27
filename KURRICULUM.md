@@ -97,14 +97,18 @@ Neue Dialoge in `sentences.js`: „famiglia“ (Familie vorstellen) und
 
 Bestand gesamt: 52 Kategorien / 773 Wörter · 125 Verben · 10 Dialoge · 36 Stories.
 
-A2 wurde auf 75 Lektionen ausgebaut; Stand 12.10.2026: **60 Voll-Stories +
-15 Mini-Lektionen** — 20 Minis sind inzwischen zu Voll-Lektionen ausgebaut
-(die „m2a-"-Reihe und der größte Teil der „m2b-"-Reihe: Pronomen direkt/
+A2 wurde auf 75 Lektionen ausgebaut; Stand 27.11.2026: **70 Voll-Stories +
+5 Mini-Lektionen** — 30 Minis sind inzwischen zu Voll-Lektionen ausgebaut
+(die „m2a-"-Reihe und fast die gesamte „m2b-"-Reihe: Pronomen direkt/
 indirekt, piacere, ne, ci, da + Zeit, Vergleiche, meglio/migliore,
-Wetter-Imperfetto, Telefon), je 8 Wörter / 7 Sätze, Satz-Indizes 0–3 stabil.
+Wetter-Imperfetto, Telefon, Einschreiben, Gefühle gestern, Beim Arzt sagen,
+Gedeck & Co., Wohnungsdaten, Streik-Meldung, Eine Nacht, Anprobe,
+Berufs-Smalltalk, Schreib mir), je 8 Wörter / 7 Sätze, Satz-Indizes 0–3
+stabil. Übrig bleiben 5 A2-Minis: Opas Geschichten, Wetter morgen,
+Ich käme gern…, Doppel-Pronomen, Umsteigen.
 Themen: Imperfetto/Passato-Kontrast, Condizionale, Imperativo tu/Lei/voi,
 direkte & indirekte Pronomen, piacere, ne/ci, Vergleiche, da + Zeitraum,
-Passivo-light (è stato cancellato, va assaggiata).
+Passivo-light (è stato cancellato, va assaggiata, sono stati avvisati).
 
 A2-Kategorien (in `vocabulary-a2.js`, je `level: "A2"`): Emotionen & Charakter,
 Gesundheit & Arzt, Wetter vertieft, Unterwegs: Details, Post & Bank,

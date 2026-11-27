@@ -1,0 +1,125 @@
+{
+  "lessons": [
+    {
+      "id": "m2b-posta",
+      "newWords": [
+        { "it": "il modulo", "de": "das Formular", "emoji": "📝", "key": "word_servizi_il_modulo" },
+        { "it": "lo sportello", "de": "der Schalter", "emoji": "🏦", "key": "word_servizi_lo_sportello" }
+      ],
+      "newSentences": [
+        { "it": "Questo modulo è per la raccomandata?", "de": "Ist dieses Formular für das Einschreiben?" },
+        { "it": "Lo sportello per i pacchi è il numero due.", "de": "Der Schalter für Pakete ist Nummer zwei." },
+        { "it": "Bisogna firmare qui.", "de": "Hier muss man unterschreiben." }
+      ]
+    },
+    {
+      "id": "m2b-sentimenti",
+      "newWords": [
+        { "it": "preoccupato", "de": "besorgt", "emoji": "😟", "key": "word_emozioni_preoccupato" },
+        { "it": "sorpreso", "de": "überrascht", "emoji": "😮", "key": "word_emozioni_sorpreso" }
+      ],
+      "newSentences": [
+        { "it": "Ero preoccupato per te ieri sera.", "de": "Ich war gestern Abend um dich besorgt." },
+        { "it": "Ero sorpreso quando ho visto il regalo.", "de": "Ich war überrascht, als ich das Geschenk gesehen habe." },
+        { "it": "Mi sentivo preoccupato, ma poi è andato tutto bene.", "de": "Ich fühlte mich besorgt, aber dann ist alles gut gegangen." }
+      ]
+    },
+    {
+      "id": "m2b-medico",
+      "newWords": [
+        { "it": "la visita", "de": "die (ärztliche) Untersuchung", "emoji": "🩻", "key": "word_salute2_la_visita" },
+        { "it": "la ricetta", "de": "das Rezept", "emoji": "🧾", "key": "word_salute2_la_ricetta" }
+      ],
+      "newSentences": [
+        { "it": "La visita è stata breve.", "de": "Die Untersuchung war kurz." },
+        { "it": "Il dottore mi ha scritto una ricetta.", "de": "Der Doktor hat mir ein Rezept geschrieben." },
+        { "it": "Con questa ricetta vado in farmacia.", "de": "Mit diesem Rezept gehe ich in die Apotheke." }
+      ]
+    },
+    {
+      "id": "m2b-ristorante",
+      "newWords": [
+        { "it": "il contorno", "de": "die Beilage", "emoji": "🥗", "key": "word_uscire_il_contorno" },
+        { "it": "il vino della casa", "de": "der Hauswein", "emoji": "🍷", "key": "word_uscire_il_vino_della_casa" }
+      ],
+      "newSentences": [
+        { "it": "Come contorno prendo le verdure.", "de": "Als Beilage nehme ich Gemüse." },
+        { "it": "Un litro di vino della casa, per favore.", "de": "Einen Liter Hauswein, bitte." },
+        { "it": "Il contorno era freddo, ma il vino era ottimo.", "de": "Die Beilage war kalt, aber der Wein war ausgezeichnet." }
+      ]
+    },
+    {
+      "id": "m2b-appartamento",
+      "newWords": [
+        { "it": "il monolocale", "de": "das Einzimmerapartment", "emoji": "🚪", "key": "word_abitare_il_monolocale" },
+        { "it": "silenzioso", "de": "leise / ruhig", "emoji": "🔇", "key": "word_abitare_silenzioso" }
+      ],
+      "newSentences": [
+        { "it": "Il monolocale è piccolo, ma c'è tutto.", "de": "Das Einzimmerapartment ist klein, aber es ist alles drin." },
+        { "it": "La zona è silenziosa e ben collegata.", "de": "Das Viertel ist ruhig und gut angebunden." },
+        { "it": "L'affitto del monolocale è più economico.", "de": "Die Miete des Einzimmerapartments ist günstiger." }
+      ]
+    },
+    {
+      "id": "m2b-streik",
+      "newWords": [
+        { "it": "il passeggero", "de": "der Passagier", "emoji": "🧍", "key": "word_trasporti2_il_passeggero" },
+        { "it": "il controllore", "de": "der Schaffner", "emoji": "🎫", "key": "word_trasporti2_il_controllore" }
+      ],
+      "newSentences": [
+        { "it": "I passeggeri aspettano da due ore.", "de": "Die Passagiere warten seit zwei Stunden." },
+        { "it": "Il controllore controlla i biglietti.", "de": "Der Schaffner kontrolliert die Tickets." },
+        { "it": "I passeggeri sono stati avvisati dello sciopero.", "de": "Die Passagiere wurden über den Streik informiert." }
+      ]
+    },
+    {
+      "id": "m2b-notte",
+      "newWords": [
+        { "it": "l'abitudine", "de": "die Gewohnheit", "emoji": "🔄", "key": "word_racconto_l_abitudine" },
+        { "it": "all'epoca", "de": "damals", "emoji": "🕰️", "key": "word_racconto_all_epoca" },
+        { "it": "la festa", "de": "das Fest", "emoji": "🎉", "key": null }
+      ],
+      "newSentences": [
+        { "it": "All'epoca si cantava tutte le sere.", "de": "Damals sang man jeden Abend." },
+        { "it": "Era una nostra vecchia abitudine.", "de": "Es war eine alte Gewohnheit von uns." },
+        { "it": "Si ballava tutta la notte, che festa!", "de": "Man tanzte die ganze Nacht, was für ein Fest!" }
+      ]
+    },
+    {
+      "id": "m2b-vestiti",
+      "newWords": [
+        { "it": "comodo", "de": "bequem", "emoji": "☁️", "key": "word_abiti2_comodo" },
+        { "it": "il bottone", "de": "der Knopf", "emoji": "🔘", "key": "word_abiti2_il_bottone" }
+      ],
+      "newSentences": [
+        { "it": "Questo pantalone è comodo, lo prendo.", "de": "Diese Hose ist bequem, die nehme ich." },
+        { "it": "A questa camicia manca un bottone.", "de": "An diesem Hemd fehlt ein Knopf." },
+        { "it": "Provali, sono molto comodi!", "de": "Probier sie an, sie sind sehr bequem!" }
+      ]
+    },
+    {
+      "id": "m2b-lavoro",
+      "newWords": [
+        { "it": "lo stipendio", "de": "das Gehalt", "emoji": "💶", "key": "word_lavoro2_lo_stipendio" },
+        { "it": "il curriculum", "de": "der Lebenslauf", "emoji": "📃", "key": "word_lavoro2_il_curriculum" }
+      ],
+      "newSentences": [
+        { "it": "Devo aggiornare il curriculum.", "de": "Ich muss den Lebenslauf aktualisieren." },
+        { "it": "L'azienda offre uno stipendio buono.", "de": "Der Betrieb bietet ein gutes Gehalt." },
+        { "it": "Lo stipendio è buono, ma i turni sono lunghi.", "de": "Das Gehalt ist gut, aber die Schichten sind lang." }
+      ]
+    },
+    {
+      "id": "m2b-messaggi",
+      "newWords": [
+        { "it": "la chiamata", "de": "der Anruf", "emoji": "📲", "key": "word_comunicare_la_chiamata" },
+        { "it": "la rete", "de": "das Netz", "emoji": "📶", "key": "word_comunicare_la_rete" }
+      ],
+      "newSentences": [
+        { "it": "Ho tre chiamate perse, scusa!", "de": "Ich habe drei verpasste Anrufe, sorry!" },
+        { "it": "In ascensore non c'è rete.", "de": "Im Aufzug gibt es kein Netz." },
+        { "it": "Rispondi al messaggio quando puoi.", "de": "Antworte auf die Nachricht, wenn du kannst." }
+      ]
+    }
+  ]
+}
